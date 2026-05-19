@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Environment Variables (NUNCA commitar!)
+.env
+.env.local
+.env.production
+
+# Build output
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.lnk
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+temp_crop/
+
+# Google Service Account Key (NUNCA commitar!)
+*.json
+!package.json
+!package-lock.json
+!eslint.config.js
+!postcss.config.js
+!tailwind.config.js
+!vite.config.js
+!tsconfig.json
+
+# Projeto docs (opcional, pode remover se quiser versionar)
+projeto/

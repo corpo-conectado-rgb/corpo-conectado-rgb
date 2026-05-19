@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corpo Conectado</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="background-animation"></div>
+    <div class="container">
+        <header class="form-header">
+            <h1>Corpo Conectado</h1>
+            <p>Preencha os dados abaixo de forma rápida e objetiva para gerarmos o seu treino sob medida.</p>
+        </header>
+
+        <form id="workout-form">
+            <!-- Seção 1: Dados Pessoais -->
+            <section class="form-section active" id="section-1">
+                <h2>1. Dados Pessoais</h2>
+                
+                <div class="input-group">
+                    <input type="text" id="nome" name="nome" required placeholder=" ">
+                    <label for="nome">Nome completo *</label>
+                </div>
+
+                <div class="row">
+                    <div class="input-group">
+                        <input type="number" id="idade" name="idade" required placeholder=" ">
+                        <label for="idade">Idade *</label>
+                    </div>
+                    
+                    <div class="input-group">
+                        <select id="sexo" name="sexo" required>
+                            <option value="" disabled selected></option>
+                            <option value="masculino">Masculino</option>
+                            <option value="feminino">Feminino</option>
+                            <option value="outro">Outro</option>
+                        </select>
+                        <label for="sexo">Sexo *</label>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="input-group">
+                        <input type="number" step="0.1" id="peso" name="peso" required placeholder=" ">
+                        <label for="peso">Peso atual (kg) *</label>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="input-group">
+                        <input type="text" id="cep" name="cep" placeholder=" " maxlength="9" oninput="this.value = this.value.replace(/[^0-9-]/g, '');">
+                        <label for="cep">CEP (opcional)</label>
+                    </div>
+                    <div class="input-group" style="flex: 2;">
+                        <input type="text" id="rua" name="rua" placeholder=" ">
+                        <label for="rua">Endereço / Rua</label>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="input-group">
+                        <input type="text" id="numero-end" name="numero-end" placeholder=" ">
+                        <label for="numero-end">Número</label>
+                    </div>
+                    <div class="input-group" style="flex: 2;">
+                        <input type="text" id="bairro" name="bairro" placeholder=" ">
+                        <label for="bairro">Bairro</label>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="input-group" style="flex: 2;">
+                        <input type="text" id="cidade" name="cidade" placeholder=" ">
+                        <label for="cidade">Cidade</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="uf" name="uf" placeholder=" ">
+                        <label for="uf">UF</label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção 2: Objetivos do Treino -->
+            <section class="form-section" id="section-2">
+                <h2>2. Objetivos do Treino</h2>
+
+                <div class="input-group">
+                    <select id="objetivo" name="objetivo" required>
+                        <option value="" disabled selected></option>
+                        <option value="qualidade">Qualidade de vida</option>
+                        <option value="emagrecimento">Emagrecimento</option>
+                        <option value="resistencia">Resistência</option>
+                        <option value="hipertrofia">Hipertrofia</option>
+                    </select>
+                    <label for="objetivo">Qual é o seu principal objetivo? *</label>
+                </div>
+
+                <div class="input-group">
+                    <input type="number" step="0.1" id="meta-peso" name="meta-peso" placeholder=" ">
+                    <label for="meta-peso">Qual é sua meta de peso? (kg) - opcional</label>
+                </div>
+            </section>
+
+            <!-- Seção 3: Rotina de Treino -->
+            <section class="form-section" id="section-3">
+                <h2>3. Rotina de Treino</h2>
+
+                <div class="input-group">
+                    <select id="dias-semana" name="dias-semana" required>
+                        <option value="" disabled selected></option>
+                        <option value="2">2 dias</option>
+                        <option value="3">3 dias</option>
+                        <option value="4">4 dias</option>
+                        <option value="5">5 dias</option>
+                        <option value="6">6 dias</option>
+                    </select>
+                    <label for="dias-semana">Quantos dias por semana pretende treinar? *</label>
+                </div>
+
+                <div class="checkbox-group">
+                    <label class="group-label">Quais dias da semana pretende treinar? *</label>
+                    <div class="checkbox-options">
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="dias" value="Segunda">
+                            <span class="checkmark"></span> Segunda
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="dias" value="Terça">
+                            <span class="checkmark"></span> Terça
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="dias" value="Quarta">
+                            <span class="checkmark"></span> Quarta
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="dias" value="Quinta">
+                            <span class="checkmark"></span> Quinta
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="dias" value="Sexta">
+                            <span class="checkmark"></span> Sexta
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="dias" value="Sábado">
+                            <span class="checkmark"></span> Sábado
+                        </label>
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="dias" value="Domingo">
+                            <span class="checkmark"></span> Domingo
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção 4: Preferências de Treino -->
+            <section class="form-section" id="section-4">
+                <h2>4. Preferências de Treino</h2>
+
+                <div class="input-group">
+                    <select id="foco-muscular" name="foco-muscular" required>
+                        <option value="Nenhum (Padrão)" selected>Não tenho preferência (Padrão)</option>
+                        <option value="Peito">Peito</option>
+                        <option value="Costas">Costas</option>
+                        <option value="Pernas">Pernas</option>
+                        <option value="Ombros">Ombros</option>
+                        <option value="Braços">Braços</option>
+                    </select>
+                    <label for="foco-muscular">Deseja focar em algum grupo muscular específico?</label>
+                </div>
+            </section>
+
+            <!-- Seção 5: Observações Gerais -->
+            <section class="form-section" id="section-5">
+                <h2>5. Observações Gerais</h2>
+
+                <div class="input-group">
+                    <textarea id="observacoes" name="observacoes" rows="4" placeholder=" "></textarea>
+                    <label for="observacoes">Existe alguma limitação, dor ou observação importante?</label>
+                </div>
+            </section>
+
+            <div class="form-actions">
+                <div class="progress-bar">
+                    <div class="progress" id="progress"></div>
+                </div>
+                <button type="button" id="btn-prev" class="btn btn-secondary" disabled>Anterior</button>
+                <div class="right-buttons">
+                    <button type="button" id="btn-next" class="btn btn-primary">Próximo</button>
+                    <button type="submit" id="btn-submit" class="btn btn-success" style="display: none;">Concluir e Enviar</button>
+                </div>
+            </div>
+            
+            <div id="status-message" class="status-message"></div>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

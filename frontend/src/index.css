@@ -1,0 +1,171 @@
+@import "tailwindcss";
+
+@theme {
+  --color-noir-black: #000000;
+  --color-noir-gray-900: #09090B;
+  --color-noir-navy: #091122;
+  --color-noir-accent: #11265A;
+  
+  --color-bg-base: #FAFAFA;
+  --color-bg-surface: #FFFFFF;
+  
+  --font-sans: "Inter", "SF Pro Display", -apple-system, sans-serif;
+
+  --animate-shake: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  @keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+  }
+
+  --animate-fade-up: fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@layer base {
+  body {
+    background-color: var(--color-bg-base);
+    color: var(--color-noir-gray-900);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Remove ícones nativos de senha de navegadores como Edge/IE */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+/* Oculta as setas automáticas do input number */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield; /* Para Firefox */
+  appearance: none;
+}
+
+@layer components {
+  /* Minimalist Canvas without harsh borders, relying on very subtle massive-spread shadows */
+  .bi-canvas {
+    background-color: var(--color-bg-surface);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0,0,0,0.01);
+    border: none;
+    overflow: hidden;
+  }
+  
+  /* Cards using negative space (padding) instead of borders */
+  .glass-card {
+    background-color: var(--color-bg-surface);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.06);
+  }
+  
+  /* Brutalist Clean Inputs */
+  .input-modern {
+    @apply bg-[var(--color-bg-base)] border border-gray-200/50 rounded-xl px-4 py-2.5 text-[15px] font-black text-[var(--color-noir-gray-900)] outline-none placeholder-gray-400 transition-all duration-200 focus:bg-white focus:border-[var(--color-noir-black)] focus:ring-[3px] focus:ring-black/10 hover:border-gray-300;
+  }
+  
+  /* Sharp Corporate Button */
+  .btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: var(--color-noir-black);
+    color: #FFFFFF;
+    font-weight: 600;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    border: none;
+  }
+
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  .btn-primary:hover {
+    background-color: #27272A; /* zinc-800 */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+
+  /* Glassmorphism Inputs (Dark Mode Base) */
+  .input-glass {
+    @apply bg-black/30 border border-white/5 rounded-xl px-4 py-2.5 text-[15px] font-black text-white outline-none placeholder-gray-500 transition-all duration-200 focus:bg-black/50 focus:border-white/20 focus:ring-[3px] focus:ring-white/10 hover:border-white/10;
+  }
+  
+  /* Bright Button (Inversion effect) */
+  .btn-bright {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: #FFFFFF;
+    color: var(--color-noir-black);
+    font-weight: 800;
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    border: none;
+    box-shadow: 0 4px 20px rgba(255,255,255,0.05);
+  }
+
+  .btn-bright:active {
+    transform: scale(0.98);
+  }
+
+  .btn-bright:hover {
+    background-color: #F4F4F5;
+    box-shadow: 0 8px 30px rgba(255,255,255,0.15);
+  }
+  
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    margin: 4px 16px;
+    gap: 0.75rem;
+    padding: 0.7rem 1.1rem;
+    cursor: pointer;
+    color: #94a3b8; /* slate-400 */
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 8px;
+    background-color: #1e293b; /* slate-800 - Fundo bloco escuro inativo */
+  }
+
+  .sidebar-item:hover {
+    color: #f8fafc;
+    background-color: #334155; /* slate-700 - Hover clareia um pouco */
+  }
+
+  .sidebar-item-active {
+    display: flex;
+    align-items: center;
+    margin: 4px 16px;
+    gap: 0.75rem;
+    padding: 0.7rem 1.1rem;
+    cursor: default;
+    background-color: #2563eb; /* blue-600 - Ativo */
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  }
+}
