@@ -1,15 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
-const { getSheet } = require('../services/googleSheets');
+const { getSheet, getCachedRows, invalidateCache } = require('../services/googleSheets');
 const adminMiddleware = require('../middlewares/adminMiddleware');
 
 // Helper para pegar detalhes de um usuário incluindo a anamnese
 async function fetchFullUser(userRowId, baseUser) {
   let userDetails = { ...baseUser };
   try {
-    const anamneseSheet = await getSheet('anamnese', []);
-    const rows = await anamneseSheet.getRows();
+    const rows = await getCachedRows('anamnese', []);
     const row = rows.find(r => r.get('id_usuario') === userRowId);
     if (row) {
       userDetails.idade = row.get('idade');
@@ -30,8 +29,7 @@ async function fetchFullUser(userRowId, baseUser) {
 // 1. Listar Todos os Usuários
 router.get('/usuarios', adminMiddleware, async (req, res) => {
   try {
-    const usersSheet = await getSheet('usuarios', []);
-    const rows = await usersSheet.getRows();
+    const rows = await getCachedRows('usuarios', []);
     
     // Ignora administradores na listagem clinica, mostra apenas users reais
     const basicUsers = rows.filter(r => r.get('role') !== 'admin').map(r => ({
@@ -42,8 +40,7 @@ router.get('/usuarios', adminMiddleware, async (req, res) => {
       role: r.get('role')
     }));
 
-    const treinosSheet = await getSheet('treinos', []);
-    const treinosRows = await treinosSheet.getRows();
+    const treinosRows = await getCachedRows('treinos', []);
 
     // Busca os dados físicos para cada um
     const fullUsers = await Promise.all(basicUsers.map(async u => {
@@ -67,8 +64,7 @@ router.get('/usuarios', adminMiddleware, async (req, res) => {
 router.get('/usuarios/:id', adminMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const usersSheet = await getSheet('usuarios', []);
-    const row = (await usersSheet.getRows()).find(r => r.get('id') === id);
+    const row = (await getCachedRows('usuarios', [])).find(r => r.get('id') === id);
     if (!row) return res.status(404).json({ message: 'Atleta não encontrado' });
 
     const baseUser = { id: row.get('id'), nome: row.get('nome'), email: row.get('email') };
@@ -83,8 +79,7 @@ router.get('/usuarios/:id', adminMiddleware, async (req, res) => {
 router.get('/usuarios/:id/ficha-ativa', adminMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const treinosSheet = await getSheet('treinos', []);
-    const treinosRows = await treinosSheet.getRows();
+    const treinosRows = await getCachedRows('treinos', []);
     const activeTreino = treinosRows.find(
       r => r.get('user_id') === id && (r.get('status') === 'ativo' || r.get('status') === 'ativa')
     );
@@ -96,12 +91,10 @@ router.get('/usuarios/:id/ficha-ativa', adminMiddleware, async (req, res) => {
     const treinoId = activeTreino.get('id');
     const objetivo = activeTreino.get('objetivo');
 
-    const diasSheet = await getSheet('dias_treino', []);
-    const diasRows = await diasSheet.getRows();
+    const diasRows = await getCachedRows('dias_treino', []);
     const diasParaTreino = diasRows.filter(r => r.get('treino_id') === treinoId);
 
-    const exerciciosSheet = await getSheet('exercicios', []);
-    const exerciciosRows = await exerciciosSheet.getRows();
+    const exerciciosRows = await getCachedRows('exercicios', []);
 
     const fichasFrontend = diasParaTreino.map((dia, idx) => {
       const diaId = dia.get('id');
@@ -136,8 +129,7 @@ router.get('/usuarios/:id/ficha-ativa', adminMiddleware, async (req, res) => {
 router.get('/fichas/usuario/:id/builder', adminMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
-    const treinosSheet = await getSheet('treinos', []);
-    const treinosRows = await treinosSheet.getRows();
+    const treinosRows = await getCachedRows('treinos', []);
     const activeTreino = treinosRows.find(
       r => r.get('user_id') === id && (r.get('status') === 'ativo' || r.get('status') === 'ativa')
     );
@@ -148,12 +140,10 @@ router.get('/fichas/usuario/:id/builder', adminMiddleware, async (req, res) => {
 
     const treinoId = activeTreino.get('id');
 
-    const diasSheet = await getSheet('dias_treino', []);
-    const diasRows = await diasSheet.getRows();
+    const diasRows = await getCachedRows('dias_treino', []);
     const diasParaTreino = diasRows.filter(r => r.get('treino_id') === treinoId);
 
-    const exerciciosSheet = await getSheet('exercicios', []);
-    const exerciciosRows = await exerciciosSheet.getRows();
+    const exerciciosRows = await getCachedRows('exercicios', []);
 
     const diasMapeados = diasParaTreino.map(dia => {
       const diaId = dia.get('id');
@@ -256,6 +246,12 @@ router.post('/fichas', adminMiddleware, async (req, res) => {
     });
 
     res.status(201).json({ message: 'Ficha de treino criada com sucesso!', treino_id: treinoId });
+
+    // Invalida caches afetados
+    invalidateCache('treinos');
+    invalidateCache('dias_treino');
+    invalidateCache('exercicios');
+    invalidateCache('logs');
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

@@ -1,13 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middlewares/authMiddleware');
-const { getSheet } = require('../services/googleSheets');
+const { getCachedRows } = require('../services/googleSheets');
 
 // Transforma o treino master, seus dias e exercicios no formato que o Frontend espera.
 router.get('/my-sheet', authMiddleware, async (req, res) => {
   try {
-    const treinosSheet = await getSheet('treinos', []);
-    const treinosRows = await treinosSheet.getRows();
+    const treinosRows = await getCachedRows('treinos', []);
     const activeTreino = treinosRows.find(
       r => r.get('user_id') === req.user.id && (r.get('status') === 'ativo' || r.get('status') === 'ativa')
     );
@@ -19,12 +18,10 @@ router.get('/my-sheet', authMiddleware, async (req, res) => {
     const treinoId = activeTreino.get('id');
     const objetivo = activeTreino.get('objetivo');
 
-    const diasSheet = await getSheet('dias_treino', []);
-    const diasRows = await diasSheet.getRows();
+    const diasRows = await getCachedRows('dias_treino', []);
     const diasParaTreino = diasRows.filter(r => r.get('treino_id') === treinoId);
 
-    const exerciciosSheet = await getSheet('exercicios', []);
-    const exerciciosRows = await exerciciosSheet.getRows();
+    const exerciciosRows = await getCachedRows('exercicios', []);
 
     const fichasFrontend = diasParaTreino.map((dia, idx) => {
       const diaId = dia.get('id');

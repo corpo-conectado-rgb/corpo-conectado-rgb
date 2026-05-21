@@ -3,7 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
-const { getSheet } = require('../services/googleSheets');
+const { getSheet, getCachedRows, invalidateCache } = require('../services/googleSheets');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 const USERS_SHEET = 'usuarios';
@@ -15,8 +15,7 @@ const ANAMNESE_HEADERS = ['id_usuario', 'idade', 'altura', 'peso', 'sexo', 'obje
 async function fetchCompleteProfile(userRowId) {
   let profileData = {};
   try {
-    const anamneseSheet = await getSheet('anamnese', ANAMNESE_HEADERS);
-    const anamneseRows = await anamneseSheet.getRows();
+    const anamneseRows = await getCachedRows('anamnese', ANAMNESE_HEADERS);
     const anamneseRow = anamneseRows.find(r => r.get('id_usuario') === userRowId);
     
     if (anamneseRow) {
@@ -44,7 +43,7 @@ router.post('/register', async (req, res) => {
   try {
     const { nome, email, senha } = req.body;
     const sheet = await getSheet(USERS_SHEET, HEADERS);
-    const rows = await sheet.getRows();
+    const rows = await getCachedRows(USERS_SHEET, HEADERS);
 
     const userExists = rows.find(r => r.get('email') === email);
     if (userExists) return res.status(400).json({ message: 'Usuário já existe' });
@@ -61,6 +60,7 @@ router.post('/register', async (req, res) => {
       role: 'user'
     });
 
+    invalidateCache(USERS_SHEET);
     const token = jwt.sign({ id: newId, role: 'user' }, process.env.JWT_SECRET || 'secret_super_seguro_para_desenvolvimento', { expiresIn: '7d' });
     res.status(201).json({ token, user: { id: newId, nome, email } });
   } catch (error) {
@@ -79,7 +79,7 @@ router.post('/register-full', async (req, res) => {
     } = req.body;
 
     const userSheet = await getSheet(USERS_SHEET, HEADERS);
-    const userRows = await userSheet.getRows();
+    const userRows = await getCachedRows(USERS_SHEET, HEADERS);
     const userExists = userRows.find(r => r.get('email') === email);
     
     if (userExists) {
@@ -98,6 +98,7 @@ router.post('/register-full', async (req, res) => {
       role: 'user'
     });
 
+    invalidateCache(USERS_SHEET);
     const anamneseSheet = await getSheet(ANAMNESE_SHEET, ANAMNESE_HEADERS);
     await anamneseSheet.addRow({
       id_usuario: newId,
@@ -113,6 +114,7 @@ router.post('/register-full', async (req, res) => {
       habitos_local: habitos_local || ''
     });
 
+    invalidateCache(ANAMNESE_SHEET);
     const token = jwt.sign({ id: newId, role: 'user' }, process.env.JWT_SECRET || 'secret_super_seguro_para_desenvolvimento', { expiresIn: '7d' });
     
     // Retorna o pacote FULL ja populado
@@ -134,8 +136,7 @@ router.post('/register-full', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, senha } = req.body;
-    const sheet = await getSheet(USERS_SHEET, HEADERS);
-    const rows = await sheet.getRows();
+    const rows = await getCachedRows(USERS_SHEET, HEADERS);
     
     const userRow = rows.find(r => r.get('email') === email);
     if (!userRow) return res.status(401).json({ message: 'E-mail não cadastrado. Verifique a digitação ou crie uma conta.' });
@@ -166,8 +167,7 @@ router.post('/login', async (req, res) => {
 
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const sheet = await getSheet(USERS_SHEET, HEADERS);
-    const rows = await sheet.getRows();
+    const rows = await getCachedRows(USERS_SHEET, HEADERS);
     
     const userRow = rows.find(r => r.get('id') === req.user.id);
     if (!userRow) return res.status(404).json({ message: 'Usuário principal não encontrado' });
