@@ -58,7 +58,8 @@ input[type="number"] {
     border-radius: 16px;
     box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0,0,0,0.01);
     border: none;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
   }
   
   /* Cards using negative space (padding) instead of borders */
