@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, BrainCircuit, Dumbbell, AlertTriangle, Activity, User, PlusCircle, Trash, Trash2, X, CalendarDays, MinusCircle } from 'lucide-react';
+import { ArrowLeft, Save, BrainCircuit, Dumbbell, AlertTriangle, Activity, User, PlusCircle, Trash, Trash2, X, CalendarDays, MinusCircle, Sparkles, Loader2 } from 'lucide-react';
 import { apiFetch } from '../services/api';
 import Toast from '../components/Toast';
 
@@ -20,6 +20,7 @@ export default function AdminPrescricao() {
   const [chatOpen, setChatOpen] = useState(false);
   const [menuAbertoDiaIdx, setMenuAbertoDiaIdx] = useState(null);
   const [toast, setToast] = useState(null);
+  const [loadingIA, setLoadingIA] = useState(null); // diaIdx que está carregando
 
   // Estados do Formulário Master
   const [nomeFicha, setNomeFicha] = useState('Projeto Hipertrofia 1.0');
@@ -175,6 +176,45 @@ export default function AdminPrescricao() {
       setToast({ message: 'Falha ao salvar a prescrição. Tente novamente.', type: 'error' });
     } finally {
       setSalvando(false);
+    }
+  };
+
+  const gerarComIA = async (diaIdx) => {
+    const dia = diasTreino[diaIdx];
+    const focosAtuais = dia.foco_muscular ? dia.foco_muscular.split(',').map(s=>s.trim()).filter(Boolean) : [];
+    
+    if (focosAtuais.length === 0) {
+      setToast({ message: 'Adicione pelo menos um Foco Muscular primeiro.', type: 'error' });
+      return;
+    }
+
+    setLoadingIA(diaIdx);
+    try {
+      const resp = await apiFetch('/ai/suggest-workout', {
+        method: 'POST',
+        body: JSON.stringify({
+          aluno,
+          focos: focosAtuais,
+          nomeFicha,
+          tipoDivisao,
+          objetivo: focoMacro
+        })
+      });
+
+      if (resp && resp.exercicios && resp.exercicios.length > 0) {
+        const novosDias = [...diasTreino];
+        // Adiciona mantendo os que o professor já tinha colocado manualmente
+        novosDias[diaIdx].exercicios = [
+          ...novosDias[diaIdx].exercicios,
+          ...resp.exercicios
+        ];
+        setDiasTreino(novosDias);
+        setToast({ message: 'Treino otimizado com IA injetado com sucesso! ✨', type: 'success' });
+      }
+    } catch (error) {
+      setToast({ message: 'Falha de comunicação com o Copiloto.', type: 'error' });
+    } finally {
+      setLoadingIA(null);
     }
   };
 
@@ -356,8 +396,18 @@ export default function AdminPrescricao() {
                      )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
+                    <button 
+                      onClick={() => gerarComIA(diaIdx)} 
+                      disabled={loadingIA === diaIdx}
+                      className="flex items-center gap-2 text-[10px] uppercase font-black tracking-widest text-purple-600 bg-purple-50 px-4 py-2 rounded-lg border border-purple-100 hover:bg-purple-100 transition disabled:opacity-50"
+                      title="Analisar anamnese e gerar treinos"
+                    >
+                      {loadingIA === diaIdx ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                      Copiloto
+                    </button>
+
                     <button onClick={() => addExercicio(diaIdx)} className="flex items-center gap-2 text-[10px] uppercase font-black tracking-widest text-blue-600 bg-blue-50 px-4 py-2 rounded-lg border border-blue-100 hover:bg-blue-100 transition">
-                      <PlusCircle size={14} /> Injetar Exercício
+                      <PlusCircle size={14} /> Injetar
                     </button>
                     <button onClick={() => removerDia(diaIdx)} className="flex items-center justify-center w-[34px] h-[34px] text-red-500 bg-red-50 border border-red-100 rounded-lg hover:bg-red-100 transition opacity-0 group-hover:opacity-100 shadow-sm" title="Excluir Dia de Treino">
                       <MinusCircle size={14} />
