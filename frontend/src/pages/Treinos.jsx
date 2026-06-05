@@ -24,6 +24,7 @@ export default function Treinos() {
   const [stats, setStats] = useState(null);
   const [historico, setHistorico] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("Buscando sua periodização médica...");
 
   const [activeView, setActiveView] = useState('hub'); // 'hub' | 'foco' | 'historico'
 
@@ -44,15 +45,36 @@ export default function Treinos() {
 
   // ─── Data Fetching ──────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
+    // 1. Stale-While-Revalidate: Tentar carregar do cache local imediatamente
+    const cached = localStorage.getItem('corpoConectado_treinos_cache');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (parsed.fichasData?.length > 0) {
+          setFichas(parsed.fichasData);
+          setStats(parsed.statsData);
+          setHistorico(parsed.histData);
+          setLoading(false); // Já temos dados, tira a tela de loading instantaneamente
+        }
+      } catch (e) {
+        // Ignora erro de parse, vai buscar na rede
+      }
+    }
+
+    // 2. Buscar os dados mais recentes do servidor em background (ou foreground se não houver cache)
     try {
       const [fichasData, statsData, histData] = await Promise.all([
         apiFetch('/workouts/my-sheet'),
         apiFetch('/workouts/stats').catch(() => null),
         apiFetch('/workouts/history?limit=5').catch(() => []),
       ]);
+      
       setFichas(fichasData);
       setStats(statsData);
       setHistorico(histData);
+      
+      // 3. Atualizar o cache para o próximo acesso
+      localStorage.setItem('corpoConectado_treinos_cache', JSON.stringify({ fichasData, statsData, histData }));
     } catch (err) {
       console.error('Erro ao buscar dados:', err);
     } finally {
@@ -61,6 +83,24 @@ export default function Treinos() {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Efeito para Mensagens Dinâmicas de Loading (Cold Start UX)
+  useEffect(() => {
+    if (!loading) return; // Se não estiver carregando, cancela
+
+    const messages = [
+      { time: 3000, text: "Despertando nosso servidor seguro..." },
+      { time: 8000, text: "Isso leva alguns segundinhos no primeiro acesso do dia! ☕" },
+      { time: 15000, text: "Organizando suas cargas e exercícios..." },
+      { time: 30000, text: "Quase lá, obrigado pela paciência..." }
+    ];
+
+    const timeouts = messages.map(msg => 
+      setTimeout(() => setLoadingMessage(msg.text), msg.time)
+    );
+
+    return () => timeouts.forEach(clearTimeout); // Limpar caso componente desmonte ou carregamento acabe
+  }, [loading]);
 
   // Timer principal
   useEffect(() => {
@@ -231,9 +271,14 @@ export default function Treinos() {
   // ─── Loading ────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-3 animate-fade-in">
-        <div className="w-10 h-10 border-3 border-gray-200 border-t-black rounded-full animate-spin" />
-        <p className="text-sm text-gray-500 font-medium">Carregando seus treinos...</p>
+      <div className="flex flex-col items-center justify-center h-full gap-4 animate-fade-in p-6 text-center">
+        <div className="w-12 h-12 border-4 border-gray-100 border-t-black rounded-full animate-spin" />
+        <div className="max-w-xs space-y-2">
+          <p className="text-base font-black text-gray-900">Preparando treinos...</p>
+          <p className="text-sm text-gray-500 font-medium transition-all duration-500 animate-fade-in">
+            {loadingMessage}
+          </p>
+        </div>
       </div>
     );
   }
