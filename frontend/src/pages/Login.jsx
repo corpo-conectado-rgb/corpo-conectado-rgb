@@ -13,6 +13,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('Entrar');
   const [error, setError] = useState('');
 
   // Recupera o último e-mail apenas como sugestão
@@ -22,6 +23,28 @@ export default function Login() {
       setSuggestedEmail(savedEmail);
     }
   }, []);
+
+  // Efeito para Mensagens Dinâmicas de Loading no Login (Cold Start UX)
+  useEffect(() => {
+    if (!loading) {
+      setLoadingMessage('Entrar');
+      return;
+    }
+
+    setLoadingMessage('Entrando...');
+
+    const messages = [
+      { time: 3000, text: "Acordando servidor..." },
+      { time: 8000, text: "Isso pode levar alguns segundos..." },
+      { time: 15000, text: "Quase pronto..." }
+    ];
+
+    const timeouts = messages.map(msg => 
+      setTimeout(() => setLoadingMessage(msg.text), msg.time)
+    );
+
+    return () => timeouts.forEach(clearTimeout);
+  }, [loading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -125,10 +148,10 @@ export default function Login() {
             <button 
               type="submit" 
               disabled={loading}
-              className="btn-bright mt-5 w-full"
+              className="btn-bright mt-5 w-full flex items-center justify-center gap-2"
             >
               {loading ? <Loader2 className="animate-spin" size={16} /> : <LogIn size={16} />}
-              Entrar
+              {loadingMessage}
             </button>
           </form>
           
