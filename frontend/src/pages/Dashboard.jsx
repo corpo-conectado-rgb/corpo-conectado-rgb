@@ -59,7 +59,7 @@ export default function Dashboard() {
       </div>
 
       <header className="shrink-0 flex justify-between items-center mb-4 px-1">
-        <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Evolução</h1>
+        <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Meu Progresso</h1>
       </header>
 
       {/* Faixa Noir (KPIs Reais) */}
@@ -71,7 +71,7 @@ export default function Dashboard() {
           <div className="flex flex-col items-center flex-1 justify-center w-full">
             <div className="flex items-center gap-2 mb-1">
               <Flame size={16} className={data.streakSemanas > 0 ? "text-orange-500" : "text-gray-500"} />
-              <span className="text-[10px] uppercase text-gray-400 font-extrabold tracking-widest">Streak Semanal</span>
+              <span className="text-[10px] uppercase text-gray-400 font-extrabold tracking-widest">Sequência Invicta</span>
             </div>
             <span className="text-2xl md:text-3xl font-black text-white tracking-widest">
               {data.streakSemanas} <span className="text-xs font-medium text-gray-400 ml-0.5">semanas</span>
@@ -81,10 +81,10 @@ export default function Dashboard() {
           <div className="flex flex-col items-center flex-1 justify-center w-full md:border-l md:border-gray-800 px-4">
             <div className="flex items-center gap-2 mb-1">
               <Activity size={16} className="text-purple-400" />
-              <span className="text-[10px] uppercase text-gray-400 font-extrabold tracking-widest">Esforço (Mês)</span>
+              <span className="text-[10px] uppercase text-gray-400 font-extrabold tracking-widest">Carga Total Movida (Mês)</span>
             </div>
             <span className="text-2xl md:text-3xl font-black text-white tracking-widest">
-              {(data.volumeMensal / 1000).toFixed(1)} <span className="text-xs font-medium text-gray-400 ml-0.5">Ton</span>
+              {(data.volumeMensal / 1000).toFixed(1)} <span className="text-xs font-medium text-gray-400 ml-0.5">Toneladas</span>
             </span>
           </div>
           
@@ -107,7 +107,7 @@ export default function Dashboard() {
       <div className="flex-1 min-h-0 bg-white border border-gray-200 shadow-sm flex flex-col p-6 rounded-2xl">
         <h2 className="text-xs font-black text-gray-800 mb-6 uppercase tracking-widest flex items-center gap-2">
           <Activity size={16} className="text-purple-600" />
-          Evolução de Volume (Kg)
+          Como Sua Força Cresceu (Mês a Mês)
         </h2>
         <div className="w-full h-64 relative">
           {data.barData && data.barData.length > 0 ? (
@@ -120,7 +120,7 @@ export default function Dashboard() {
                   cursor={{fill: '#f8fafc'}}
                   contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: 'white', fontWeight: 700, padding: '10px 16px', fontSize: 13, boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                   itemStyle={{color: '#c084fc'}}
-                  formatter={(value) => [`${value} Kg`, 'Volume Levantado']}
+                  formatter={(value) => [`${value} Kg`, 'Carga Levantada']}
                 />
                 <Bar dataKey="volume" fill="#9333ea" radius={[6, 6, 0, 0]} maxBarSize={48} />
               </BarChart>
