@@ -45,10 +45,10 @@ export default function Dashboard() {
   else if (data.totalSessoes > 0 && data.diasDesdeUltimoTreino !== null) insightText = `Faz ${data.diasDesdeUltimoTreino} dias desde o seu último treino. Que tal agendar a próxima sessão?`;
 
   return (
-    <div className="flex flex-col h-full overflow-y-auto animate-fade-in pb-8">
+    <div className="flex flex-col h-full overflow-hidden animate-fade-in pb-2">
       
       {/* Insight Alfred (Topo) */}
-      <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 flex items-center gap-4 mb-6 shadow-sm">
+      <div className="shrink-0 bg-purple-50 border border-purple-200 rounded-2xl p-4 flex items-center gap-4 mb-6 shadow-sm">
         <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center shrink-0 shadow-inner">
           <Bot size={20} className="text-white" />
         </div>
@@ -58,12 +58,12 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <header className="flex justify-between items-center mb-4 px-1">
+      <header className="shrink-0 flex justify-between items-center mb-4 px-1">
         <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Evolução</h1>
       </header>
 
       {/* Faixa Noir (KPIs Reais) */}
-      <div className="bg-gray-900 rounded-2xl text-white py-5 px-6 flex flex-col md:flex-row items-center justify-between mb-6 shadow-md relative overflow-hidden">
+      <div className="shrink-0 bg-gray-900 rounded-2xl text-white py-5 px-6 flex flex-col md:flex-row items-center justify-between mb-6 shadow-md relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-2xl"></div>
         
         <div className="flex flex-col md:flex-row gap-6 md:gap-10 w-full items-center justify-between z-10">
@@ -104,7 +104,7 @@ export default function Dashboard() {
 
 
       {/* Gráfico Dinâmico */}
-      <div className="bg-white border border-gray-200 shadow-sm flex flex-col p-6 rounded-2xl">
+      <div className="flex-1 min-h-0 bg-white border border-gray-200 shadow-sm flex flex-col p-6 rounded-2xl">
         <h2 className="text-xs font-black text-gray-800 mb-6 uppercase tracking-widest flex items-center gap-2">
           <Activity size={16} className="text-purple-600" />
           Evolução de Volume (Kg)
