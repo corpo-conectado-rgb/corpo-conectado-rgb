@@ -281,7 +281,12 @@ Inclua UM bloco JSON APENAS quando for apropriado acionar uma dessas funcionalid
     const acaoMatch = responseText.match(/%%ACAO_INICIO%%([\s\S]*?)%%ACAO_FIM%%/);
     if (acaoMatch) {
       try {
-        action = JSON.parse(acaoMatch[1].trim());
+        let jsonStr = acaoMatch[1].trim();
+        if (jsonStr.startsWith('```json')) jsonStr = jsonStr.slice(7);
+        else if (jsonStr.startsWith('```')) jsonStr = jsonStr.slice(3);
+        if (jsonStr.endsWith('```')) jsonStr = jsonStr.slice(0, -3);
+        
+        action = JSON.parse(jsonStr.trim());
         // Limpar os marcadores da resposta visível
         responseText = responseText
           .replace(/%%ACAO_INICIO%%[\s\S]*?%%ACAO_FIM%%/, '')

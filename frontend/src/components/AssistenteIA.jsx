@@ -243,12 +243,12 @@ export default function AssistenteIA({ isOpen, onClose, alunoId, alunoNome, onAp
                 <div className="flex items-center gap-2">
                   <Sparkles size={14} className="text-purple-600" />
                   <p className="text-xs font-black text-purple-700 uppercase tracking-wider">
-                    {pendingAction.tipo === 'gerar_exercicios' ? 'Treino Gerado' : 
+                    {(pendingAction.tipo === 'gerar_exercicios' || pendingAction.dias) ? 'Treino Gerado' : 
                      pendingAction.tipo === 'relatorio_evolucao' ? 'Relatório de Evolução' : 'Ação Disponível'}
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
-                  {pendingAction.tipo === 'gerar_exercicios' && (
+                  {(pendingAction.tipo === 'gerar_exercicios' || pendingAction.dias) && (
                     <button
                       onClick={handleApplyAction}
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-purple-700 transition shadow-sm active:scale-95"
@@ -260,7 +260,7 @@ export default function AssistenteIA({ isOpen, onClose, alunoId, alunoNome, onAp
                   <button
                     onClick={handleDiscardAction}
                     className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-white rounded-lg transition"
-                    title={pendingAction.tipo === 'gerar_exercicios' ? "Descartar sugestão" : "Fechar relatório"}
+                    title={(pendingAction.tipo === 'gerar_exercicios' || pendingAction.dias) ? "Descartar sugestão" : "Fechar relatório"}
                   >
                     <Trash2 size={14} />
                   </button>
