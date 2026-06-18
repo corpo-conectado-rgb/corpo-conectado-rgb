@@ -51,11 +51,10 @@ export default function AssistenteIA({ isOpen, onClose, alunoId, alunoNome, onAp
     setPendingAction(null);
 
     try {
-      // Remover a mensagem de boas vindas para que o histórico sempre comece com 'user' (exigência do Gemini)
-      let mensagensValidas = updatedMessages;
-      if (mensagensValidas.length > 0 && mensagensValidas[0].role === 'assistant' && mensagensValidas[0].content.includes('Olá! Sou o **Copiloto Inteligente**')) {
-        mensagensValidas = mensagensValidas.slice(1);
-      }
+      // Garantir que o histórico sempre comece com 'user' (exigência do Gemini)
+      // Encontramos a primeira mensagem do usuário e ignoramos tudo antes dela (boas vindas, reinício, etc)
+      const firstUserIdx = updatedMessages.findIndex(m => m.role === 'user');
+      const mensagensValidas = firstUserIdx >= 0 ? updatedMessages.slice(firstUserIdx) : updatedMessages;
 
       // Preparar histórico para a API
       const apiMessages = mensagensValidas
