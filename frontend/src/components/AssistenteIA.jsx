@@ -248,6 +248,18 @@ export default function AssistenteIA({ isOpen, onClose, alunoId, alunoNome, onAp
                       <p className="text-[10px] font-medium text-gray-400 mt-0.5">
                         {dia.exercicios?.length || 0} exercícios
                       </p>
+                      {dia.exercicios && dia.exercicios.length > 0 && (
+                        <div className="space-y-1.5 mt-2.5 border-t border-purple-50 pt-2.5">
+                          {dia.exercicios.map((ex, j) => (
+                            <div key={j} className="flex justify-between items-center bg-gray-50/80 rounded-lg p-2">
+                              <span className="text-[11px] font-bold text-gray-700 truncate pr-2">{ex.nome}</span>
+                              <span className="text-[10px] font-medium text-purple-600 bg-purple-50 px-2 py-0.5 rounded shadow-sm border border-purple-100 shrink-0">
+                                {ex.series}x{ex.repeticoes}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
