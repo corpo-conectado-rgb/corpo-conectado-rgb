@@ -1,153 +1,166 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, Dumbbell, FileText, BarChart2 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-
-const barData = [
-  { name: 'Jan', volume: 80000 },
-  { name: 'Fev', volume: 75000 },
-  { name: 'Mar', volume: 76000 },
-  { name: 'Abr', volume: 17500 },
-];
-
-const pieData = [
-  { name: 'Pernas', value: 46.74, fill: '#000000' },
-  { name: 'Peito/Tríceps', value: 44.10, fill: '#0F172A' },
-  { name: 'Costas/Bíceps', value: 5.00, fill: '#A1A1AA' },
-  { name: 'Abdômen', value: 3.16, fill: '#E4E4E7' },
-];
+import { Dumbbell, FileText, BarChart2, Flame, Activity, Clock, Loader2, Bot } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+import { apiFetch } from '../services/api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState({
+    streakSemanas: 0,
+    volumeMensal: 0,
+    diasDesdeUltimoTreino: null,
+    barData: [],
+    totalSessoes: 0
+  });
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const result = await apiFetch('/dashboard');
+        setData(result);
+      } catch (err) {
+        console.error('Falha ao carregar dashboard', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full space-y-4">
+        <Loader2 className="animate-spin text-purple-600" size={32} />
+        <p className="text-sm font-bold text-gray-500">Buscando seus resultados...</p>
+      </div>
+    );
+  }
+
+  // Insight Gamificado Baseado no Streak
+  let insightText = "Vamos começar a treinar? Sua jornada aguarda!";
+  if (data.streakSemanas > 4) insightText = `Você está imparável! Já são ${data.streakSemanas} semanas seguidas mantendo a consistência.`;
+  else if (data.streakSemanas > 0) insightText = `Excelente ritmo! Continue assim para bater 4 semanas seguidas.`;
+  else if (data.totalSessoes > 0 && data.diasDesdeUltimoTreino !== null) insightText = `Faz ${data.diasDesdeUltimoTreino} dias desde o seu último treino. Que tal agendar a próxima sessão?`;
 
   return (
-    <div className="flex flex-col h-full overflow-hidden animate-fade-in">
+    <div className="flex flex-col h-full overflow-y-auto animate-fade-in pb-8">
       
-      {/* Cabeçalho */}
-      <header className="flex justify-between items-center mb-4 px-1">
-        <h1 className="text-2xl md:text-3xl font-black text-[#000000] tracking-tight">Análise Executiva</h1>
-        <div className="flex items-center gap-2 text-xs md:text-sm text-[#000000] font-bold bg-[#F4F4F5] py-1.5 px-4 rounded-full cursor-pointer hover:bg-gray-200 transition">
-          <span>Semana Atual: 2026</span>
-          <ChevronDown size={14} className="ml-1" />
+      {/* Insight Alfred (Topo) */}
+      <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 flex items-center gap-4 mb-6 shadow-sm">
+        <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center shrink-0 shadow-inner">
+          <Bot size={20} className="text-white" />
         </div>
+        <div>
+          <h2 className="text-xs font-black text-purple-800 uppercase tracking-widest mb-0.5">Alfred Diz:</h2>
+          <p className="text-sm font-medium text-purple-900">{insightText}</p>
+        </div>
+      </div>
+
+      <header className="flex justify-between items-center mb-4 px-1">
+        <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Evolução</h1>
       </header>
 
-      {/* Faixa Noir (Sash) */}
-      <div className="bg-[#000000] rounded-xl text-white py-3.5 px-6 flex flex-col md:flex-row items-center justify-between mb-4 shadow-sm">
-        <div className="flex flex-col md:flex-row gap-6 md:gap-10 w-full items-center justify-between">
-          <div className="flex flex-col w-full md:w-auto">
-            <span className="text-[9px] uppercase text-zinc-400 font-extrabold tracking-widest mb-1">Foco de Treino</span>
-            <div className="bg-[#18181B] rounded-md px-3 py-1.5 text-xs font-bold flex items-center justify-between min-w-[180px] cursor-pointer border border-zinc-800 hover:bg-zinc-800 transition">
-              <span>Hipertrofia</span>
-              <ChevronDown size={12} className="ml-2" />
+      {/* Faixa Noir (KPIs Reais) */}
+      <div className="bg-gray-900 rounded-2xl text-white py-5 px-6 flex flex-col md:flex-row items-center justify-between mb-6 shadow-md relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+        
+        <div className="flex flex-col md:flex-row gap-6 md:gap-10 w-full items-center justify-between z-10">
+          
+          <div className="flex flex-col items-center flex-1 justify-center w-full">
+            <div className="flex items-center gap-2 mb-1">
+              <Flame size={16} className={data.streakSemanas > 0 ? "text-orange-500" : "text-gray-500"} />
+              <span className="text-[10px] uppercase text-gray-400 font-extrabold tracking-widest">Streak Semanal</span>
             </div>
+            <span className="text-2xl md:text-3xl font-black text-white tracking-widest">
+              {data.streakSemanas} <span className="text-xs font-medium text-gray-400 ml-0.5">semanas</span>
+            </span>
           </div>
           
-          <div className="flex flex-col text-center flex-1 justify-center w-full md:border-l md:border-[rgba(255,255,255,0.1)] px-4">
-            <span className="text-[9px] uppercase text-zinc-400 font-extrabold tracking-widest mb-1">Escopo</span>
-            <span className="font-extrabold text-xs tracking-wide text-zinc-200">Todos os Dados</span>
+          <div className="flex flex-col items-center flex-1 justify-center w-full md:border-l md:border-gray-800 px-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Activity size={16} className="text-purple-400" />
+              <span className="text-[10px] uppercase text-gray-400 font-extrabold tracking-widest">Esforço (Mês)</span>
+            </div>
+            <span className="text-2xl md:text-3xl font-black text-white tracking-widest">
+              {(data.volumeMensal / 1000).toFixed(1)} <span className="text-xs font-medium text-gray-400 ml-0.5">Ton</span>
+            </span>
           </div>
           
-          <div className="flex flex-col items-center md:items-end w-full md:w-auto md:border-l md:border-[rgba(255,255,255,0.1)] md:pl-8">
-            <span className="text-[9px] uppercase text-zinc-400 font-extrabold tracking-widest mb-1">Carga Exportada (Mensal)</span>
-            <span className="text-xl md:text-2xl font-black text-white tracking-widest">17.500 <span className="text-xs font-medium text-zinc-400 ml-0.5">Kg</span></span>
+          <div className="flex flex-col items-center flex-1 justify-center w-full md:border-l md:border-gray-800 md:pl-8">
+            <div className="flex items-center gap-2 mb-1">
+              <Clock size={16} className="text-blue-400" />
+              <span className="text-[10px] uppercase text-gray-400 font-extrabold tracking-widest">Último Treino</span>
+            </div>
+            <span className="text-xl md:text-2xl font-black text-white tracking-wide">
+              {data.diasDesdeUltimoTreino === 0 ? 'Hoje' : data.diasDesdeUltimoTreino === 1 ? 'Ontem' : data.diasDesdeUltimoTreino === null ? 'Nenhum' : `${data.diasDesdeUltimoTreino} dias`}
+            </span>
           </div>
+
         </div>
       </div>
 
-      {/* Cards de Acesso Rápido - Clean Design */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 px-1">
-        <button onClick={() => navigate('/treinos')} className="bg-white border border-zinc-100 rounded-xl shadow-sm py-3 px-5 flex items-center gap-4 cursor-pointer group hover:shadow-md transition-all duration-200">
-          <div className="p-2.5 bg-[#F4F4F5] rounded-full group-hover:bg-[#000000] group-hover:text-white transition-colors duration-300">
-            <Dumbbell size={18} className="text-[#000000] group-hover:text-white" />
+      {/* Cards de Acesso Rápido */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 px-1">
+        <button onClick={() => navigate('/treinos')} className="bg-white border border-gray-200 rounded-2xl shadow-sm py-4 px-5 flex items-center gap-4 cursor-pointer hover:border-purple-300 hover:shadow-md transition-all group">
+          <div className="p-3 bg-purple-50 text-purple-600 rounded-xl group-hover:bg-purple-600 group-hover:text-white transition-colors">
+            <Dumbbell size={20} />
           </div>
           <div className="flex flex-col text-left">
-            <h3 className="font-extrabold text-[#000000] text-sm">Treino Ativo</h3>
-            <p className="text-[11px] text-zinc-500 font-medium mt-0.5">Ficha de exercícios</p>
+            <h3 className="font-extrabold text-gray-900 text-sm">Meu Treino</h3>
+            <p className="text-[11px] text-gray-500 font-medium mt-0.5">Visualizar ficha ativa</p>
           </div>
         </button>
 
-        <button onClick={() => navigate('/anamnese')} className="bg-white border border-zinc-100 rounded-xl shadow-sm py-3 px-5 flex items-center gap-4 cursor-pointer group hover:shadow-md transition-all duration-200">
-          <div className="p-2.5 bg-[#F4F4F5] rounded-full group-hover:bg-[#000000] group-hover:text-white transition-colors duration-300">
-            <FileText size={18} className="text-[#000000] group-hover:text-white" />
+        <button onClick={() => navigate('/anamnese')} className="bg-white border border-gray-200 rounded-2xl shadow-sm py-4 px-5 flex items-center gap-4 cursor-pointer hover:border-blue-300 hover:shadow-md transition-all group">
+          <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
+            <FileText size={20} />
           </div>
           <div className="flex flex-col text-left">
-            <h3 className="font-extrabold text-[#000000] text-sm">Anamnese</h3>
-            <p className="text-[11px] text-zinc-500 font-medium mt-0.5">Perfil morfológico</p>
+            <h3 className="font-extrabold text-gray-900 text-sm">Meu Perfil</h3>
+            <p className="text-[11px] text-gray-500 font-medium mt-0.5">Dados morfológicos</p>
           </div>
         </button>
 
-        <button onClick={() => navigate('/progresso')} className="bg-white border border-zinc-100 rounded-xl shadow-sm py-3 px-5 flex items-center gap-4 cursor-pointer group hover:shadow-md transition-all duration-200">
-          <div className="p-2.5 bg-[#F4F4F5] rounded-full group-hover:bg-[#000000] group-hover:text-white transition-colors duration-300">
-            <BarChart2 size={18} className="text-[#000000] group-hover:text-white" />
+        <button onClick={() => navigate('/progresso')} className="bg-white border border-gray-200 rounded-2xl shadow-sm py-4 px-5 flex items-center gap-4 cursor-pointer hover:border-emerald-300 hover:shadow-md transition-all group">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+            <BarChart2 size={20} />
           </div>
           <div className="flex flex-col text-left">
-            <h3 className="font-extrabold text-[#000000] text-sm">Data Logs</h3>
-            <p className="text-[11px] text-zinc-500 font-medium mt-0.5">Histórico do sistema</p>
+            <h3 className="font-extrabold text-gray-900 text-sm">Histórico</h3>
+            <p className="text-[11px] text-gray-500 font-medium mt-0.5">Logs de atividades</p>
           </div>
         </button>
       </div>
 
-      {/* Gráficos */}
-      <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-[220px] px-1 pb-2 overflow-hidden">
-        <div className="flex-[3] bg-white border border-zinc-100 shadow-sm flex flex-col p-5 rounded-2xl overflow-hidden">
-          <h2 className="text-[10px] font-black text-zinc-400 mb-4 uppercase tracking-widest">Volume (Kg)</h2>
-          <div className="flex-1 w-full relative">
+      {/* Gráfico Dinâmico */}
+      <div className="bg-white border border-gray-200 shadow-sm flex flex-col p-6 rounded-2xl">
+        <h2 className="text-xs font-black text-gray-800 mb-6 uppercase tracking-widest flex items-center gap-2">
+          <Activity size={16} className="text-purple-600" />
+          Evolução de Volume (Kg)
+        </h2>
+        <div className="w-full h-64 relative">
+          {data.barData && data.barData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={barData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F4F4F5" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#A1A1AA', fontSize: 11, fontWeight: 700}} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#A1A1AA', fontSize: 11, fontWeight: 700}} tickFormatter={(val) => `${val/1000}k`} />
-                <Tooltip 
-                  cursor={{fill: '#FAFAFA'}}
-                  contentStyle={{ backgroundColor: '#000000', border: 'none', borderRadius: '8px', color: 'white', fontWeight: 700, padding: '8px 12px', fontSize: 12 }}
-                  itemStyle={{color: 'white'}}
-                  formatter={(value) => [`${value} Kg`, 'Carga']}
+              <BarChart data={data.barData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 700}} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 700}} tickFormatter={(val) => `${val/1000}k`} />
+                <RechartsTooltip 
+                  cursor={{fill: '#f8fafc'}}
+                  contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: 'white', fontWeight: 700, padding: '10px 16px', fontSize: 13, boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                  itemStyle={{color: '#c084fc'}}
+                  formatter={(value) => [`${value} Kg`, 'Volume Levantado']}
                 />
-                <Bar dataKey="volume" fill="#000000" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                <Bar dataKey="volume" fill="#9333ea" radius={[6, 6, 0, 0]} maxBarSize={48} />
               </BarChart>
             </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="flex-[2] bg-white border border-zinc-100 shadow-sm flex flex-col p-5 rounded-2xl overflow-hidden">
-          <h2 className="text-[10px] font-black text-zinc-400 mb-3 uppercase tracking-widest">Grupamentos</h2>
-          <div className="flex-1 w-full flex flex-col justify-between overflow-hidden">
-            <div className="flex-1 min-h-[120px] relative">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius="60%"
-                    outerRadius="85%"
-                    dataKey="value"
-                    stroke="none"
-                    paddingAngle={2}
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#000000', border: 'none', borderRadius: '8px', color: '#FFFFFF', fontWeight: 600, fontSize: 12 }}
-                    itemStyle={{color: '#FFFFFF'}}
-                    formatter={(value, name) => [`${value}%`, name]}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+              <p className="text-sm font-bold text-gray-400">Sem dados de treino suficientes.</p>
             </div>
-
-            <div className="flex gap-2.5 mt-2.5 flex-wrap justify-center">
-              {pieData.map((item, i) => (
-                <div key={i} className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-sm" style={{backgroundColor: item.fill}}></div>
-                  <span className="text-[10px] text-zinc-500 font-bold tracking-wide">{item.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
         </div>
       </div>
       
