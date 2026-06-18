@@ -115,7 +115,7 @@ export default function Dashboard() {
               <BarChart data={data.barData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 700}} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 700}} tickFormatter={(val) => `${val/1000}k`} />
+                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 700}} tickFormatter={(val) => val === 0 ? '0' : `${val/1000} Mil`} />
                 <RechartsTooltip 
                   cursor={{fill: '#f8fafc'}}
                   contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: 'white', fontWeight: 700, padding: '10px 16px', fontSize: 13, boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
