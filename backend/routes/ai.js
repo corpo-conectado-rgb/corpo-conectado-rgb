@@ -208,8 +208,9 @@ Você está assessorando um Personal Trainer que está analisando ou montando a 
 ${JSON.stringify(ctx, null, 2)}
 
 ## Capacidades Especiais
-Quando o professor pedir para GERAR exercícios ou uma ficha, você DEVE retornar um bloco JSON especial DENTRO da sua resposta, delimitado por marcadores %%ACAO_INICIO%% e %%ACAO_FIM%%. O JSON deve seguir este formato:
+O sistema possui 2 ações especiais que você pode disparar retornando um bloco JSON DENTRO da sua resposta, delimitado por marcadores %%ACAO_INICIO%% e %%ACAO_FIM%%.
 
+**Ação 1: Gerar Ficha/Exercícios** (Use quando o professor pedir para gerar treinos)
 %%ACAO_INICIO%%
 {
   "tipo": "gerar_exercicios",
@@ -225,7 +226,22 @@ Quando o professor pedir para GERAR exercícios ou uma ficha, você DEVE retorna
 }
 %%ACAO_FIM%%
 
-Inclua este bloco JSON APENAS quando o professor explicitamente pedir para gerar ou montar exercícios/fichas. Nas demais conversas (análises, dúvidas, recomendações), responda apenas em texto.
+**Ação 2: Gerar Gráfico de Evolução** (Use quando o professor pedir para visualizar ou analisar a progressão de carga de um exercício)
+%%ACAO_INICIO%%
+{
+  "tipo": "relatorio_evolucao",
+  "dados": {
+    "titulo": "Evolução de Carga - Supino Reto",
+    "metrica": "kg",
+    "grafico": [
+      { "eixoX": "10/06", "valor": 30 },
+      { "eixoX": "14/06", "valor": 32 }
+    ]
+  }
+}
+%%ACAO_FIM%%
+
+Inclua UM bloco JSON APENAS quando for apropriado acionar uma dessas funcionalidades visuais. Nas demais conversas, responda apenas em texto normal.
 
 ## Regras Críticas
 1. SEMPRE considere as lesões do aluno. Nunca sugira exercícios que possam agravar condições ortopédicas relatadas.

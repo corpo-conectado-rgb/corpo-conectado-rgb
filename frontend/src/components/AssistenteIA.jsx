@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Send, BrainCircuit, Loader2, Sparkles, ChevronDown, Check, Trash2, Eye, EyeOff } from 'lucide-react';
 import { apiFetch } from '../services/api';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function AssistenteIA({ isOpen, onClose, alunoId, alunoNome, onApplyAction }) {
   const [messages, setMessages] = useState([]);
@@ -86,9 +87,10 @@ export default function AssistenteIA({ isOpen, onClose, alunoId, alunoNome, onAp
         setPendingAction(resp.action);
       }
     } catch (error) {
+      console.error("Erro completo:", error);
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: '❌ Falha ao comunicar com o servidor. Verifique se o backend está ativo.',
+        content: `❌ Falha: ${error.message || 'Erro desconhecido ao comunicar com o servidor.'}`,
         timestamp: new Date()
       }]);
     } finally {
@@ -241,26 +243,49 @@ export default function AssistenteIA({ isOpen, onClose, alunoId, alunoNome, onAp
                 <div className="flex items-center gap-2">
                   <Sparkles size={14} className="text-purple-600" />
                   <p className="text-xs font-black text-purple-700 uppercase tracking-wider">
-                    {pendingAction.tipo === 'gerar_exercicios' ? 'Treino Gerado' : 'Ação Disponível'}
+                    {pendingAction.tipo === 'gerar_exercicios' ? 'Treino Gerado' : 
+                     pendingAction.tipo === 'relatorio_evolucao' ? 'Relatório de Evolução' : 'Ação Disponível'}
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <button
-                    onClick={handleApplyAction}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-purple-700 transition shadow-sm active:scale-95"
-                    title="Aplicar na ficha"
-                  >
-                    <Check size={12} /> Aplicar
-                  </button>
+                  {pendingAction.tipo === 'gerar_exercicios' && (
+                    <button
+                      onClick={handleApplyAction}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-purple-700 transition shadow-sm active:scale-95"
+                      title="Aplicar na ficha"
+                    >
+                      <Check size={12} /> Aplicar
+                    </button>
+                  )}
                   <button
                     onClick={handleDiscardAction}
                     className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-white rounded-lg transition"
-                    title="Descartar sugestão"
+                    title={pendingAction.tipo === 'gerar_exercicios' ? "Descartar sugestão" : "Fechar relatório"}
                   >
                     <Trash2 size={14} />
                   </button>
                 </div>
               </div>
+              
+              {pendingAction.tipo === 'relatorio_evolucao' && pendingAction.dados && (
+                <div className="bg-white border border-purple-100 rounded-xl p-4 mt-2">
+                  <p className="text-sm font-black text-gray-900 mb-4">{pendingAction.dados.titulo}</p>
+                  <div className="h-48 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={pendingAction.dados.grafico}>
+                        <XAxis dataKey="eixoX" tick={{fontSize: 10}} stroke="#cbd5e1" />
+                        <YAxis tick={{fontSize: 10}} stroke="#cbd5e1" unit={pendingAction.dados.metrica ? ` ${pendingAction.dados.metrica}` : ''} width={40} />
+                        <Tooltip 
+                          contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}}
+                          itemStyle={{color: '#9333ea', fontWeight: 'bold'}}
+                          labelStyle={{color: '#64748b', fontSize: '12px', marginBottom: '4px'}}
+                        />
+                        <Line type="monotone" dataKey="valor" stroke="#9333ea" strokeWidth={3} dot={{r: 4, fill: '#9333ea', strokeWidth: 2, stroke: '#fff'}} activeDot={{r: 6}} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              )}
               
               {pendingAction.dias && (
                 <div className="space-y-2">
