@@ -27,6 +27,7 @@ export default function Treinos() {
   const [loadingMessage, setLoadingMessage] = useState("Buscando sua periodização médica...");
 
   const [activeView, setActiveView] = useState('hub'); // 'hub' | 'foco' | 'historico'
+  const [fichaSelecionada, setFichaSelecionada] = useState(null);
 
   // Foco (execução)
   const [fichaAtiva, setFichaAtiva] = useState(null);
@@ -266,7 +267,8 @@ export default function Treinos() {
 
   // Determinar próximo treino para o hub
   const proximaLetraHub = stats?.proxima_letra || fichas[0]?.letra;
-  const fichaProxima = fichas.find(f => f.letra === proximaLetraHub) || fichas[0];
+  const letraAtivaHub = fichaSelecionada || proximaLetraHub;
+  const fichaProxima = fichas.find(f => f.letra === letraAtivaHub) || fichas[0];
 
   // ─── Loading ────────────────────────────────────────────────────────────
   if (loading) {
@@ -556,12 +558,14 @@ export default function Treinos() {
         <h2 className="text-xs font-black text-gray-900 uppercase tracking-widest mb-2.5">Fichas</h2>
         <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 snap-x snap-mandatory scrollbar-hide">
           {fichas.map(ficha => {
-            const isProxima = ficha.letra === proximaLetraHub;
+            const isProximaBadge = ficha.letra === proximaLetraHub;
+            const isSelected = ficha.letra === letraAtivaHub;
             return (
               <div key={ficha.id}
-                className={`snap-start shrink-0 w-[200px] md:w-[220px] bg-white border rounded-xl overflow-hidden transition-all
-                  ${isProxima ? 'border-black ring-1 ring-black' : 'border-gray-200'}`}>
-                <div className={`h-1 w-full ${isProxima ? 'bg-black' : 'bg-gray-200'}`} />
+                onClick={() => setFichaSelecionada(ficha.letra)}
+                className={`snap-start shrink-0 w-[200px] md:w-[220px] bg-white border rounded-xl overflow-hidden transition-all cursor-pointer
+                  ${isSelected ? 'border-black ring-1 ring-black shadow-md' : 'border-gray-200 hover:border-gray-300'}`}>
+                <div className={`h-1 w-full ${isSelected ? 'bg-black' : 'bg-gray-200'}`} />
                 <div className="p-3.5 flex flex-col gap-2">
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center">
@@ -569,14 +573,14 @@ export default function Treinos() {
                     </div>
                     <div className="min-w-0">
                       <h3 className="font-black text-gray-900 text-xs leading-none truncate">{ficha.nome}</h3>
-                      {isProxima && <span className="text-[8px] font-black text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded mt-0.5 inline-block uppercase tracking-widest">Próximo</span>}
+                      {isProximaBadge && <span className="text-[8px] font-black text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded mt-0.5 inline-block uppercase tracking-widest">Próximo</span>}
                     </div>
                   </div>
                   <div className="flex gap-2 text-[9px] text-gray-400">
                     <span className="flex items-center gap-0.5"><Dumbbell size={9} /> {ficha.exercicios.length} exer</span>
                     <span className="flex items-center gap-0.5"><Clock size={9} /> {ficha.duracao}</span>
                   </div>
-                  <button onClick={() => iniciarTreino(ficha)}
+                  <button onClick={(e) => { e.stopPropagation(); iniciarTreino(ficha); }}
                     className="flex items-center justify-center gap-1 py-2 rounded-lg bg-black text-white text-[11px] font-black hover:bg-gray-800 active:scale-95 transition-all mt-0.5">
                     <Play size={10} fill="white" /> Iniciar
                   </button>
