@@ -51,8 +51,14 @@ export default function AssistenteIA({ isOpen, onClose, alunoId, alunoNome, onAp
     setPendingAction(null);
 
     try {
-      // Preparar histórico para a API (sem timestamps, sem a welcome msg se for do assistant)
-      const apiMessages = updatedMessages
+      // Remover a mensagem de boas vindas para que o histórico sempre comece com 'user' (exigência do Gemini)
+      let mensagensValidas = updatedMessages;
+      if (mensagensValidas.length > 0 && mensagensValidas[0].role === 'assistant' && mensagensValidas[0].content.includes('Olá! Sou o **Copiloto Inteligente**')) {
+        mensagensValidas = mensagensValidas.slice(1);
+      }
+
+      // Preparar histórico para a API
+      const apiMessages = mensagensValidas
         .filter(m => m.role === 'user' || m.role === 'assistant')
         .map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', content: m.content }));
 
