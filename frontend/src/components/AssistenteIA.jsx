@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Send, BrainCircuit, Loader2, Sparkles, ChevronDown, Check, Trash2 } from 'lucide-react';
+import { X, Send, BrainCircuit, Loader2, Sparkles, ChevronDown, Check, Trash2, Eye, EyeOff } from 'lucide-react';
 import { apiFetch } from '../services/api';
 
 export default function AssistenteIA({ isOpen, onClose, alunoId, alunoNome, onApplyAction }) {
@@ -7,8 +7,13 @@ export default function AssistenteIA({ isOpen, onClose, alunoId, alunoNome, onAp
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
+  const [expandedDays, setExpandedDays] = useState({});
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
+
+  const toggleDay = (idx) => {
+    setExpandedDays(prev => ({ ...prev, [idx]: !prev[idx] }));
+  };
 
   // Auto-scroll para a última mensagem
   useEffect(() => {
@@ -232,24 +237,55 @@ export default function AssistenteIA({ isOpen, onClose, alunoId, alunoNome, onAp
           {/* Pending Action Card */}
           {pendingAction && (
             <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 shadow-sm animate-fade-in">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles size={14} className="text-purple-600" />
-                <p className="text-xs font-black text-purple-700 uppercase tracking-wider">
-                  {pendingAction.tipo === 'gerar_exercicios' ? 'Treino Gerado' : 'Ação Disponível'}
-                </p>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={14} className="text-purple-600" />
+                  <p className="text-xs font-black text-purple-700 uppercase tracking-wider">
+                    {pendingAction.tipo === 'gerar_exercicios' ? 'Treino Gerado' : 'Ação Disponível'}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={handleApplyAction}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 text-white rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-purple-700 transition shadow-sm active:scale-95"
+                    title="Aplicar na ficha"
+                  >
+                    <Check size={12} /> Aplicar
+                  </button>
+                  <button
+                    onClick={handleDiscardAction}
+                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-white rounded-lg transition"
+                    title="Descartar sugestão"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               </div>
+              
               {pendingAction.dias && (
-                <div className="space-y-2 mb-3">
+                <div className="space-y-2">
                   {pendingAction.dias.map((dia, i) => (
-                    <div key={i} className="bg-white border border-purple-100 rounded-xl px-3 py-2">
-                      <p className="text-xs font-black text-gray-900">
-                        {dia.letra_dia} — {dia.foco_muscular}
-                      </p>
-                      <p className="text-[10px] font-medium text-gray-400 mt-0.5">
-                        {dia.exercicios?.length || 0} exercícios
-                      </p>
-                      {dia.exercicios && dia.exercicios.length > 0 && (
-                        <div className="space-y-1.5 mt-2.5 border-t border-purple-50 pt-2.5">
+                    <div key={i} className="bg-white border border-purple-100 rounded-xl px-3 py-2 transition-all">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-black text-gray-900">
+                            {dia.letra_dia} — {dia.foco_muscular}
+                          </p>
+                          <p className="text-[10px] font-medium text-gray-400 mt-0.5">
+                            {dia.exercicios?.length || 0} exercícios
+                          </p>
+                        </div>
+                        <button 
+                          onClick={() => toggleDay(i)} 
+                          className={`p-1.5 rounded-lg transition flex items-center justify-center ${expandedDays[i] ? 'bg-purple-50 text-purple-600' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'}`}
+                          title="Visualizar exercícios"
+                        >
+                          {expandedDays[i] ? <EyeOff size={14} /> : <Eye size={14} />}
+                        </button>
+                      </div>
+
+                      {expandedDays[i] && dia.exercicios && dia.exercicios.length > 0 && (
+                        <div className="space-y-1.5 mt-2.5 border-t border-purple-50 pt-2.5 animate-fade-in">
                           {dia.exercicios.map((ex, j) => (
                             <div key={j} className="flex justify-between items-center bg-gray-50/80 rounded-lg p-2">
                               <span className="text-[11px] font-bold text-gray-700 truncate pr-2">{ex.nome}</span>
@@ -264,20 +300,6 @@ export default function AssistenteIA({ isOpen, onClose, alunoId, alunoNome, onAp
                   ))}
                 </div>
               )}
-              <div className="flex gap-2">
-                <button
-                  onClick={handleApplyAction}
-                  className="flex-1 flex items-center justify-center gap-1.5 bg-purple-600 text-white py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-purple-700 transition shadow-md active:scale-95"
-                >
-                  <Check size={12} /> Aplicar na Ficha
-                </button>
-                <button
-                  onClick={handleDiscardAction}
-                  className="px-4 py-2.5 bg-gray-100 text-gray-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition"
-                >
-                  Descartar
-                </button>
-              </div>
             </div>
           )}
 
