@@ -101,38 +101,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Cards de Acesso Rápido */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 px-1">
-        <button onClick={() => navigate('/treinos')} className="bg-white border border-gray-200 rounded-2xl shadow-sm py-4 px-5 flex items-center gap-4 cursor-pointer hover:border-purple-300 hover:shadow-md transition-all group">
-          <div className="p-3 bg-purple-50 text-purple-600 rounded-xl group-hover:bg-purple-600 group-hover:text-white transition-colors">
-            <Dumbbell size={20} />
-          </div>
-          <div className="flex flex-col text-left">
-            <h3 className="font-extrabold text-gray-900 text-sm">Meu Treino</h3>
-            <p className="text-[11px] text-gray-500 font-medium mt-0.5">Visualizar ficha ativa</p>
-          </div>
-        </button>
 
-        <button onClick={() => navigate('/anamnese')} className="bg-white border border-gray-200 rounded-2xl shadow-sm py-4 px-5 flex items-center gap-4 cursor-pointer hover:border-blue-300 hover:shadow-md transition-all group">
-          <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
-            <FileText size={20} />
-          </div>
-          <div className="flex flex-col text-left">
-            <h3 className="font-extrabold text-gray-900 text-sm">Meu Perfil</h3>
-            <p className="text-[11px] text-gray-500 font-medium mt-0.5">Dados morfológicos</p>
-          </div>
-        </button>
-
-        <button onClick={() => navigate('/progresso')} className="bg-white border border-gray-200 rounded-2xl shadow-sm py-4 px-5 flex items-center gap-4 cursor-pointer hover:border-emerald-300 hover:shadow-md transition-all group">
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-            <BarChart2 size={20} />
-          </div>
-          <div className="flex flex-col text-left">
-            <h3 className="font-extrabold text-gray-900 text-sm">Histórico</h3>
-            <p className="text-[11px] text-gray-500 font-medium mt-0.5">Logs de atividades</p>
-          </div>
-        </button>
-      </div>
 
       {/* Gráfico Dinâmico */}
       <div className="bg-white border border-gray-200 shadow-sm flex flex-col p-6 rounded-2xl">
