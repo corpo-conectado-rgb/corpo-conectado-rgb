@@ -53,7 +53,7 @@ export default function Dashboard() {
           <Bot size={20} className="text-white" />
         </div>
         <div>
-          <h2 className="text-xs font-black text-purple-800 uppercase tracking-widest mb-0.5">Alfred Diz:</h2>
+          <h2 className="text-xs font-black text-purple-800 uppercase tracking-widest mb-0.5">Alfred</h2>
           <p className="text-sm font-medium text-purple-900">{insightText}</p>
         </div>
       </div>
