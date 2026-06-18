@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, BrainCircuit, Dumbbell, AlertTriangle, Activity, User, PlusCircle, Trash, Trash2, X, CalendarDays, MinusCircle, Sparkles, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, BrainCircuit, Dumbbell, AlertTriangle, Activity, User, PlusCircle, Trash, Trash2, X, CalendarDays, MinusCircle, Bot, Loader2 } from 'lucide-react';
 import { apiFetch } from '../services/api';
 import Toast from '../components/Toast';
 import AssistenteIA from '../components/AssistenteIA';
@@ -226,7 +226,7 @@ export default function AdminPrescricao() {
             onClick={() => setAssistenteOpen(true)}
             className="flex items-center gap-2 bg-purple-600 text-white px-5 py-3.5 rounded-xl font-black hover:bg-purple-700 transition shadow-lg"
           >
-            <Sparkles size={16} /> Copiloto IA
+            <Bot size={16} /> Alfred
           </button>
           <button 
             onClick={salvarPrescricao}

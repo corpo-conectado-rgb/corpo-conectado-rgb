@@ -193,7 +193,7 @@ router.post('/chat', adminMiddleware, async (req, res) => {
     const ctx = await buildStudentContext(user_id);
 
     // System Instruction rica com todo o contexto
-    const systemInstruction = `Você é o **Copiloto Inteligente** do sistema Corpo Conectado — um assistente de Educação Física com raciocínio clínico avançado.
+    const systemInstruction = `Você é o **Alfred** do sistema Corpo Conectado — um assistente de Educação Física com raciocínio clínico avançado.
 
 Você está assessorando um Personal Trainer que está analisando ou montando a ficha de treino de um aluno chamado **${nomeAluno}**.
 
@@ -253,7 +253,7 @@ Inclua UM bloco JSON APENAS quando for apropriado acionar uma dessas funcionalid
     if (!process.env.GEMINI_API_KEY) {
       // Mock para desenvolvimento
       return res.json({
-        response: `Olá! Sou o Copiloto Inteligente do Corpo Conectado. 🧠\n\nEstou analisando o perfil de **${nomeAluno}**.\n\n⚠️ *Modo de demonstração ativo — configure a GEMINI_API_KEY para ativar a IA real.*\n\nDados que tenho acesso:\n- **Anamnese**: ${ctx.anamnese ? '✅ Disponível' : '❌ Não encontrada'}\n- **Ficha Ativa**: ${ctx.ficha_ativa ? '✅ ' + ctx.ficha_ativa.nome_ficha : '❌ Sem ficha'}\n- **Histórico**: ${ctx.historico ? ctx.historico.length + ' sessões' : '❌ Sem histórico'}\n- **Cargas**: ${ctx.cargas_recentes ? '✅ ' + ctx.cargas_recentes.length + ' sessões com dados' : '❌ Sem dados de carga'}`,
+        response: `Olá! Sou o Alfred do Corpo Conectado. 🧠\n\nEstou analisando o perfil de **${nomeAluno}**.\n\n⚠️ *Modo de demonstração ativo — configure a GEMINI_API_KEY para ativar a IA real.*\n\nDados que tenho acesso:\n- **Anamnese**: ${ctx.anamnese ? '✅ Disponível' : '❌ Não encontrada'}\n- **Ficha Ativa**: ${ctx.ficha_ativa ? '✅ ' + ctx.ficha_ativa.nome_ficha : '❌ Sem ficha'}\n- **Histórico**: ${ctx.historico ? ctx.historico.length + ' sessões' : '❌ Sem histórico'}\n- **Cargas**: ${ctx.cargas_recentes ? '✅ ' + ctx.cargas_recentes.length + ' sessões com dados' : '❌ Sem dados de carga'}`,
         action: null
       });
     }
