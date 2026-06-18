@@ -210,7 +210,7 @@ ${JSON.stringify(ctx, null, 2)}
 ## Capacidades Especiais
 O sistema possui 2 ações especiais que você pode disparar retornando um bloco JSON DENTRO da sua resposta, delimitado por marcadores %%ACAO_INICIO%% e %%ACAO_FIM%%.
 
-**Ação 1: Gerar Ficha/Exercícios** (Use quando o professor pedir para gerar treinos)
+**Ação 1: Gerar Ficha/Exercícios** (Use SEMPRE que o professor pedir para sugerir, montar ou gerar treinos)
 %%ACAO_INICIO%%
 {
   "tipo": "gerar_exercicios",
@@ -241,7 +241,7 @@ O sistema possui 2 ações especiais que você pode disparar retornando um bloco
 }
 %%ACAO_FIM%%
 
-Inclua UM bloco JSON APENAS quando for apropriado acionar uma dessas funcionalidades visuais. Nas demais conversas, responda apenas em texto normal.
+Inclua UM bloco JSON SEMPRE que o professor pedir para sugerir, montar, criar ou gerar um treino. OBRIGATÓRIO usar o bloco %%ACAO_INICIO%% nesses casos para que a interface consiga renderizar a ficha. Nas demais conversas (apenas dúvidas), responda apenas em texto normal.
 
 ## Regras Críticas
 1. SEMPRE considere as lesões do aluno. Nunca sugira exercícios que possam agravar condições ortopédicas relatadas.
