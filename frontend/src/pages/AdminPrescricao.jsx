@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, BrainCircuit, Dumbbell, AlertTriangle, Activity, User, PlusCircle, Trash, Trash2, X, CalendarDays, MinusCircle, Sparkles, Loader2 } from 'lucide-react';
 import { apiFetch } from '../services/api';
 import Toast from '../components/Toast';
+import AssistenteIA from '../components/AssistenteIA';
 
 export default function AdminPrescricao() {
   const { id } = useParams();
@@ -20,7 +21,7 @@ export default function AdminPrescricao() {
   const [chatOpen, setChatOpen] = useState(false);
   const [menuAbertoDiaIdx, setMenuAbertoDiaIdx] = useState(null);
   const [toast, setToast] = useState(null);
-  const [loadingIA, setLoadingIA] = useState(null); // diaIdx que está carregando
+  const [assistenteOpen, setAssistenteOpen] = useState(false);
 
   // Estados do Formulário Master
   const [nomeFicha, setNomeFicha] = useState('Projeto Hipertrofia 1.0');
@@ -73,36 +74,6 @@ export default function AdminPrescricao() {
     fetchDados();
   }, [id]);
 
-  // Lógica de "IA" do Copiloto (Sugestões Baseadas em Regras Clínicas)
-  const sugestoesMotor = () => {
-    if (!aluno) return [];
-    let avisos = [];
-    
-    // IMC Proxy (se tiver altura e peso)
-    if (aluno.peso && aluno.altura) {
-      const imc = parseFloat(aluno.peso) / (parseFloat(aluno.altura) * parseFloat(aluno.altura));
-      if (imc > 30) {
-         avisos.push({ tipo: 'alert', obs: 'Detectado Imc > 30. Carga articular alta. Recomendado priorizar máquinas sobre pesos livres na fase inicial e proteger joelhos.' });
-      }
-    }
-    
-    if (aluno.nivel_fisico === 'INICIANTE') {
-         avisos.push({ tipo: 'info', obs: 'Atleta Iniciante. Ideal focar em Full Body ou A/B com volume super baixo (9 a 12 séries/músculo/semana) para adaptação neural.' });
-    }
-
-    if (aluno.lesoes_criticas && aluno.lesoes_criticas.length > 5) {
-         avisos.push({ tipo: 'danger', obs: `Alerta Ortopédico Relatado: "${aluno.lesoes_criticas}". Evitar ângulos de stress extremo nessa região.` });
-    }
-
-    if (aluno.habitos_freq === '1 A 2 DIAS' || aluno.habitos_freq === '1 a 2 vezes') {
-         avisos.push({ tipo: 'info', obs: 'Atleta dispõe de máximo 2 dias na semana. A divisão imperativa Sugerida é FULL BODY (Corpo Inteiro).' });
-    }
-    
-    if (avisos.length === 0) avisos.push({ tipo: 'success', obs: 'Biológico perfeitamente modular. Pode aplicar alto volume e splits avançados de A/B/C/D.' });
-
-    return avisos;
-  };
-
   const handleAddDia = () => {
     const nextLetras = ['A', 'B', 'C', 'D', 'E', 'F'];
     const nextLetra = nextLetras[diasTreino.length] || 'X';
@@ -147,7 +118,6 @@ export default function AdminPrescricao() {
   const removerDia = (diaIdx) => {
     const novosDias = [...diasTreino];
     novosDias.splice(diaIdx, 1);
-    // Recalcula as letras para manter a sequência (A, B, C...)
     const nextLetras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     novosDias.forEach((dia, idx) => {
       dia.letra_dia = nextLetras[idx] || 'X';
@@ -179,42 +149,48 @@ export default function AdminPrescricao() {
     }
   };
 
-  const gerarComIA = async (diaIdx) => {
-    const dia = diasTreino[diaIdx];
-    const focosAtuais = dia.foco_muscular ? dia.foco_muscular.split(',').map(s=>s.trim()).filter(Boolean) : [];
-    
-    if (focosAtuais.length === 0) {
-      setToast({ message: 'Adicione pelo menos um Foco Muscular primeiro.', type: 'error' });
-      return;
-    }
+  // Handler para ações vindas do Assistente IA (ex: injetar exercícios na ficha)
+  const handleApplyIAAction = (action) => {
+    if (action.tipo === 'gerar_exercicios' && action.dias) {
+      const novosDias = [...diasTreino];
+      const nextLetras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
-    setLoadingIA(diaIdx);
-    try {
-      const resp = await apiFetch('/ai/suggest-workout', {
-        method: 'POST',
-        body: JSON.stringify({
-          aluno,
-          focos: focosAtuais,
-          nomeFicha,
-          tipoDivisao,
-          objetivo: focoMacro
-        })
-      });
-
-      if (resp && resp.exercicios && resp.exercicios.length > 0) {
-        const novosDias = [...diasTreino];
-        // Adiciona mantendo os que o professor já tinha colocado manualmente
-        novosDias[diaIdx].exercicios = [
-          ...novosDias[diaIdx].exercicios,
-          ...resp.exercicios
-        ];
-        setDiasTreino(novosDias);
-        setToast({ message: 'Treino otimizado com IA injetado com sucesso! ✨', type: 'success' });
+      for (const diaSugerido of action.dias) {
+        // Procura se já existe um dia com essa letra
+        const idx = novosDias.findIndex(d => d.letra_dia === diaSugerido.letra_dia);
+        if (idx !== -1) {
+          // Adiciona exercícios ao dia existente
+          const exsFormatados = (diaSugerido.exercicios || []).map(ex => ({
+            nome: ex.nome || '',
+            series: ex.series || 3,
+            repeticoes: ex.repeticoes || '10-12',
+            descanso: ex.descanso || 60,
+            carga: '',
+            observacoes: ex.observacoes || ''
+          }));
+          novosDias[idx].exercicios = [...novosDias[idx].exercicios, ...exsFormatados];
+          if (diaSugerido.foco_muscular && !novosDias[idx].foco_muscular) {
+            novosDias[idx].foco_muscular = diaSugerido.foco_muscular;
+          }
+        } else {
+          // Cria novo dia
+          novosDias.push({
+            letra_dia: diaSugerido.letra_dia || nextLetras[novosDias.length] || 'X',
+            foco_muscular: diaSugerido.foco_muscular || '',
+            exercicios: (diaSugerido.exercicios || []).map(ex => ({
+              nome: ex.nome || '',
+              series: ex.series || 3,
+              repeticoes: ex.repeticoes || '10-12',
+              descanso: ex.descanso || 60,
+              carga: '',
+              observacoes: ex.observacoes || ''
+            }))
+          });
+        }
       }
-    } catch (error) {
-      setToast({ message: 'Falha de comunicação com o Copiloto.', type: 'error' });
-    } finally {
-      setLoadingIA(null);
+
+      setDiasTreino(novosDias);
+      setToast({ message: 'Treino gerado pela IA aplicado com sucesso! ✨', type: 'success' });
     }
   };
 
@@ -245,13 +221,21 @@ export default function AdminPrescricao() {
             <p className="text-gray-500 font-medium text-xs md:text-sm mt-0.5">Modelagem e design de treinamento clínico para {aluno?.nome}</p>
           </div>
         </div>
-        <button 
-          onClick={salvarPrescricao}
-          disabled={salvando}
-          className="mt-4 md:mt-0 flex items-center gap-2 bg-black text-white px-8 py-3.5 rounded-xl font-black hover:bg-gray-800 transition shadow-lg disabled:opacity-50"
-        >
-          {salvando ? 'Compilando...' : <><Save size={18} /> Salvar Prescrição</>}
-        </button>
+        <div className="flex items-center gap-3 mt-4 md:mt-0">
+          <button 
+            onClick={() => setAssistenteOpen(true)}
+            className="flex items-center gap-2 bg-purple-600 text-white px-5 py-3.5 rounded-xl font-black hover:bg-purple-700 transition shadow-lg"
+          >
+            <Sparkles size={16} /> Copiloto IA
+          </button>
+          <button 
+            onClick={salvarPrescricao}
+            disabled={salvando}
+            className="flex items-center gap-2 bg-black text-white px-8 py-3.5 rounded-xl font-black hover:bg-gray-800 transition shadow-lg disabled:opacity-50"
+          >
+            {salvando ? 'Compilando...' : <><Save size={18} /> Salvar Prescrição</>}
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -396,16 +380,6 @@ export default function AdminPrescricao() {
                      )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <button 
-                      onClick={() => gerarComIA(diaIdx)} 
-                      disabled={loadingIA === diaIdx}
-                      className="flex items-center gap-2 text-[10px] uppercase font-black tracking-widest text-purple-600 bg-purple-50 px-4 py-2 rounded-lg border border-purple-100 hover:bg-purple-100 transition disabled:opacity-50"
-                      title="Analisar anamnese e gerar treinos"
-                    >
-                      {loadingIA === diaIdx ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                      Copiloto
-                    </button>
-
                     <button onClick={() => addExercicio(diaIdx)} className="flex items-center gap-2 text-[10px] uppercase font-black tracking-widest text-blue-600 bg-blue-50 px-4 py-2 rounded-lg border border-blue-100 hover:bg-blue-100 transition">
                       <PlusCircle size={14} /> Injetar
                     </button>
@@ -453,76 +427,14 @@ export default function AdminPrescricao() {
         </div>
       </div>
 
-      {/* --- Copiloto Flutuante (FAB) --- */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
-        {/* Painel de Chat */}
-        {chatOpen && (
-          <div className="w-[340px] max-h-[500px] flex flex-col bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden animate-fade-up origin-bottom-right">
-            {/* Header Chat */}
-            <div className="bg-black text-white p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-600/20 flex items-center justify-center text-blue-400">
-                  <BrainCircuit size={16} />
-                </div>
-                <div>
-                  <h3 className="text-sm font-black tracking-wide">Copiloto Inteligente</h3>
-                  <p className="text-[10px] text-blue-300 font-bold uppercase tracking-widest">Motor Analítico Ativo</p>
-                </div>
-              </div>
-              <button onClick={() => setChatOpen(false)} className="text-gray-400 hover:text-white transition">
-                <X size={18} />
-              </button>
-            </div>
-            
-            {/* Corpo Chat */}
-            <div className="flex-1 overflow-y-auto p-5 bg-[#FAFAFA] space-y-4">
-              <div className="flex gap-3">
-                <div className="w-6 h-6 shrink-0 rounded-full bg-black flex items-center justify-center text-white mt-1 shadow-sm">
-                  <BrainCircuit size={12} />
-                </div>
-                <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-sm p-3.5 shadow-sm">
-                   <p className="text-xs text-gray-700 font-bold leading-relaxed">Olá! Baseado no perfil biológico e nos relatos de {aluno?.nome || 'seu aluno'}, levantei algumas diretrizes clínicas para este treino:</p>
-                </div>
-              </div>
-
-              {sugestoesMotor().map((aviso, idx) => (
-                <div key={idx} className="flex gap-3 animate-fade-in" style={{ animationDelay: `${idx * 150}ms` }}>
-                  <div className="w-6 h-6 shrink-0 rounded-full bg-black flex items-center justify-center text-white mt-1 shadow-sm">
-                    <BrainCircuit size={12} />
-                  </div>
-                  <div className={`rounded-2xl rounded-tl-sm p-3.5 shadow-sm border ${
-                    aviso.tipo === 'danger' ? 'bg-red-50 border-red-200' :
-                    aviso.tipo === 'alert' ? 'bg-orange-50 border-orange-200' :
-                    'bg-white border-gray-200'
-                  }`}>
-                    {aviso.tipo === 'danger' && <AlertTriangle size={14} className="text-red-500 mb-1" />}
-                    <p className={`text-[13px] font-bold leading-relaxed ${
-                      aviso.tipo === 'danger' ? 'text-red-700' :
-                      aviso.tipo === 'alert' ? 'text-orange-700' :
-                      'text-gray-700'
-                    }`}>
-                      {aviso.obs}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Botão Flutuante */}
-        <button 
-          onClick={() => setChatOpen(!chatOpen)}
-          className="w-14 h-14 rounded-full flex items-center justify-center bg-black text-white shadow-[0_10px_25px_rgba(0,0,0,0.5)] transition-all duration-300 hover:scale-105 active:scale-95 group relative"
-        >
-          {chatOpen ? <X size={24} /> : (
-            <>
-               <div className="absolute inset-0 bg-white/20 rounded-full animate-ping opacity-75"></div>
-               <BrainCircuit size={26} />
-            </>
-          )}
-        </button>
-      </div>
+      {/* --- Assistente IA Consultivo (Drawer) --- */}
+      <AssistenteIA
+        isOpen={assistenteOpen}
+        onClose={() => setAssistenteOpen(false)}
+        alunoId={id}
+        alunoNome={aluno?.nome || 'Aluno'}
+        onApplyAction={handleApplyIAAction}
+      />
     </div>
   );
 }
