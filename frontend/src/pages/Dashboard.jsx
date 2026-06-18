@@ -84,7 +84,7 @@ export default function Dashboard() {
               <span className="text-[10px] uppercase text-gray-400 font-extrabold tracking-widest">Carga Total Movida (Mês)</span>
             </div>
             <span className="text-2xl md:text-3xl font-black text-white tracking-widest">
-              {(data.volumeMensal / 1000).toFixed(1)} <span className="text-xs font-medium text-gray-400 ml-0.5">Toneladas</span>
+              {data.volumeMensal} <span className="text-xs font-medium text-gray-400 ml-0.5">Kg</span>
             </span>
           </div>
           
