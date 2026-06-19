@@ -107,7 +107,7 @@ export default function Dashboard() {
       <div className="flex-1 min-h-0 bg-white border border-gray-200 shadow-sm flex flex-col p-6 rounded-2xl">
         <h2 className="text-xs font-black text-gray-800 mb-6 uppercase tracking-widest flex items-center gap-2">
           <Activity size={16} className="text-purple-600" />
-          Como Sua Força Cresceu (Mês a Mês)
+          Treinos Realizados (Mês a Mês)
         </h2>
         <div className="w-full h-64 relative">
           {data.barData && data.barData.length > 0 ? (
@@ -115,14 +115,14 @@ export default function Dashboard() {
               <BarChart data={data.barData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 700}} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 700}} tickFormatter={(val) => val === 0 ? '0' : `${val/1000} Mil`} />
+                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 700}} allowDecimals={false} />
                 <RechartsTooltip 
                   cursor={{fill: '#f8fafc'}}
                   contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: 'white', fontWeight: 700, padding: '10px 16px', fontSize: 13, boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                   itemStyle={{color: '#c084fc'}}
-                  formatter={(value) => [`${value} Kg`, 'Carga Levantada']}
+                  formatter={(value) => [`${value} ${value === 1 ? 'Treino' : 'Treinos'}`, 'Concluídos']}
                 />
-                <Bar dataKey="volume" fill="#9333ea" radius={[6, 6, 0, 0]} maxBarSize={48} />
+                <Bar dataKey="treinos" fill="#9333ea" radius={[6, 6, 0, 0]} maxBarSize={48} />
               </BarChart>
             </ResponsiveContainer>
           ) : (

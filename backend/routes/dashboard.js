@@ -87,8 +87,7 @@ router.get('/', authMiddleware, async (req, res) => {
       }
     }
 
-    // Evolução de Carga Mensal (Volume total dividido por 4 semanas simplificado para o Gráfico)
-    // Para simplificar, vamos enviar o volume por mês dos últimos 4 meses
+    // Evolução de Treinos por Mês
     const barData = [];
     for (let i = 3; i >= 0; i--) {
       const d = new Date();
@@ -102,8 +101,8 @@ router.get('/', authMiddleware, async (req, res) => {
         return dt >= monthStart && dt <= monthEnd;
       });
 
-      const volMes = treinosMes.reduce((acc, curr) => acc + curr.volume_total, 0);
-      barData.push({ name: monthStr.charAt(0).toUpperCase() + monthStr.slice(1), volume: volMes });
+      const qtdTreinos = treinosMes.length;
+      barData.push({ name: monthStr.charAt(0).toUpperCase() + monthStr.slice(1), treinos: qtdTreinos });
     }
 
     // Pegar o último treino para mensagem
