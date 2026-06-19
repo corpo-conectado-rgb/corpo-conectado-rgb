@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Send, BrainCircuit, Loader2, Sparkles, ChevronDown, Check, Trash2, Eye, EyeOff, Briefcase } from 'lucide-react';
+import { X, Send, BrainCircuit, Loader2, Sparkles, ChevronDown, Check, Trash2, Eye, EyeOff, Bot } from 'lucide-react';
 import { apiFetch } from '../services/api';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -169,7 +169,7 @@ export default function AssistenteIA({ isOpen, onClose, alunoId, alunoNome, onAp
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-gray-900 to-gray-800 text-white shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-300">
-              <Briefcase size={18} />
+              <Bot size={18} />
             </div>
             <div>
               <h3 className="text-sm font-black tracking-wide">Alfred</h3>
@@ -202,7 +202,7 @@ export default function AssistenteIA({ isOpen, onClose, alunoId, alunoNome, onAp
             <div key={idx} className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}>
               {msg.role === 'assistant' && (
                 <div className="w-7 h-7 shrink-0 rounded-full bg-gray-900 flex items-center justify-center text-purple-400 mt-0.5 shadow-sm">
-                  <Briefcase size={12} />
+                  <Bot size={12} />
                 </div>
               )}
               <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${
@@ -225,7 +225,7 @@ export default function AssistenteIA({ isOpen, onClose, alunoId, alunoNome, onAp
           {loading && (
             <div className="flex gap-2.5 animate-fade-in">
               <div className="w-7 h-7 shrink-0 rounded-full bg-gray-900 flex items-center justify-center text-purple-400 mt-0.5">
-                <Briefcase size={12} />
+                <Bot size={12} />
               </div>
               <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
                 <div className="flex items-center gap-2">
