@@ -368,10 +368,10 @@ export default function Treinos() {
 
     // ── Execução do Exercício ──
     return (
-      <div className="flex flex-col h-full animate-fade-in overflow-y-auto -mx-1">
+      <div className="flex flex-col h-full animate-fade-in overflow-y-auto">
 
         {/* HUD Header */}
-        <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm pb-3 mb-3 border-b border-gray-100 px-1">
+        <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm pb-3 mb-3 border-b border-gray-100">
           <div className="flex items-center justify-between mb-2.5">
             <button onClick={voltarHub} className="flex items-center gap-1.5 text-gray-400 hover:text-black transition text-sm font-bold active:scale-95">
               <X size={18} /> Encerrar
@@ -391,7 +391,7 @@ export default function Treinos() {
         </div>
 
         {/* Card do Exercício */}
-        <div className="flex-1 px-1">
+        <div className="flex-1">
           <div className="mb-1.5">
             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 py-0.5 bg-gray-50 rounded border border-gray-100">{exAtual.grupomuscular}</span>
           </div>
@@ -419,16 +419,16 @@ export default function Treinos() {
               const feita = serie.concluida;
               return (
                 <div key={serieIdx}
-                  className={`flex items-center gap-3 p-4 md:p-5 rounded-xl border transition-all duration-200
+                  className={`flex items-center gap-2 md:gap-3 p-3 md:p-5 rounded-xl border transition-all duration-200
                     ${feita ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-200 shadow-sm'}`}>
-                  <span className={`text-sm font-black w-5 text-center ${feita ? 'text-gray-400' : 'text-gray-900'}`}>
+                  <span className={`text-sm font-black w-5 text-center shrink-0 ${feita ? 'text-gray-400' : 'text-gray-900'}`}>
                     {serieIdx + 1}
                   </span>
 
                   {/* Input de carga com +/- */}
-                  <div className="flex items-center gap-1 flex-1">
+                  <div className="flex items-center gap-1 flex-1 min-w-0">
                     <button onClick={() => updateCarga(exAtual.id, serieIdx, Math.max(0, (Number(serie.carga) || 0) - 2.5))}
-                      className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200 shrink-0">
+                      className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200 shrink-0">
                       <Minus size={16} />
                     </button>
                     <input
@@ -437,20 +437,20 @@ export default function Treinos() {
                       value={serie.carga}
                       onChange={(e) => updateCarga(exAtual.id, serieIdx, e.target.value)}
                       placeholder="kg"
-                      className={`flex-1 min-w-0 bg-gray-50 border border-gray-200 rounded-lg px-2 py-2 text-center text-sm font-black outline-none h-10
+                      className={`flex-1 min-w-[40px] bg-gray-50 border border-gray-200 rounded-lg px-1 py-1.5 md:py-2 text-center text-sm font-black outline-none h-8 md:h-10
                         ${feita ? 'text-gray-400' : 'text-gray-900 focus:border-black focus:ring-1 focus:ring-black'}`}
                     />
                     <button onClick={() => updateCarga(exAtual.id, serieIdx, (Number(serie.carga) || 0) + 2.5)}
-                      className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200 shrink-0">
+                      className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200 shrink-0">
                       <Plus size={16} />
                     </button>
                   </div>
 
-                  <span className={`text-xs font-medium whitespace-nowrap ${feita ? 'text-gray-400' : 'text-gray-600'}`}>{exAtual.reps}</span>
+                  <span className={`text-[11px] md:text-xs font-medium whitespace-nowrap shrink-0 ${feita ? 'text-gray-400' : 'text-gray-600'}`}>{exAtual.reps}</span>
 
                   {/* Botão concluir série */}
                   <button onClick={() => checkSerie(exAtual.id, serieIdx)}
-                    className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90 shrink-0
+                    className={`w-11 h-11 md:w-14 md:h-14 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90 shrink-0
                       ${feita ? 'bg-black text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}>
                     {feita ? <CheckCircle2 size={24} /> : <Circle size={24} />}
                   </button>
