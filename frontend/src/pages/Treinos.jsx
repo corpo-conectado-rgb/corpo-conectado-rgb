@@ -70,14 +70,9 @@ export default function Treinos() {
         apiFetch('/workouts/history?limit=5').catch(() => []),
       ]);
       
-      // Garantir ordenação estrita (Data e Hora) no frontend
+      // Garantir ordenação estrita no frontend baseada na inserção original + data
       if (histData) {
-        histData.sort((a, b) => {
-          const dDiff = new Date(b.data) - new Date(a.data);
-          if (dDiff !== 0) return dDiff;
-          if (a.hora_fim && b.hora_fim) return b.hora_fim.localeCompare(a.hora_fim);
-          return 0;
-        });
+        histData.reverse().sort((a, b) => new Date(b.data) - new Date(a.data));
       }
 
       setFichas(fichasData);
@@ -654,12 +649,7 @@ function HistoricoView({ onBack }) {
       try {
         const data = await apiFetch('/workouts/history?limit=90');
         if (data) {
-          data.sort((a, b) => {
-            const dDiff = new Date(b.data) - new Date(a.data);
-            if (dDiff !== 0) return dDiff;
-            if (a.hora_fim && b.hora_fim) return b.hora_fim.localeCompare(a.hora_fim);
-            return 0;
-          });
+          data.reverse().sort((a, b) => new Date(b.data) - new Date(a.data));
         }
         setHistorico(data);
       } catch (err) {

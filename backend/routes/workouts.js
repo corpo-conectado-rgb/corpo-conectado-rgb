@@ -55,13 +55,9 @@ function calcularSequencia(sessoes, metaObjetivo) {
   const intervaloEsperado = 7 / metaObjetivo;
   const maxGap = Math.max(3, Math.ceil(intervaloEsperado * 2.5));
 
-  // Ordenar por data e depois hora DESC
-  const sorted = [...sessoes].sort((a, b) => {
-    const dDiff = new Date(b.data) - new Date(a.data);
-    if (dDiff !== 0) return dDiff;
-    if (a.hora_fim && b.hora_fim) return b.hora_fim.localeCompare(a.hora_fim);
-    return 0;
-  });
+  // Reverter a ordem original (as inserções mais recentes ficam no início) e depois ordenar por data
+  // O sort do V8 é estável, então se as datas forem iguais, a ordem reversa (inserção) é mantida.
+  const sorted = [...sessoes].reverse().sort((a, b) => new Date(b.data) - new Date(a.data));
 
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
@@ -245,12 +241,8 @@ router.get('/history', authMiddleware, async (req, res) => {
         exercicios_feitos: Number(r.get('exercicios_feitos')) || 0,
         exercicios_total: Number(r.get('exercicios_total')) || 0
       }))
-      .sort((a, b) => {
-        const dDiff = new Date(b.data) - new Date(a.data);
-        if (dDiff !== 0) return dDiff;
-        if (a.hora_fim && b.hora_fim) return b.hora_fim.localeCompare(a.hora_fim);
-        return 0;
-      })
+      .reverse()
+      .sort((a, b) => new Date(b.data) - new Date(a.data))
       .slice(0, limit)
       .map(item => {
         // Adicionar dia da semana em português
@@ -287,13 +279,8 @@ router.get('/stats', authMiddleware, async (req, res) => {
       exercicios_feitos: Number(r.get('exercicios_feitos')) || 0
     }));
 
-    // Ordenar por data e depois hora DESC
-    sessoes.sort((a, b) => {
-      const dDiff = new Date(b.data) - new Date(a.data);
-      if (dDiff !== 0) return dDiff;
-      if (a.hora_fim && b.hora_fim) return b.hora_fim.localeCompare(a.hora_fim);
-      return 0;
-    });
+    // Reverter e ordenar por data DESC
+    sessoes.reverse().sort((a, b) => new Date(b.data) - new Date(a.data));
 
     // Buscar meta semanal da anamnese
     const anamneseRows = await getCachedRows('anamnese', ANAMNESE_HEADERS);
