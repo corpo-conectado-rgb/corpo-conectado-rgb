@@ -70,11 +70,6 @@ export default function Treinos() {
         apiFetch('/workouts/history?limit=5').catch(() => []),
       ]);
       
-      // Garantir ordenação estrita no frontend baseada na inserção original + data
-      if (histData) {
-        histData.reverse().sort((a, b) => new Date(b.data) - new Date(a.data));
-      }
-
       setFichas(fichasData);
       setStats(statsData);
       setHistorico(histData);
@@ -648,9 +643,6 @@ function HistoricoView({ onBack }) {
     const fetch = async () => {
       try {
         const data = await apiFetch('/workouts/history?limit=90');
-        if (data) {
-          data.reverse().sort((a, b) => new Date(b.data) - new Date(a.data));
-        }
         setHistorico(data);
       } catch (err) {
         console.error('Erro ao buscar histórico:', err);

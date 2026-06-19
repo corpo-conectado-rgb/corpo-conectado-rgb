@@ -55,9 +55,12 @@ function calcularSequencia(sessoes, metaObjetivo) {
   const intervaloEsperado = 7 / metaObjetivo;
   const maxGap = Math.max(3, Math.ceil(intervaloEsperado * 2.5));
 
-  // Reverter a ordem original (as inserções mais recentes ficam no início) e depois ordenar por data
-  // O sort do V8 é estável, então se as datas forem iguais, a ordem reversa (inserção) é mantida.
-  const sorted = [...sessoes].reverse().sort((a, b) => new Date(b.data) - new Date(a.data));
+  // Ordenar por data+hora DESC para garantir ordem cronológica correta
+  const sorted = [...sessoes].sort((a, b) => {
+    const dtA = new Date(`${a.data}T${a.hora_inicio || '00:00'}`);
+    const dtB = new Date(`${b.data}T${b.hora_inicio || '00:00'}`);
+    return dtB - dtA;
+  });
 
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
@@ -241,8 +244,11 @@ router.get('/history', authMiddleware, async (req, res) => {
         exercicios_feitos: Number(r.get('exercicios_feitos')) || 0,
         exercicios_total: Number(r.get('exercicios_total')) || 0
       }))
-      .reverse()
-      .sort((a, b) => new Date(b.data) - new Date(a.data))
+      .sort((a, b) => {
+        const dtA = new Date(`${a.data}T${a.hora_inicio || '00:00'}`);
+        const dtB = new Date(`${b.data}T${b.hora_inicio || '00:00'}`);
+        return dtB - dtA;
+      })
       .slice(0, limit)
       .map(item => {
         // Adicionar dia da semana em português
@@ -274,13 +280,18 @@ router.get('/stats', authMiddleware, async (req, res) => {
       letra: r.get('letra'),
       nome_dia: r.get('nome_dia'),
       data: r.get('data'),
+      hora_inicio: r.get('hora_inicio'),
       duracao_seg: Number(r.get('duracao_seg')) || 0,
       volume_total: Number(r.get('volume_total')) || 0,
       exercicios_feitos: Number(r.get('exercicios_feitos')) || 0
     }));
 
-    // Reverter e ordenar por data DESC
-    sessoes.reverse().sort((a, b) => new Date(b.data) - new Date(a.data));
+    // Ordenar por data+hora DESC
+    sessoes.sort((a, b) => {
+      const dtA = new Date(`${a.data}T${a.hora_inicio || '00:00'}`);
+      const dtB = new Date(`${b.data}T${b.hora_inicio || '00:00'}`);
+      return dtB - dtA;
+    });
 
     // Buscar meta semanal da anamnese
     const anamneseRows = await getCachedRows('anamnese', ANAMNESE_HEADERS);

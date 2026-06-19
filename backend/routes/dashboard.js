@@ -19,12 +19,16 @@ router.get('/', authMiddleware, async (req, res) => {
       .filter(r => r.get('user_id') === userId)
       .map(r => ({
         data: r.get('data'),
+        hora_inicio: r.get('hora_inicio'),
         volume_total: Number(r.get('volume_total')) || 0,
         duracao_seg: Number(r.get('duracao_seg')) || 0,
         detalhes: r.get('detalhes')
       }))
-      .reverse()
-      .sort((a, b) => new Date(b.data) - new Date(a.data));
+      .sort((a, b) => {
+        const dtA = new Date(`${a.data}T${a.hora_inicio || '00:00'}`);
+        const dtB = new Date(`${b.data}T${b.hora_inicio || '00:00'}`);
+        return dtB - dtA;
+      });
 
     // Cálculos de Tempo Mensal (Últimos 30 dias)
     const hoje = new Date();
