@@ -713,7 +713,7 @@ function HistoricoView({ onBack }) {
                   <div className="flex gap-3 mt-2.5 pt-2.5 border-t border-gray-50">
                     {[
                       { label: 'Duração', valor: `${Math.round(h.duracao_seg / 60)}min` },
-                      { label: 'Volume', valor: `${formatVolume(h.volume_total)}kg` },
+                      { label: 'Eficiência', valor: `${Math.round((h.exercicios_feitos / Math.max(1, h.exercicios_total)) * 100)}%` },
                       { label: 'Exercícios', valor: `${h.exercicios_feitos}/${h.exercicios_total}` },
                     ].map(({ label, valor }) => (
                       <div key={label} className="flex-1 text-center">
