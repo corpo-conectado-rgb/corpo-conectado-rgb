@@ -543,7 +543,7 @@ export default function Treinos() {
           { label: 'Treinados', valor: stats?.dias_treinados_mes ?? '—', icon: Trophy, cor: 'text-yellow-500', sub: 'Mês' },
           { label: 'Sequência', valor: stats?.sequencia_atual != null ? `${stats.sequencia_atual}` : '—', icon: Flame, cor: 'text-orange-500', sub: 'Treinos' },
           { label: 'Meta', valor: stats?.meta_semanal ? `${stats.meta_semanal.feitos}/${stats.meta_semanal.objetivo}` : '—', icon: Target, cor: 'text-emerald-500', sub: 'Semana' },
-          { label: 'Volume', valor: stats?.volume_semana != null ? formatVolume(stats.volume_semana) : '—', icon: BarChart3, cor: 'text-blue-500', sub: '7 dias' },
+          { label: 'Eficiência', valor: stats?.eficiencia_semana != null ? `${stats.eficiencia_semana}%` : '—', icon: CheckCircle2, cor: 'text-blue-500', sub: '7 dias' },
         ].map(({ label, valor, icon: Icon, cor, sub }) => (
           <div key={label} className="bg-white border border-gray-100 shadow-sm rounded-xl p-3 flex flex-col justify-center gap-0.5">
             <div className="flex items-center justify-between mb-0.5">

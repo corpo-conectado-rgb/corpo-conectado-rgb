@@ -282,8 +282,8 @@ router.get('/stats', authMiddleware, async (req, res) => {
       data: r.get('data'),
       hora_inicio: r.get('hora_inicio'),
       duracao_seg: Number(r.get('duracao_seg')) || 0,
-      volume_total: Number(r.get('volume_total')) || 0,
-      exercicios_feitos: Number(r.get('exercicios_feitos')) || 0
+      exercicios_feitos: Number(r.get('exercicios_feitos')) || 0,
+      exercicios_total: Number(r.get('exercicios_total')) || 0
     }));
 
     // Ordenar por data+hora DESC
@@ -325,8 +325,15 @@ router.get('/stats', authMiddleware, async (req, res) => {
 
     const diasTreinadosMes = sessoesUlt30.length;
 
-    // Volume da semana
-    const volumeSemana = sessoesUlt7.reduce((sum, s) => sum + s.volume_total, 0);
+    // Eficiência da semana (Média das porcentagens de conclusão)
+    let eficienciaSemana = 0;
+    if (sessoesUlt7.length > 0) {
+      const sumEficiencia = sessoesUlt7.reduce((sum, s) => {
+        const perc = (s.exercicios_feitos / Math.max(1, s.exercicios_total)) * 100;
+        return sum + Math.min(100, perc); // Cap at 100% per session just in case
+      }, 0);
+      eficienciaSemana = Math.round(sumEficiencia / sessoesUlt7.length);
+    }
 
     // Exercícios do mês
     const exerciciosMes = sessoesUlt30.reduce((sum, s) => sum + s.exercicios_feitos, 0);
@@ -371,7 +378,7 @@ router.get('/stats', authMiddleware, async (req, res) => {
         feitos: sessoesUlt7.length,
         objetivo: metaObjetivo
       },
-      volume_semana: volumeSemana,
+      eficiencia_semana: eficienciaSemana,
       exercicios_mes: exerciciosMes,
       tempo_medio_min: tempoMedio,
       frequencia_semanal: frequenciaSemanal,
