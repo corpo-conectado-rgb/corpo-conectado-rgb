@@ -55,8 +55,13 @@ function calcularSequencia(sessoes, metaObjetivo) {
   const intervaloEsperado = 7 / metaObjetivo;
   const maxGap = Math.max(3, Math.ceil(intervaloEsperado * 2.5));
 
-  // Ordenar por data DESC
-  const sorted = [...sessoes].sort((a, b) => new Date(b.data) - new Date(a.data));
+  // Ordenar por data e depois hora DESC
+  const sorted = [...sessoes].sort((a, b) => {
+    const dDiff = new Date(b.data) - new Date(a.data);
+    if (dDiff !== 0) return dDiff;
+    if (a.hora_fim && b.hora_fim) return b.hora_fim.localeCompare(a.hora_fim);
+    return 0;
+  });
 
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
@@ -240,7 +245,12 @@ router.get('/history', authMiddleware, async (req, res) => {
         exercicios_feitos: Number(r.get('exercicios_feitos')) || 0,
         exercicios_total: Number(r.get('exercicios_total')) || 0
       }))
-      .sort((a, b) => new Date(b.data) - new Date(a.data))
+      .sort((a, b) => {
+        const dDiff = new Date(b.data) - new Date(a.data);
+        if (dDiff !== 0) return dDiff;
+        if (a.hora_fim && b.hora_fim) return b.hora_fim.localeCompare(a.hora_fim);
+        return 0;
+      })
       .slice(0, limit)
       .map(item => {
         // Adicionar dia da semana em português
@@ -277,8 +287,13 @@ router.get('/stats', authMiddleware, async (req, res) => {
       exercicios_feitos: Number(r.get('exercicios_feitos')) || 0
     }));
 
-    // Ordenar por data DESC
-    sessoes.sort((a, b) => new Date(b.data) - new Date(a.data));
+    // Ordenar por data e depois hora DESC
+    sessoes.sort((a, b) => {
+      const dDiff = new Date(b.data) - new Date(a.data);
+      if (dDiff !== 0) return dDiff;
+      if (a.hora_fim && b.hora_fim) return b.hora_fim.localeCompare(a.hora_fim);
+      return 0;
+    });
 
     // Buscar meta semanal da anamnese
     const anamneseRows = await getCachedRows('anamnese', ANAMNESE_HEADERS);

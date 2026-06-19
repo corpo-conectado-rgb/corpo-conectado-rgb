@@ -23,7 +23,12 @@ router.get('/', authMiddleware, async (req, res) => {
         duracao_seg: Number(r.get('duracao_seg')) || 0,
         detalhes: r.get('detalhes')
       }))
-      .sort((a, b) => new Date(b.data) - new Date(a.data));
+      .sort((a, b) => {
+        const dDiff = new Date(b.data) - new Date(a.data);
+        if (dDiff !== 0) return dDiff;
+        if (a.hora_fim && b.hora_fim) return b.hora_fim.localeCompare(a.hora_fim);
+        return 0;
+      });
 
     // Cálculos de Tempo Mensal (Últimos 30 dias)
     const hoje = new Date();
