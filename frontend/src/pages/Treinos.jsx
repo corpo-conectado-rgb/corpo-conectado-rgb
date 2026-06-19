@@ -311,7 +311,10 @@ export default function Treinos() {
           <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
             {[
               { label: 'Tempo', valor: formatTime(tempoTotal) },
-              { label: 'Volume', valor: `${formatVolume(volumeTotal)}kg` },
+              { 
+                label: 'Eficiência', 
+                valor: `${fichaAtiva.exercicios.reduce((acc, ex) => acc + ex.series, 0) > 0 ? Math.round((seriesConcluidas / fichaAtiva.exercicios.reduce((acc, ex) => acc + ex.series, 0)) * 100) : 0}%` 
+              },
               { label: 'Exercícios', valor: fichaAtiva.exercicios.length },
               { label: 'Séries', valor: seriesConcluidas },
             ].map(({ label, valor }) => (
