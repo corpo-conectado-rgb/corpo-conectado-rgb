@@ -631,7 +631,7 @@ export default function Treinos() {
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-xs font-black text-gray-900">{Math.round(h.duracao_seg / 60)}min</p>
-                  <p className="text-[10px] text-gray-400">{formatVolume(h.volume_total)}kg</p>
+                  <p className="text-[10px] text-gray-400 font-bold">{Math.round((h.exercicios_feitos / Math.max(1, h.exercicios_total)) * 100)}% concluído</p>
                 </div>
               </div>
             ))}
