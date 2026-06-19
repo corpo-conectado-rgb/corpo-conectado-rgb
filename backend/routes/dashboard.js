@@ -20,18 +20,19 @@ router.get('/', authMiddleware, async (req, res) => {
       .map(r => ({
         data: r.get('data'),
         volume_total: Number(r.get('volume_total')) || 0,
+        duracao_seg: Number(r.get('duracao_seg')) || 0,
         detalhes: r.get('detalhes')
       }))
       .sort((a, b) => new Date(b.data) - new Date(a.data));
 
-    // Cálculos de Volume Mensal Real (Últimos 30 dias)
+    // Cálculos de Tempo Mensal (Últimos 30 dias)
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
     const trintaDiasAtras = new Date(hoje);
     trintaDiasAtras.setDate(hoje.getDate() - 30);
 
     const treinosUltimos30Dias = userHist.filter(t => new Date(t.data) >= trintaDiasAtras);
-    const volumeMensal = treinosUltimos30Dias.reduce((acc, curr) => acc + curr.volume_total, 0);
+    const tempoMensalSegundos = treinosUltimos30Dias.reduce((acc, curr) => acc + curr.duracao_seg, 0);
 
     // Calcular "Semanas Ativas Consecutivas" (Streak)
     let streakSemanas = 0;
@@ -110,7 +111,7 @@ router.get('/', authMiddleware, async (req, res) => {
 
     res.json({
       streakSemanas,
-      volumeMensal,
+      tempoMensalSegundos,
       barData,
       diasDesdeUltimoTreino,
       totalSessoes: userHist.length

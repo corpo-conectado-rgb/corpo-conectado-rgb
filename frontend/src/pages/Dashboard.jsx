@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, FileText, BarChart2, Flame, Activity, Clock, Loader2, Bot } from 'lucide-react';
+import { Dumbbell, FileText, BarChart2, Flame, Activity, Clock, Loader2, Bot, Timer } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { apiFetch } from '../services/api';
 
@@ -80,11 +80,12 @@ export default function Dashboard() {
           
           <div className="flex flex-col items-center flex-1 justify-center w-full pb-5 md:pb-0 border-b border-gray-800 md:border-b-0 md:border-l md:px-4 mb-5 md:mb-0">
             <div className="flex items-center gap-2 mb-1">
-              <Activity size={16} className="text-purple-400" />
-              <span className="text-[10px] md:text-xs uppercase text-gray-400 font-extrabold tracking-widest text-center">Carga Total (Mês)</span>
+              <Timer size={16} className="text-purple-400" />
+              <span className="text-[10px] md:text-xs uppercase text-gray-400 font-extrabold tracking-widest text-center">Tempo Total (Mês)</span>
             </div>
             <span className="text-3xl md:text-4xl font-black text-white tracking-widest">
-              {data.volumeMensal} <span className="text-sm font-medium text-gray-400 ml-0.5">Kg</span>
+              {Math.floor((data.tempoMensalSegundos || 0) / 3600)}<span className="text-sm font-medium text-gray-400 ml-0.5 mr-1.5">h</span>
+              {Math.floor(((data.tempoMensalSegundos || 0) % 3600) / 60)}<span className="text-sm font-medium text-gray-400 ml-0.5">m</span>
             </span>
           </div>
           
