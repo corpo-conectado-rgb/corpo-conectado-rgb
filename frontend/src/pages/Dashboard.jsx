@@ -63,37 +63,37 @@ export default function Dashboard() {
       </header>
 
       {/* Faixa Noir (KPIs Reais) */}
-      <div className="shrink-0 bg-gray-900 rounded-2xl text-white py-5 px-6 flex flex-col md:flex-row items-center justify-between mb-6 shadow-md relative overflow-hidden">
+      <div className="shrink-0 bg-gray-900 rounded-2xl text-white py-6 px-4 md:px-6 flex flex-col md:flex-row items-center justify-between mb-6 shadow-md relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-2xl"></div>
         
-        <div className="flex flex-col md:flex-row gap-6 md:gap-10 w-full items-center justify-between z-10">
+        <div className="flex flex-col md:flex-row gap-0 md:gap-10 w-full items-center justify-between z-10">
           
-          <div className="flex flex-col items-center flex-1 justify-center w-full">
+          <div className="flex flex-col items-center flex-1 justify-center w-full pb-5 md:pb-0 border-b border-gray-800 md:border-b-0 mb-5 md:mb-0">
             <div className="flex items-center gap-2 mb-1">
               <Flame size={16} className={data.streakSemanas > 0 ? "text-orange-500" : "text-gray-500"} />
-              <span className="text-[10px] uppercase text-gray-400 font-extrabold tracking-widest">Sequência Invicta</span>
+              <span className="text-[10px] md:text-xs uppercase text-gray-400 font-extrabold tracking-widest text-center">Sequência Invicta</span>
             </div>
-            <span className="text-2xl md:text-3xl font-black text-white tracking-widest">
-              {data.streakSemanas} <span className="text-xs font-medium text-gray-400 ml-0.5">semanas</span>
+            <span className="text-3xl md:text-4xl font-black text-white tracking-widest">
+              {data.streakSemanas} <span className="text-sm font-medium text-gray-400 ml-0.5">sem</span>
             </span>
           </div>
           
-          <div className="flex flex-col items-center flex-1 justify-center w-full md:border-l md:border-gray-800 px-4">
+          <div className="flex flex-col items-center flex-1 justify-center w-full pb-5 md:pb-0 border-b border-gray-800 md:border-b-0 md:border-l md:px-4 mb-5 md:mb-0">
             <div className="flex items-center gap-2 mb-1">
               <Activity size={16} className="text-purple-400" />
-              <span className="text-[10px] uppercase text-gray-400 font-extrabold tracking-widest">Carga Total Movida (Mês)</span>
+              <span className="text-[10px] md:text-xs uppercase text-gray-400 font-extrabold tracking-widest text-center">Carga Total (Mês)</span>
             </div>
-            <span className="text-2xl md:text-3xl font-black text-white tracking-widest">
-              {data.volumeMensal} <span className="text-xs font-medium text-gray-400 ml-0.5">Kg</span>
+            <span className="text-3xl md:text-4xl font-black text-white tracking-widest">
+              {data.volumeMensal} <span className="text-sm font-medium text-gray-400 ml-0.5">Kg</span>
             </span>
           </div>
           
           <div className="flex flex-col items-center flex-1 justify-center w-full md:border-l md:border-gray-800 md:pl-8">
             <div className="flex items-center gap-2 mb-1">
               <Clock size={16} className="text-blue-400" />
-              <span className="text-[10px] uppercase text-gray-400 font-extrabold tracking-widest">Último Treino</span>
+              <span className="text-[10px] md:text-xs uppercase text-gray-400 font-extrabold tracking-widest text-center">Último Treino</span>
             </div>
-            <span className="text-xl md:text-2xl font-black text-white tracking-wide">
+            <span className="text-2xl md:text-3xl font-black text-white tracking-wide">
               {data.diasDesdeUltimoTreino === 0 ? 'Hoje' : data.diasDesdeUltimoTreino === 1 ? 'Ontem' : data.diasDesdeUltimoTreino === null ? 'Nenhum' : `${data.diasDesdeUltimoTreino} dias`}
             </span>
           </div>

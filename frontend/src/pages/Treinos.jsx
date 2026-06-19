@@ -419,7 +419,7 @@ export default function Treinos() {
               const feita = serie.concluida;
               return (
                 <div key={serieIdx}
-                  className={`flex items-center gap-3 p-3.5 rounded-xl border transition-all duration-200
+                  className={`flex items-center gap-3 p-4 md:p-5 rounded-xl border transition-all duration-200
                     ${feita ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-200 shadow-sm'}`}>
                   <span className={`text-sm font-black w-5 text-center ${feita ? 'text-gray-400' : 'text-gray-900'}`}>
                     {serieIdx + 1}
@@ -428,8 +428,8 @@ export default function Treinos() {
                   {/* Input de carga com +/- */}
                   <div className="flex items-center gap-1 flex-1">
                     <button onClick={() => updateCarga(exAtual.id, serieIdx, Math.max(0, (Number(serie.carga) || 0) - 2.5))}
-                      className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200 shrink-0">
-                      <Minus size={14} />
+                      className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200 shrink-0">
+                      <Minus size={16} />
                     </button>
                     <input
                       type="number"
@@ -437,12 +437,12 @@ export default function Treinos() {
                       value={serie.carga}
                       onChange={(e) => updateCarga(exAtual.id, serieIdx, e.target.value)}
                       placeholder="kg"
-                      className={`flex-1 min-w-0 bg-gray-50 border border-gray-200 rounded-lg px-2 py-2 text-center text-sm font-black outline-none
-                        placeholder-gray-400 focus:border-black transition ${feita ? 'text-gray-400' : 'text-gray-900'}`}
+                      className={`flex-1 min-w-0 bg-gray-50 border border-gray-200 rounded-lg px-2 py-2 text-center text-sm font-black outline-none h-10
+                        ${feita ? 'text-gray-400' : 'text-gray-900 focus:border-black focus:ring-1 focus:ring-black'}`}
                     />
                     <button onClick={() => updateCarga(exAtual.id, serieIdx, (Number(serie.carga) || 0) + 2.5)}
-                      className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200 shrink-0">
-                      <Plus size={14} />
+                      className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200 shrink-0">
+                      <Plus size={16} />
                     </button>
                   </div>
 
@@ -450,9 +450,9 @@ export default function Treinos() {
 
                   {/* Botão concluir série */}
                   <button onClick={() => checkSerie(exAtual.id, serieIdx)}
-                    className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 active:scale-90 shrink-0
+                    className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90 shrink-0
                       ${feita ? 'bg-black text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}>
-                    {feita ? <CheckCircle2 size={20} /> : <Circle size={20} />}
+                    {feita ? <CheckCircle2 size={24} /> : <Circle size={24} />}
                   </button>
                 </div>
               );
