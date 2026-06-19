@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, FileText, BarChart2, Flame, Activity, Clock, Loader2, Bot } from 'lucide-react';
+import { Dumbbell, FileText, BarChart2, Flame, Activity, Clock, Loader2, Briefcase } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { apiFetch } from '../services/api';
 
@@ -50,7 +50,7 @@ export default function Dashboard() {
       {/* Insight Alfred (Topo) */}
       <div className="shrink-0 bg-purple-50 border border-purple-200 rounded-2xl p-4 flex items-center gap-4 mb-6 shadow-sm">
         <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center shrink-0 shadow-inner">
-          <Bot size={20} className="text-white" />
+          <Briefcase size={20} className="text-white" />
         </div>
         <div>
           <h2 className="text-xs font-black text-purple-800 uppercase tracking-widest mb-0.5">Alfred</h2>
