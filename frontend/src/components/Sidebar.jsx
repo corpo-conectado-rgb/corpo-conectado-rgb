@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, Dumbbell, Activity, User, ArrowLeft, Home } from 'lucide-react';
+import { LayoutDashboard, FileText, Dumbbell, Activity, User, ArrowLeft, Home, Bell } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -22,7 +22,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
   const adminMenu = user?.role === 'admin' ? [
     { name: 'Gestão de Fichas', icon: FileText, path: '/admin/alunos' },
-    { name: 'Solicitações', icon: Activity, path: '/admin/solicitacoes' }
+    { name: 'Solicitações', icon: Bell, path: '/admin/solicitacoes' }
   ] : [];
 
   return (
