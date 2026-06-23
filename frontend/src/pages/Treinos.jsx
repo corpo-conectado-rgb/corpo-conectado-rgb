@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Dumbbell, Play, CheckCircle2, Circle, ChevronRight, ChevronUp, ChevronLeft,
   Flame, Target, Zap, Clock, BarChart3, Trophy, X,
-  ArrowLeft, ArrowRight, Timer, History, Minus, Plus
+  ArrowLeft, ArrowRight, Timer, History, Minus, Plus, MessageSquarePlus
 } from 'lucide-react';
 import { apiFetch } from '../services/api';
 
@@ -511,12 +511,22 @@ export default function Treinos() {
       {/* Header */}
       <header className="flex items-center justify-between">
         <h1 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight">Meus Treinos</h1>
-        <button 
-          onClick={() => setShowSolicitacao(true)}
-          className="text-xs font-black uppercase tracking-widest bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-black px-4 py-2 rounded-xl transition"
-        >
-          Pedir Ajuste
-        </button>
+        <div className="relative group">
+          <button 
+            onClick={() => setShowSolicitacao(true)}
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-black transition-all"
+            aria-label="Solicitar Ajuste"
+          >
+            <MessageSquarePlus size={20} />
+          </button>
+          
+          {/* Tooltip elegante */}
+          <div className="absolute right-0 top-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+            <div className="bg-black text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
+              Solicitar Ajuste
+            </div>
+          </div>
+        </div>
       </header>
 
       {/* ── Hero: Próximo Treino ──────────────────────────────────────── */}
