@@ -132,8 +132,6 @@ export default function AdminSolicitacoes() {
             <div className="flex items-center justify-center py-12">
               <div className="w-8 h-8 border-4 border-gray-200 border-t-black rounded-full animate-spin"></div>
             </div>
-          ) : error ? (
-            <div className="text-center py-12 text-red-500 font-bold">{error}</div>
           ) : filteredSolicitacoes.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-200">
               <Mail className="mx-auto h-12 w-12 text-gray-300 mb-3" />
