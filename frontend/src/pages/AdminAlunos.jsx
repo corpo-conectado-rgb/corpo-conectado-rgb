@@ -442,11 +442,11 @@ export default function AdminAlunos() {
                   </tr>
                 ) : (
                   alunosFiltrados.map((aluno) => (
-                    <tr key={aluno.id} className="hover:bg-gray-50/50 transition-colors group">
+                    <tr key={aluno.id} className="hover:bg-gray-50/80 transition-all duration-300 group">
                       {/* INFO ATLETA */}
                       <td className="px-6 py-4 w-[35%]">
                         <div className="flex items-center gap-4">
-                          <div className="w-11 h-11 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 font-black text-base shadow-sm">
+                          <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-blue-100 via-blue-50 to-white border border-blue-200/60 flex items-center justify-center text-blue-700 font-black text-base shadow-sm group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
                              {aluno.nome ? aluno.nome.charAt(0).toUpperCase() : '?'}
                           </div>
                           <div>
@@ -461,8 +461,10 @@ export default function AdminAlunos() {
                       {/* DADOS FÍSICOS/MÉDICOS */}
                       <td className="px-6 py-4 w-[20%]">
                         {aluno.objetivo ? (
-                          <div className="flex flex-col gap-0.5">
-                            <span className="text-[11px] uppercase tracking-wider font-extrabold text-gray-900">{aluno.objetivo}</span>
+                          <div className="flex flex-col gap-1.5">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[9px] uppercase tracking-widest font-black bg-gray-900 text-white shadow-sm w-fit">
+                              {aluno.objetivo}
+                            </span>
                             <span className="text-[11px] font-medium text-gray-500">{aluno.idade || '--'} anos • {aluno.peso ? `${aluno.peso}kg` : ''} • Nível: {aluno.nivel_fisico}</span>
                           </div>
                         ) : (
