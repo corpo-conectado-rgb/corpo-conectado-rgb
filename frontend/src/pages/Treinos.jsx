@@ -249,6 +249,28 @@ export default function Treinos() {
     }
   };
 
+  const handleEnviarSolicitacao = async (e) => {
+    e.preventDefault();
+    if (!solicitacaoForm.mensagem.trim()) return;
+    try {
+      setEnviandoSolicitacao(true);
+      await apiFetch('/solicitacoes', {
+        method: 'POST',
+        body: JSON.stringify(solicitacaoForm)
+      });
+      setSolicitacaoSuccess(true);
+      setTimeout(() => {
+        setShowSolicitacao(false);
+        setSolicitacaoSuccess(false);
+        setSolicitacaoForm({ tipo: 'AJUSTE_TREINO', mensagem: '' });
+      }, 4000);
+    } catch (err) {
+      alert('Erro ao enviar: ' + err.message);
+    } finally {
+      setEnviandoSolicitacao(false);
+    }
+  };
+
   const voltarHub = async () => {
     clearInterval(timerRef.current);
     clearInterval(descansoRef.current);
