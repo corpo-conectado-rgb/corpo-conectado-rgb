@@ -9,11 +9,6 @@ export default function FloatingAlfred() {
   const location = useLocation();
   const popoverRef = useRef(null);
 
-  // Não renderizar no Dashboard, pois lá já tem o Alfred principal
-  if (location.pathname === '/dashboard' || location.pathname === '/') {
-    return null;
-  }
-
   useEffect(() => {
     fetchNotificacoes();
   }, [location.pathname]); // Atualiza as notificações ao mudar de rota
@@ -45,6 +40,11 @@ export default function FloatingAlfred() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen]);
+
+  // Não renderizar no Dashboard ou Home, pois lá já tem o Alfred principal
+  if (location.pathname === '/dashboard' || location.pathname === '/') {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
