@@ -1,0 +1,11 @@
+Add-Type -AssemblyName System.Drawing
+$bg = [System.Drawing.Color]::FromArgb(255, 15, 23, 42)
+$img = [System.Drawing.Image]::FromFile("CC_Icone.png")
+$bmp = New-Object System.Drawing.Bitmap($img.Width, $img.Height)
+$g = [System.Drawing.Graphics]::FromImage($bmp)
+$g.Clear($bg)
+$g.DrawImage($img, 0, 0, $img.Width, $img.Height)
+$bmp.Save("apple-touch-icon.png", [System.Drawing.Imaging.ImageFormat]::Png)
+$g.Dispose()
+$bmp.Dispose()
+$img.Dispose()
