@@ -750,6 +750,53 @@ function HistoricoView({ onBack }) {
           </section>
         ))
       )}
+
+      {/* ── MODAL DE SOLICITAÇÃO ──────────────────────────────────────── */}
+      {showSolicitacao && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => setShowSolicitacao(false)} />
+          <div className="relative bg-white w-full max-w-sm rounded-3xl shadow-2xl animate-scale-in flex flex-col overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+              <h3 className="text-lg font-black text-gray-900 tracking-tight">Falar com Treinador</h3>
+              <button onClick={() => setShowSolicitacao(false)} className="text-gray-400 hover:text-black">
+                <X size={20} />
+              </button>
+            </div>
+            <form onSubmit={handleEnviarSolicitacao} className="p-6 flex flex-col gap-4">
+              <div>
+                <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5 block">Tipo de Pedido</label>
+                <select 
+                  value={solicitacaoForm.tipo}
+                  onChange={e => setSolicitacaoForm(prev => ({ ...prev, tipo: e.target.value }))}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-black"
+                >
+                  <option value="AJUSTE_TREINO">Ajuste ou Dúvida no Treino</option>
+                  <option value="REAVALIACAO">Solicitar Reavaliação (Mês novo)</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5 block">Sua Mensagem</label>
+                <textarea 
+                  value={solicitacaoForm.mensagem}
+                  onChange={e => setSolicitacaoForm(prev => ({ ...prev, mensagem: e.target.value }))}
+                  placeholder="Escreva aqui se está sentindo dores, dúvidas na execução ou motivo da troca..."
+                  rows={4}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 outline-none focus:border-black resize-none"
+                  required
+                />
+              </div>
+              <button 
+                type="submit" 
+                disabled={enviandoSolicitacao || !solicitacaoForm.mensagem.trim()}
+                className="w-full bg-black text-white font-black uppercase tracking-widest text-xs py-4 rounded-xl mt-2 disabled:opacity-50 active:scale-95 transition-all"
+              >
+                {enviandoSolicitacao ? 'Enviando...' : 'Enviar Solicitação'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
