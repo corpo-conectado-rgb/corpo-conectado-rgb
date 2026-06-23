@@ -32,6 +32,7 @@ export default function AdminAlunos() {
   const [loadingFicha, setLoadingFicha] = useState(false);
   const [alunoParaExcluir, setAlunoParaExcluir] = useState(null); // Modal de exclusão
   const [loadingExclusao, setLoadingExclusao] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
   const navigate = useNavigate();
 
   // ── FILTROS ──────────────────────────────────────────────────────────
@@ -146,7 +147,8 @@ export default function AdminAlunos() {
       if (drawerAluno?.id === alunoParaExcluir.id) {
         closeDrawer();
       }
-      alert('Aluno excluído com sucesso.');
+      setToastMessage('Usuário e dados de treino excluídos permanentemente.');
+      setTimeout(() => setToastMessage(null), 4000);
     } catch (err) {
       console.error(err);
       alert('Erro ao excluir aluno: ' + err.message);
@@ -685,6 +687,18 @@ export default function AdminAlunos() {
                 Cancelar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── TOAST DE SUCESSO ────────────────────────────────────────────── */}
+      {toastMessage && (
+        <div className="fixed bottom-6 inset-x-0 mx-auto w-fit z-[300] animate-slide-up">
+          <div className="bg-emerald-500 text-white px-5 py-3.5 rounded-full shadow-2xl flex items-center gap-3 font-medium text-sm tracking-wide">
+            <div className="w-6 h-6 rounded-full bg-emerald-400/50 flex items-center justify-center shrink-0">
+              <Check size={14} className="text-white" />
+            </div>
+            {toastMessage}
           </div>
         </div>
       )}
