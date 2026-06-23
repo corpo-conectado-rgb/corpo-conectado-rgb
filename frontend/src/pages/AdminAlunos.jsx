@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, UserPlus, Filter, MoreVertical, Edit3, Eye, FileText, X, Clock, Dumbbell, ChevronDown, ChevronUp, CalendarDays, RotateCcw, Check } from 'lucide-react';
+import { Search, UserPlus, Filter, MoreVertical, Edit3, Eye, FileText, X, Clock, Dumbbell, ChevronDown, ChevronUp, CalendarDays, RotateCcw, Check, Trash2, AlertTriangle } from 'lucide-react';
 import { apiFetch } from '../services/api';
 
 // Helper: calcula dias restantes a partir de string "dd/mm/yyyy"
@@ -30,6 +30,8 @@ export default function AdminAlunos() {
   const [drawerAluno, setDrawerAluno] = useState(null); // Atleta clicado
   const [fichaAberta, setFichaAberta] = useState(null); // Dados da ficha
   const [loadingFicha, setLoadingFicha] = useState(false);
+  const [alunoParaExcluir, setAlunoParaExcluir] = useState(null); // Modal de exclusão
+  const [loadingExclusao, setLoadingExclusao] = useState(false);
   const navigate = useNavigate();
 
   // ── FILTROS ──────────────────────────────────────────────────────────
@@ -132,6 +134,25 @@ export default function AdminAlunos() {
   const closeDrawer = () => {
     setDrawerAluno(null);
     setFichaAberta(null);
+  };
+
+  const confirmarExclusao = async () => {
+    if (!alunoParaExcluir) return;
+    setLoadingExclusao(true);
+    try {
+      await apiFetch(`/admin/usuarios/${alunoParaExcluir.id}`, { method: 'DELETE' });
+      setAlunos(prev => prev.filter(a => a.id !== alunoParaExcluir.id));
+      setAlunoParaExcluir(null);
+      if (drawerAluno?.id === alunoParaExcluir.id) {
+        closeDrawer();
+      }
+      alert('Aluno excluído com sucesso.');
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao excluir aluno: ' + err.message);
+    } finally {
+      setLoadingExclusao(false);
+    }
   };
 
   useEffect(() => {
@@ -512,6 +533,13 @@ export default function AdminAlunos() {
                           >
                             <FileText size={11} fill="white" /> {aluno.status_treino === 'ATIVO' ? 'Editar' : 'Ficha'}
                           </button>
+                          <button
+                            onClick={() => setAlunoParaExcluir(aluno)}
+                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-red-50 border border-red-100 text-red-500 hover:text-white hover:bg-red-500 transition active:scale-95 shrink-0"
+                            title="Excluir Aluno"
+                          >
+                            <Trash2 size={15} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -542,12 +570,21 @@ export default function AdminAlunos() {
                   {drawerAluno.ficha_nome || 'Ficha de Treinamento'}
                 </p>
               </div>
-              <button 
-                onClick={closeDrawer}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:text-black hover:bg-gray-200 transition"
-              >
-                <X size={18} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setAlunoParaExcluir(drawerAluno)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 text-red-500 hover:text-white hover:bg-red-500 transition"
+                  title="Excluir Aluno"
+                >
+                  <Trash2 size={15} />
+                </button>
+                <button 
+                  onClick={closeDrawer}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:text-black hover:bg-gray-200 transition"
+                >
+                  <X size={18} />
+                </button>
+              </div>
             </div>
 
             {/* Content */}
@@ -611,6 +648,41 @@ export default function AdminAlunos() {
                 className="w-full bg-black text-white py-3.5 rounded-xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-800 transition active:scale-95 shadow-lg"
               >
                 <Edit3 size={16} /> Modificar Ficha
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL DE CONFIRMAÇÃO DE EXCLUSÃO ──────────────────────────────── */}
+      {alunoParaExcluir && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
+            onClick={() => !loadingExclusao && setAlunoParaExcluir(null)}
+          />
+          <div className="relative bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl animate-scale-up">
+            <div className="w-16 h-16 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle size={32} />
+            </div>
+            <h3 className="text-xl font-black text-center text-gray-900 tracking-tight mb-2">Excluir Aluno?</h3>
+            <p className="text-sm font-medium text-gray-500 text-center mb-6 leading-relaxed">
+              Você está prestes a apagar <strong className="text-gray-900">{alunoParaExcluir.nome}</strong>. Esta ação <strong>deletará todas as fichas, histórico e dados de treino permanentemente</strong> da base de dados e não pode ser desfeita.
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={confirmarExclusao}
+                disabled={loadingExclusao}
+                className="w-full bg-red-500 text-white font-black py-3.5 rounded-xl uppercase tracking-widest text-xs hover:bg-red-600 transition active:scale-95 disabled:opacity-50"
+              >
+                {loadingExclusao ? 'Excluindo dados...' : 'Sim, Excluir Definitivamente'}
+              </button>
+              <button
+                onClick={() => setAlunoParaExcluir(null)}
+                disabled={loadingExclusao}
+                className="w-full bg-gray-50 text-gray-600 font-bold py-3.5 rounded-xl text-xs hover:bg-gray-100 transition active:scale-95 disabled:opacity-50"
+              >
+                Cancelar
               </button>
             </div>
           </div>

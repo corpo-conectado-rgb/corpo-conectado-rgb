@@ -257,4 +257,77 @@ router.post('/fichas', adminMiddleware, async (req, res) => {
   }
 });
 
+// ============================================
+// DELETE /admin/usuarios/:id — Exclusão em cascata de aluno e seus dados
+// ============================================
+router.delete('/usuarios/:id', adminMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Buscar as planilhas do Sheets para ter referências
+    const usuariosSheet = await getSheet('usuarios');
+    const anamneseSheet = await getSheet('anamnese');
+    const histSheet = await getSheet('historico_treinos');
+    const treinosSheet = await getSheet('treinos');
+    const diasSheet = await getSheet('dias_treino');
+    const exsSheet = await getSheet('exercicios');
+
+    // Carregar todas as linhas
+    const [
+      usuariosRows, anamneseRows, histRows, treinosRows, diasRows, exsRows
+    ] = await Promise.all([
+      usuariosSheet.getRows(),
+      anamneseSheet.getRows(),
+      histSheet.getRows(),
+      treinosSheet.getRows(),
+      diasSheet.getRows(),
+      exsSheet.getRows()
+    ]);
+
+    const userRow = usuariosRows.find(r => r.get('id') === id);
+    if (!userRow) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    // Coletar linhas relacionadas
+    const rowsToDelete = [];
+    rowsToDelete.push(userRow);
+
+    const anamneseRow = anamneseRows.find(r => r.get('id_usuario') === id);
+    if (anamneseRow) rowsToDelete.push(anamneseRow);
+
+    const userHistRows = histRows.filter(r => r.get('user_id') === id);
+    rowsToDelete.push(...userHistRows);
+
+    const userTreinosRows = treinosRows.filter(r => r.get('user_id') === id);
+    const treinosIds = userTreinosRows.map(t => t.get('id'));
+    rowsToDelete.push(...userTreinosRows);
+
+    const userDiasRows = diasRows.filter(r => treinosIds.includes(r.get('treino_id')));
+    const diasIds = userDiasRows.map(d => d.get('id'));
+    rowsToDelete.push(...userDiasRows);
+
+    const userExsRows = exsRows.filter(r => diasIds.includes(r.get('dia_treino_id')));
+    rowsToDelete.push(...userExsRows);
+
+    // Deletar fisicamente (de trás pra frente é mais seguro com APIs baseadas em índices, mas o google-spreadsheet trata isso pela instância da linha)
+    for (const row of rowsToDelete) {
+      await row.delete();
+    }
+
+    // Invalidar todo o cache associado
+    invalidateCache('usuarios');
+    invalidateCache('anamnese');
+    invalidateCache('historico_treinos');
+    invalidateCache('treinos');
+    invalidateCache('dias_treino');
+    invalidateCache('exercicios');
+
+    res.json({ message: 'Usuário e todos os dados associados foram excluídos com sucesso.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
