@@ -225,7 +225,7 @@ export default function AdminAlunos() {
   });
 
   return (
-    <div className="flex-1 flex flex-col -m-6 lg:-m-8 overflow-hidden animate-fade-in">
+    <div className="absolute inset-0 z-10 bg-white rounded-2xl flex flex-col overflow-hidden animate-fade-in">
       
       {/* Header Area — Fixo no topo */}
       <div className="px-6 lg:px-8 pt-6 lg:pt-8 pb-4 flex-shrink-0">
@@ -537,7 +537,7 @@ export default function AdminAlunos() {
                           </button>
                           <button
                             onClick={() => setAlunoParaExcluir(aluno)}
-                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-red-50 border border-red-100 text-red-500 hover:text-white hover:bg-red-500 transition active:scale-95 shrink-0"
+                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-red-50 border border-red-100 text-red-500 hover:text-white hover:bg-red-500 transition-all opacity-0 group-hover:opacity-100 active:scale-95 shrink-0"
                             title="Excluir Aluno"
                           >
                             <Trash2 size={15} />

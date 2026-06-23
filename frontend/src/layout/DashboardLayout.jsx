@@ -21,7 +21,7 @@ export default function DashboardLayout() {
           <Menu size={22} />
         </button>
 
-        <div className="bi-canvas max-w-7xl mx-auto h-full bg-white flex flex-col p-4 md:p-5 lg:p-6 rounded-2xl shadow-sm border border-gray-100 overflow-y-auto overflow-x-hidden">
+        <div className="bi-canvas relative max-w-7xl mx-auto h-full bg-white flex flex-col p-4 md:p-5 lg:p-6 rounded-2xl shadow-sm border border-gray-100 overflow-y-auto overflow-x-hidden">
           <Outlet />
         </div>
       </main>
