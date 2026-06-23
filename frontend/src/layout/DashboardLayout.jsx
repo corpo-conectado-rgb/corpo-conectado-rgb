@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { Outlet } from 'react-router-dom';
 import { Menu } from 'lucide-react';
+import FloatingAlfred from '../components/FloatingAlfred';
 
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -25,6 +26,9 @@ export default function DashboardLayout() {
           <Outlet />
         </div>
       </main>
+
+      {/* Assistente Virtual Flutuante */}
+      <FloatingAlfred />
     </div>
   );
 }

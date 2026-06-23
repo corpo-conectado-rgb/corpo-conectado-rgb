@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { CheckCircle2, AlertCircle, Goal, Activity, Timer, MapPin, ShieldAlert, Edit3, X, Check, CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Goal, Activity, Timer, MapPin, ShieldAlert, Edit3, X, Check } from 'lucide-react';
 import { apiFetch } from '../services/api';
 
 export default function Perfil() {
@@ -10,13 +10,6 @@ export default function Perfil() {
   const [solicitacaoSuccess, setSolicitacaoSuccess] = useState(false);
   const [solicitacaoForm, setSolicitacaoForm] = useState({ tipo: 'REAVALIACAO', mensagem: '' });
   const [enviandoSolicitacao, setEnviandoSolicitacao] = useState(false);
-  const [notificacoes, setNotificacoes] = useState([]);
-
-  useEffect(() => {
-    apiFetch('/solicitacoes/aluno/notificacoes')
-      .then(data => setNotificacoes(data))
-      .catch(() => {});
-  }, []);
 
   const handleEnviarSolicitacao = async (e) => {
     e.preventDefault();
@@ -40,10 +33,6 @@ export default function Perfil() {
     }
   };
 
-  const dismissNotificacao = (index) => {
-    setNotificacoes(prev => prev.filter((_, i) => i !== index));
-  };
-
   // Verifica se todos os principais campos da anamnese estão preenchidos para definir o status
   const isProfileComplete = user?.idade && user?.peso && user?.altura && user?.objetivo;
 
@@ -63,43 +52,6 @@ export default function Perfil() {
           {isProfileComplete ? 'Perfil 100% Completo' : 'Perfil Incompleto'}
         </div>
       </div>
-
-      {/* Notificações do Treinador */}
-      {notificacoes.length > 0 && (
-        <div className="space-y-3 mb-5">
-          {notificacoes.map((notif, idx) => (
-            <div key={notif.id} className={`border rounded-2xl p-4 flex items-start gap-4 shadow-sm animate-fade-in ${notif.status === 'APROVADA' ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-inner ${notif.status === 'APROVADA' ? 'bg-emerald-500' : 'bg-red-500'}`}>
-                {notif.status === 'APROVADA' ? <CheckCircle size={20} className="text-white" /> : <XCircle size={20} className="text-white" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-xs font-black uppercase tracking-widest mb-0.5 flex items-center gap-2">
-                  <span className={notif.status === 'APROVADA' ? 'text-emerald-800' : 'text-red-800'}>
-                    Resposta do Treinador
-                  </span>
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded font-black ${notif.status === 'APROVADA' ? 'bg-emerald-200 text-emerald-700' : 'bg-red-200 text-red-700'}`}>
-                    {notif.status}
-                  </span>
-                </h2>
-                <p className={`text-sm font-medium ${notif.status === 'APROVADA' ? 'text-emerald-900' : 'text-red-900'}`}>
-                  Sua solicitação de <strong>{notif.tipo === 'AJUSTE_TREINO' ? 'ajuste de treino' : 'reavaliação'}</strong> foi {notif.status.toLowerCase()}.
-                </p>
-                {notif.observacao_admin && (
-                  <p className={`text-xs italic mt-1 ${notif.status === 'APROVADA' ? 'text-emerald-700' : 'text-red-700'}`}>
-                    "{notif.observacao_admin}"
-                  </p>
-                )}
-                <button 
-                  onClick={() => dismissNotificacao(idx)}
-                  className={`mt-2 text-[10px] font-bold uppercase tracking-widest transition ${notif.status === 'APROVADA' ? 'text-emerald-600 hover:text-emerald-800' : 'text-red-600 hover:text-red-800'}`}
-                >
-                  Entendi, fechar
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         

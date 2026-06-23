@@ -45,7 +45,6 @@ export default function Treinos() {
   const [solicitacaoSuccess, setSolicitacaoSuccess] = useState(false);
   const [solicitacaoForm, setSolicitacaoForm] = useState({ tipo: 'AJUSTE_TREINO', mensagem: '' });
   const [enviandoSolicitacao, setEnviandoSolicitacao] = useState(false);
-  const [notificacoes, setNotificacoes] = useState([]);
   const timerRef = useRef(null);
   const descansoRef = useRef(null);
 
@@ -69,17 +68,15 @@ export default function Treinos() {
 
     // 2. Buscar os dados mais recentes do servidor em background (ou foreground se não houver cache)
     try {
-      const [fichasData, statsData, histData, notificacoesData] = await Promise.all([
+      const [fichasData, statsData, histData] = await Promise.all([
         apiFetch('/workouts/my-sheet'),
         apiFetch('/workouts/stats').catch(() => null),
-        apiFetch('/workouts/history?limit=5').catch(() => []),
-        apiFetch('/solicitacoes/aluno/notificacoes').catch(() => [])
+        apiFetch('/workouts/history?limit=5').catch(() => [])
       ]);
       
       setFichas(fichasData);
       setStats(statsData);
       setHistorico(histData);
-      setNotificacoes(notificacoesData);
       
       // 3. Atualizar o cache para o próximo acesso
       localStorage.setItem('corpoConectado_treinos_cache', JSON.stringify({ fichasData, statsData, histData }));
@@ -554,30 +551,6 @@ export default function Treinos() {
           </div>
         </div>
       </header>
-
-      {/* ── Notificações do Alfred ──────────────────────────────────────── */}
-      {notificacoes.length > 0 && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 flex gap-4 animate-fade-in">
-          <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-sm shadow-blue-500/20">
-            {/* Alfred "Face" icon */}
-            <span className="font-black text-lg">A</span>
-          </div>
-          <div className="flex-1">
-            <h3 className="text-sm font-black text-blue-900 mb-1">Resposta do Treinador</h3>
-            <p className="text-xs text-blue-800 leading-relaxed">
-              Olá! Sua solicitação recente foi <strong className={notificacoes[0].status === 'APROVADA' ? 'text-emerald-600' : 'text-red-600'}>{notificacoes[0].status.toLowerCase()}</strong>.
-              <br />
-              <span className="italic mt-1 block">"{notificacoes[0].observacao_admin}"</span>
-            </p>
-            <button 
-              onClick={() => setNotificacoes([])} // Apenas dismiss visual simples
-              className="mt-2 text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:text-blue-800 transition"
-            >
-              Entendi, fechar
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* ── Hero: Próximo Treino ──────────────────────────────────────── */}
       {fichaProxima && (
