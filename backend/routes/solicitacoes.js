@@ -19,12 +19,24 @@ router.post('/', authMiddleware, async (req, res) => {
 
     const aluno_id = req.user.id;
 
+    // Buscar nome do aluno na planilha de usuários (JWT não contém nome)
+    let nomeAluno = aluno_nome;
+    if (!nomeAluno) {
+      try {
+        const usuariosRows = await getCachedRows('usuarios', ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role']);
+        const alunoRow = usuariosRows.find(r => r.get('id') === aluno_id);
+        nomeAluno = alunoRow ? alunoRow.get('nome') : 'Aluno(a)';
+      } catch {
+        nomeAluno = 'Aluno(a)';
+      }
+    }
+
     const sheet = await getSheet('solicitacoes', SOLICITACOES_HEADERS);
     
     const novaSolicitacao = {
       id: uuidv4(),
       aluno_id,
-      aluno_nome: aluno_nome || req.user.nome || 'Aluno(a)',
+      aluno_nome: nomeAluno,
       tipo,
       mensagem,
       status: 'PENDENTE',
