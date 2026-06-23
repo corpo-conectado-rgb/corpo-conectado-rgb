@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, FileText, BarChart2, Flame, Activity, Clock, Loader2, Bot, Timer } from 'lucide-react';
+import { Dumbbell, FileText, BarChart2, Flame, Activity, Clock, Loader2, Bot, Timer, CheckCircle, XCircle, ChevronRight } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { apiFetch } from '../services/api';
 
@@ -14,12 +14,17 @@ export default function Dashboard() {
     barData: [],
     totalSessoes: 0
   });
+  const [notificacoes, setNotificacoes] = useState([]);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const result = await apiFetch('/dashboard');
+        const [result, notifs] = await Promise.all([
+          apiFetch('/dashboard'),
+          apiFetch('/solicitacoes/aluno/notificacoes').catch(() => [])
+        ]);
         setData(result);
+        setNotificacoes(notifs);
       } catch (err) {
         console.error('Falha ao carregar dashboard', err);
       } finally {
@@ -44,9 +49,50 @@ export default function Dashboard() {
   else if (data.streakSemanas > 0) insightText = `Excelente ritmo! Continue assim para bater 4 semanas seguidas.`;
   else if (data.totalSessoes > 0 && data.diasDesdeUltimoTreino !== null) insightText = `Faz ${data.diasDesdeUltimoTreino} dias desde o seu último treino. Que tal agendar a próxima sessão?`;
 
+  const dismissNotificacao = (index) => {
+    setNotificacoes(prev => prev.filter((_, i) => i !== index));
+  };
+
   return (
     <div className="flex flex-col h-full overflow-hidden animate-fade-in pb-2">
       
+      {/* Notificações do Treinador (acima do Alfred quando existem) */}
+      {notificacoes.length > 0 && (
+        <div className="shrink-0 space-y-3 mb-4">
+          {notificacoes.map((notif, idx) => (
+            <div key={notif.id} className={`border rounded-2xl p-4 flex items-start gap-4 shadow-sm animate-fade-in ${notif.status === 'APROVADA' ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-inner ${notif.status === 'APROVADA' ? 'bg-emerald-500' : 'bg-red-500'}`}>
+                {notif.status === 'APROVADA' ? <CheckCircle size={20} className="text-white" /> : <XCircle size={20} className="text-white" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-xs font-black uppercase tracking-widest mb-0.5 flex items-center gap-2">
+                  <span className={notif.status === 'APROVADA' ? 'text-emerald-800' : 'text-red-800'}>
+                    Resposta do Treinador
+                  </span>
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded font-black ${notif.status === 'APROVADA' ? 'bg-emerald-200 text-emerald-700' : 'bg-red-200 text-red-700'}`}>
+                    {notif.status}
+                  </span>
+                </h2>
+                <p className={`text-sm font-medium ${notif.status === 'APROVADA' ? 'text-emerald-900' : 'text-red-900'}`}>
+                  Sua solicitação de <strong>{notif.tipo === 'AJUSTE_TREINO' ? 'ajuste de treino' : 'reavaliação'}</strong> foi {notif.status.toLowerCase()}.
+                </p>
+                {notif.observacao_admin && (
+                  <p className={`text-xs italic mt-1 ${notif.status === 'APROVADA' ? 'text-emerald-700' : 'text-red-700'}`}>
+                    "{notif.observacao_admin}"
+                  </p>
+                )}
+                <button 
+                  onClick={() => dismissNotificacao(idx)}
+                  className={`mt-2 text-[10px] font-bold uppercase tracking-widest transition ${notif.status === 'APROVADA' ? 'text-emerald-600 hover:text-emerald-800' : 'text-red-600 hover:text-red-800'}`}
+                >
+                  Entendi, fechar
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Insight Alfred (Topo) */}
       <div className="shrink-0 bg-purple-50 border border-purple-200 rounded-2xl p-4 flex items-center gap-4 mb-6 shadow-sm">
         <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center shrink-0 shadow-inner">
