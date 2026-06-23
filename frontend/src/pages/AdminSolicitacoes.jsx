@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, CheckCircle, Search, User, Filter, XCircle, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { apiFetch } from '../services/api';
 
 export default function AdminSolicitacoes() {
   const [solicitacoes, setSolicitacoes] = useState([]);
@@ -21,12 +22,7 @@ export default function AdminSolicitacoes() {
   const fetchSolicitacoes = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('@CorpoConectado:token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/solicitacoes/admin`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!response.ok) throw new Error('Erro ao buscar solicitações');
-      const data = await response.json();
+      const data = await apiFetch('/solicitacoes/admin');
       setSolicitacoes(data);
     } catch (err) {
       setError(err.message);
@@ -41,16 +37,10 @@ export default function AdminSolicitacoes() {
 
     try {
       setSubmitting(true);
-      const token = localStorage.getItem('@CorpoConectado:token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/solicitacoes/admin/${actionModal.id}/${actionModal.type}`, {
+      await apiFetch(`/solicitacoes/admin/${actionModal.id}/${actionModal.type}`, {
         method: 'PUT',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
         body: JSON.stringify({ observacao })
       });
-      if (!response.ok) throw new Error(`Erro ao ${actionModal.type}`);
       
       const novoStatus = actionModal.type === 'aprovar' ? 'APROVADA' : 'RECUSADA';
 
