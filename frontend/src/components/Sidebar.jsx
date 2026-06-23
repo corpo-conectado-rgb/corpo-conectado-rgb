@@ -78,7 +78,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
           {adminMenu.length > 0 && (
             <>
-              <div className="px-8 py-1 text-[10px] font-black text-blue-500 uppercase tracking-widest mt-6 mb-1 border-t border-white/5 pt-4 shrink-0">
+              <div className="px-8 py-1 text-[10px] font-black text-gray-500 uppercase tracking-widest mt-6 mb-1 border-t border-white/5 pt-4 shrink-0">
                 Administrador
               </div>
               {adminMenu.map((item) => {
