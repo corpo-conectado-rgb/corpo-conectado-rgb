@@ -228,7 +228,7 @@ export default function AdminAlunos() {
     <div className="absolute inset-0 z-10 bg-white rounded-2xl flex flex-col overflow-hidden animate-fade-in">
       
       {/* Header Area — Fixo no topo */}
-      <div className="px-6 lg:px-8 pt-6 lg:pt-8 pb-4 flex-shrink-0">
+      <div className="px-6 lg:px-8 xl:px-10 pt-6 lg:pt-8 pb-4 flex-shrink-0">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-5 gap-4">
           <div>
             <h1 className="text-3xl font-black text-gray-900 tracking-tight">Gestão de Alunos</h1>
@@ -256,7 +256,7 @@ export default function AdminAlunos() {
 
               {/* Painel de Filtros Dropdown */}
               {showFilters && (
-                <div className="absolute right-0 top-full mt-2 w-[380px] max-h-[calc(100vh-180px)] flex flex-col bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 animate-fade-in overflow-hidden">
+                <div className="absolute right-0 top-full mt-2 w-[calc(100vw-48px)] md:w-[380px] max-h-[calc(100vh-180px)] flex flex-col bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 animate-fade-in overflow-hidden">
                   
                   {/* Header do Painel */}
                   <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 shrink-0">
@@ -412,10 +412,10 @@ export default function AdminAlunos() {
       </div>
 
       {/* Data Grid / Tabela — Scroll interno independente */}
-      <div className="flex-1 min-h-0 px-6 lg:px-8 pb-6 lg:pb-8">
+      <div className="flex-1 min-h-0 px-6 lg:px-8 xl:px-10 pb-6 lg:pb-8">
         <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm h-full flex flex-col">
-          {/* Cabeçalho da tabela — Fixo */}
-          <div className="flex-shrink-0 overflow-x-auto">
+          {/* Cabeçalho da tabela — Fixo (Apenas Desktop) */}
+          <div className="flex-shrink-0 overflow-x-auto hidden lg:block">
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead>
                 <tr className="bg-[#FAFAFA] border-b border-gray-100 text-[10px] uppercase font-black tracking-widest text-gray-400">
@@ -428,8 +428,8 @@ export default function AdminAlunos() {
               </thead>
             </table>
           </div>
-          {/* Corpo da tabela — Scroll */}
-          <div className="flex-1 overflow-y-auto overflow-x-auto">
+          {/* Corpo da tabela — Scroll (Apenas Desktop) */}
+          <div className="flex-1 overflow-y-auto overflow-x-auto hidden lg:block">
             <table className="w-full text-left border-collapse min-w-[800px]">
               <tbody className="divide-y divide-gray-100/60">
                 {loading ? (
@@ -549,9 +549,93 @@ export default function AdminAlunos() {
               </tbody>
             </table>
           </div>
+
+          {/* Corpo em Cards (Apenas Mobile) */}
+          <div className="flex-1 overflow-y-auto block lg:hidden p-4 space-y-4">
+            {loading ? (
+              <div className="py-12 text-center text-gray-400 font-bold">Carregando banco biológico...</div>
+            ) : alunosFiltrados.length === 0 ? (
+              <div className="py-12 text-center text-gray-400 font-bold">Nenhum atleta encontrado na base de dados.</div>
+            ) : (
+              alunosFiltrados.map((aluno) => {
+                const isAtivo = aluno.status_treino === 'ATIVO';
+                const diasRest = calcDiasRestantes(aluno.data_termino);
+                const hasDuracao = diasRest !== null;
+                const style = hasDuracao ? getDiasRestantesStyle(diasRest) : null;
+                
+                return (
+                  <div key={aluno.id} className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm flex flex-col gap-4">
+                    {/* Header do Card (Avatar + Info) */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-100 via-blue-50 to-white border border-blue-200/60 flex items-center justify-center text-blue-700 font-black text-sm shadow-sm shrink-0">
+                         {aluno.nome ? aluno.nome.charAt(0).toUpperCase() : '?'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[13px] font-black text-gray-900 truncate">
+                          {aluno.nome || 'Sem Nome'}
+                        </div>
+                        <div className="text-[10px] text-gray-500 font-medium truncate">{aluno.email}</div>
+                      </div>
+                      <button
+                        onClick={() => setAlunoParaExcluir(aluno)}
+                        className="w-8 h-8 flex items-center justify-center rounded-xl bg-red-50 border border-red-100 text-red-500 active:scale-95 shrink-0"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+
+                    {/* Tags e Dados */}
+                    <div className="flex flex-wrap gap-2">
+                      {aluno.objetivo ? (
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-[9px] uppercase tracking-widest font-black bg-gray-900 text-white shadow-sm">
+                          {aluno.objetivo}
+                        </span>
+                      ) : (
+                        <span className="inline-flex bg-amber-50 text-amber-600 text-[9px] uppercase font-black tracking-widest px-2 py-1 rounded-md border border-amber-200/50">
+                          Pend. Anamnese
+                        </span>
+                      )}
+                      
+                      {isAtivo ? (
+                        <span className={`inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest ${style?.bg || 'bg-emerald-50'} px-2 py-1 rounded-md border ${style?.border || 'border-emerald-100'}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${style?.dot || 'bg-emerald-400'}`}></span>
+                          {hasDuracao && diasRest <= 0 ? 'Expirada' : 'Ativo'}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest bg-gray-100 text-gray-500 px-2 py-1 rounded-md">
+                          Sem Treino
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="text-[10px] text-gray-500 font-medium">
+                      {aluno.idade || '--'} anos • {aluno.peso ? `${aluno.peso}kg` : ''} • Nível: {aluno.nivel_fisico}
+                    </div>
+
+                    {/* Ações */}
+                    <div className="flex items-center gap-2 mt-2 pt-4 border-t border-gray-50">
+                      {isAtivo && (
+                        <button 
+                          onClick={() => openDrawer(aluno)}
+                          className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 border border-gray-200 text-gray-500 active:scale-95 shrink-0"
+                        >
+                          <Eye size={16} />
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => navigate(`/admin/prescricao/${aluno.id}`)}
+                        className="flex-1 flex justify-center items-center gap-2 bg-black text-white h-10 rounded-xl text-[10px] uppercase tracking-widest font-black active:scale-95 shadow-md"
+                      >
+                        <FileText size={12} fill="white" /> {isAtivo ? 'Editar Ficha' : 'Nova Ficha'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
       </div>
-
       {/* ── DRAWER DE VISUALIZAÇÃO DE FICHA ───────────────────────────────── */}
       {drawerAluno && (
         <div className="fixed inset-0 z-[100] flex justify-end">

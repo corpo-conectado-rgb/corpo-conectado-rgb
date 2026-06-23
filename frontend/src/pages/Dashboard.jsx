@@ -66,12 +66,12 @@ export default function Dashboard() {
     <div className="flex flex-col h-full overflow-hidden animate-fade-in pb-2">
       
       {/* Insight Alfred (Topo) — com notificação integrada */}
-      <div className="shrink-0 bg-purple-50 border border-purple-200 rounded-2xl p-4 flex items-start gap-4 mb-6 shadow-sm">
-        <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center shrink-0 shadow-inner mt-0.5">
-          <Bot size={20} className="text-white" />
+      <div className="shrink-0 bg-purple-50 border border-purple-200 rounded-2xl p-3 md:p-4 flex items-start gap-3 md:gap-4 mb-3 md:mb-6 shadow-sm">
+        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-purple-600 flex items-center justify-center shrink-0 shadow-inner mt-0.5">
+          <Bot className="text-white w-4 h-4 md:w-5 md:h-5" />
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-xs font-black text-purple-800 uppercase tracking-widest mb-0.5">Alfred</h2>
+          <h2 className="text-[10px] md:text-xs font-black text-purple-800 uppercase tracking-widest mb-0.5">Alfred</h2>
           
           {/* Notificação mais recente do treinador (se houver) */}
           {notificacoes.length > 0 && (
@@ -100,44 +100,44 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <header className="shrink-0 flex justify-between items-center mb-4 px-1">
+      <header className="shrink-0 flex justify-between items-center mb-2 md:mb-4 px-1">
         <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Meu Progresso</h1>
       </header>
 
       {/* Faixa Noir (KPIs Reais) */}
-      <div className="shrink-0 bg-gray-900 rounded-2xl text-white py-6 px-4 md:px-6 flex flex-col md:flex-row items-center justify-between mb-6 shadow-md relative overflow-hidden">
+      <div className="shrink-0 bg-gray-900 rounded-2xl text-white py-4 md:py-6 px-2 md:px-6 mb-3 md:mb-6 shadow-md relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-2xl"></div>
         
-        <div className="flex flex-col md:flex-row gap-0 md:gap-10 w-full items-center justify-between z-10">
+        <div className="grid grid-cols-3 md:flex md:flex-row gap-2 md:gap-10 w-full items-center justify-between z-10 relative">
           
-          <div className="flex flex-col items-center flex-1 justify-center w-full pb-5 md:pb-0 border-b border-gray-800 md:border-b-0 mb-5 md:mb-0">
-            <div className="flex items-center gap-2 mb-1">
-              <Flame size={16} className={data.streakSemanas > 0 ? "text-orange-500" : "text-gray-500"} />
-              <span className="text-[10px] md:text-xs uppercase text-gray-400 font-extrabold tracking-widest text-center">Sequência Invicta</span>
+          <div className="flex flex-col items-center flex-1 justify-center w-full">
+            <div className="flex flex-col md:flex-row items-center gap-1 md:gap-2 mb-1">
+              <Flame size={14} className={data.streakSemanas > 0 ? "text-orange-500" : "text-gray-500 md:w-4 md:h-4"} />
+              <span className="text-[8px] md:text-xs uppercase text-gray-400 font-extrabold tracking-widest text-center leading-tight">Sequência<span className="hidden md:inline"> Invicta</span></span>
             </div>
-            <span className="text-3xl md:text-4xl font-black text-white tracking-widest">
-              {data.streakSemanas} <span className="text-sm font-medium text-gray-400 ml-0.5">sem</span>
+            <span className="text-xl md:text-4xl font-black text-white tracking-widest">
+              {data.streakSemanas} <span className="text-[10px] md:text-sm font-medium text-gray-400 ml-0.5">sem</span>
             </span>
           </div>
           
-          <div className="flex flex-col items-center flex-1 justify-center w-full pb-5 md:pb-0 border-b border-gray-800 md:border-b-0 md:border-l md:px-4 mb-5 md:mb-0">
-            <div className="flex items-center gap-2 mb-1">
-              <Timer size={16} className="text-purple-400" />
-              <span className="text-[10px] md:text-xs uppercase text-gray-400 font-extrabold tracking-widest text-center">Tempo Total (Mês)</span>
+          <div className="flex flex-col items-center flex-1 justify-center w-full border-l border-gray-800 md:px-4">
+            <div className="flex flex-col md:flex-row items-center gap-1 md:gap-2 mb-1">
+              <Timer size={14} className="text-purple-400 md:w-4 md:h-4" />
+              <span className="text-[8px] md:text-xs uppercase text-gray-400 font-extrabold tracking-widest text-center leading-tight">Tempo<span className="hidden md:inline"> Total (Mês)</span></span>
             </div>
-            <span className="text-3xl md:text-4xl font-black text-white tracking-widest">
-              {Math.floor((data.tempoMensalSegundos || 0) / 3600)}<span className="text-sm font-medium text-gray-400 ml-0.5 mr-1.5">h</span>
-              {Math.floor(((data.tempoMensalSegundos || 0) % 3600) / 60)}<span className="text-sm font-medium text-gray-400 ml-0.5">m</span>
+            <span className="text-xl md:text-4xl font-black text-white tracking-widest whitespace-nowrap">
+              {Math.floor((data.tempoMensalSegundos || 0) / 3600)}<span className="text-[10px] md:text-sm font-medium text-gray-400 ml-0.5 mr-0.5 md:mr-1.5">h</span>
+              {Math.floor(((data.tempoMensalSegundos || 0) % 3600) / 60)}<span className="text-[10px] md:text-sm font-medium text-gray-400 ml-0.5">m</span>
             </span>
           </div>
           
-          <div className="flex flex-col items-center flex-1 justify-center w-full md:border-l md:border-gray-800 md:pl-8">
-            <div className="flex items-center gap-2 mb-1">
-              <Clock size={16} className="text-blue-400" />
-              <span className="text-[10px] md:text-xs uppercase text-gray-400 font-extrabold tracking-widest text-center">Último Treino</span>
+          <div className="flex flex-col items-center flex-1 justify-center w-full border-l border-gray-800 md:pl-8">
+            <div className="flex flex-col md:flex-row items-center gap-1 md:gap-2 mb-1">
+              <Clock size={14} className="text-blue-400 md:w-4 md:h-4" />
+              <span className="text-[8px] md:text-xs uppercase text-gray-400 font-extrabold tracking-widest text-center leading-tight">Último<span className="hidden md:inline"> Treino</span></span>
             </div>
-            <span className="text-2xl md:text-3xl font-black text-white tracking-wide">
-              {data.diasDesdeUltimoTreino === 0 ? 'Hoje' : data.diasDesdeUltimoTreino === 1 ? 'Ontem' : data.diasDesdeUltimoTreino === null ? 'Nenhum' : `${data.diasDesdeUltimoTreino} dias`}
+            <span className="text-base md:text-3xl font-black text-white tracking-wide mt-1 md:mt-0">
+              {data.diasDesdeUltimoTreino === 0 ? 'Hoje' : data.diasDesdeUltimoTreino === 1 ? 'Ontem' : data.diasDesdeUltimoTreino === null ? 'N/A' : `${data.diasDesdeUltimoTreino}d`}
             </span>
           </div>
 
@@ -147,12 +147,12 @@ export default function Dashboard() {
 
 
       {/* Gráfico Dinâmico */}
-      <div className="flex-1 min-h-0 bg-white border border-gray-200 shadow-sm flex flex-col p-6 rounded-2xl">
-        <h2 className="text-xs font-black text-gray-800 mb-6 uppercase tracking-widest flex items-center gap-2">
-          <Activity size={16} className="text-purple-600" />
+      <div className="flex-1 min-h-0 bg-white border border-gray-200 shadow-sm flex flex-col p-3 md:p-6 rounded-2xl mb-2">
+        <h2 className="text-[10px] md:text-xs font-black text-gray-800 mb-3 md:mb-6 uppercase tracking-widest flex items-center gap-2">
+          <Activity size={14} className="text-purple-600 md:w-4 md:h-4" />
           Treinos Realizados (Mês a Mês)
         </h2>
-        <div className="w-full h-64 relative">
+        <div className="w-full h-44 md:h-64 relative">
           {data.barData && data.barData.length > 0 ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data.barData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>

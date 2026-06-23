@@ -362,7 +362,7 @@ export default function Treinos() {
             <p className="text-sm text-gray-400 animate-pulse">Salvando sessão...</p>
           ) : (
             <button onClick={voltarHub}
-              className="mt-2 bg-black text-white font-black px-8 py-3.5 rounded-xl hover:bg-gray-800 active:scale-95 transition-all text-sm w-full max-w-xs">
+              className="mt-2 bg-black text-white font-black px-8 py-4 rounded-xl hover:bg-gray-800 active:scale-95 transition-all text-sm w-full max-w-xs">
               Voltar ao Hub
             </button>
           )}
@@ -448,7 +448,7 @@ export default function Treinos() {
               const feita = serie.concluida;
               return (
                 <div key={serieIdx}
-                  className={`flex items-center gap-2 md:gap-3 p-3 md:p-5 rounded-xl border transition-all duration-200
+                  className={`flex items-center gap-2 md:gap-3 p-3.5 md:p-5 rounded-xl border transition-all duration-200
                     ${feita ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-200 shadow-sm'}`}>
                   <span className={`text-sm font-black w-5 text-center shrink-0 ${feita ? 'text-gray-400' : 'text-gray-900'}`}>
                     {serieIdx + 1}
@@ -457,7 +457,7 @@ export default function Treinos() {
                   {/* Input de carga com +/- */}
                   <div className="flex items-center gap-1 flex-1 min-w-0">
                     <button onClick={() => updateCarga(exAtual.id, serieIdx, Math.max(0, (Number(serie.carga) || 0) - 2.5))}
-                      className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200 shrink-0">
+                      className="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200 shrink-0">
                       <Minus size={16} />
                     </button>
                     <input
@@ -466,11 +466,11 @@ export default function Treinos() {
                       value={serie.carga}
                       onChange={(e) => updateCarga(exAtual.id, serieIdx, e.target.value)}
                       placeholder="kg"
-                      className={`flex-1 min-w-[40px] bg-gray-50 border border-gray-200 rounded-lg px-1 py-1.5 md:py-2 text-center text-sm font-black outline-none h-8 md:h-10
+                      className={`flex-1 min-w-[40px] bg-gray-50 border border-gray-200 rounded-lg px-1 py-1.5 md:py-2 text-center text-sm font-black outline-none h-9 md:h-10
                         ${feita ? 'text-gray-400' : 'text-gray-900 focus:border-black focus:ring-1 focus:ring-black'}`}
                     />
                     <button onClick={() => updateCarga(exAtual.id, serieIdx, (Number(serie.carga) || 0) + 2.5)}
-                      className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200 shrink-0">
+                      className="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200 shrink-0">
                       <Plus size={16} />
                     </button>
                   </div>
@@ -479,7 +479,7 @@ export default function Treinos() {
 
                   {/* Botão concluir série */}
                   <button onClick={() => checkSerie(exAtual.id, serieIdx)}
-                    className={`w-11 h-11 md:w-14 md:h-14 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90 shrink-0
+                    className={`w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center transition-all duration-200 active:scale-90 shrink-0
                       ${feita ? 'bg-black text-white' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}>
                     {feita ? <CheckCircle2 size={24} /> : <Circle size={24} />}
                   </button>
@@ -494,11 +494,11 @@ export default function Treinos() {
           <button
             onClick={() => { if (exIndex > 0) { setExIndex(i => i - 1); setDescansoAtivo(false); } }}
             disabled={exIndex === 0}
-            className="flex items-center justify-center w-12 h-12 rounded-xl text-gray-500 hover:bg-gray-100 border border-gray-200 transition disabled:opacity-30 shrink-0 active:scale-95">
+            className="flex items-center justify-center w-[52px] h-[52px] md:w-12 md:h-12 rounded-xl text-gray-500 hover:bg-gray-100 border border-gray-200 transition disabled:opacity-30 shrink-0 active:scale-95">
             <ArrowLeft size={18} />
           </button>
           <button onClick={proximoExercicio}
-            className="flex-1 flex items-center justify-center gap-2 h-12 rounded-xl font-black text-white bg-black
+            className="flex-1 flex items-center justify-center gap-2 h-[52px] md:h-12 rounded-xl font-black text-white bg-black
                        hover:bg-gray-800 active:scale-[0.98] transition-all text-sm shadow-md">
             {exIndex === fichaAtiva.exercicios.length - 1 ? (
               <><Trophy size={16} /> Finalizar Treino</>
@@ -529,7 +529,7 @@ export default function Treinos() {
   }
 
   return (
-    <div className="flex flex-col gap-4 animate-fade-in pb-4">
+    <div className="flex flex-col gap-3 md:gap-4 animate-fade-in pb-4">
 
       {/* Header */}
       <header className="flex items-center justify-between">
@@ -556,7 +556,7 @@ export default function Treinos() {
       {fichaProxima && (
         <div className="relative rounded-xl overflow-hidden bg-black text-white shadow-lg">
           <div className="absolute -top-16 -right-16 w-56 h-56 bg-white/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="relative p-5 flex flex-col gap-3">
+          <div className="relative p-4 md:p-5 flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <div>
                 <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1">
@@ -571,7 +571,7 @@ export default function Treinos() {
               </div>
             </div>
             <button onClick={() => iniciarTreino(fichaProxima)}
-              className="flex items-center justify-center gap-2 bg-white text-black font-black py-3.5 rounded-xl text-sm
+              className="flex items-center justify-center gap-2 bg-white text-black font-black py-4 md:py-3.5 rounded-xl text-sm
                          hover:bg-gray-100 active:scale-[0.98] transition-all shadow-md w-full mt-1">
               <Play size={14} fill="black" /> Iniciar Treino
             </button>
@@ -580,7 +580,7 @@ export default function Treinos() {
       )}
 
       {/* ── Métricas 2x2 ─────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-2 gap-2 md:gap-2.5">
         {[
           { label: 'Treinados', valor: stats?.dias_treinados_mes ?? '—', icon: Trophy, cor: 'text-yellow-500', sub: 'Mês' },
           { label: 'Sequência', valor: stats?.sequencia_atual != null ? `${stats.sequencia_atual}` : '—', icon: Flame, cor: 'text-orange-500', sub: 'Treinos' },
@@ -600,7 +600,7 @@ export default function Treinos() {
 
       {/* ── Fichas: Scroll Horizontal ─────────────────────────────────── */}
       <section>
-        <h2 className="text-xs font-black text-gray-900 uppercase tracking-widest mb-2.5">Fichas</h2>
+        <h2 className="text-xs font-black text-gray-900 uppercase tracking-widest mb-2 md:mb-2.5">Fichas</h2>
         <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 snap-x snap-mandatory scrollbar-hide">
           {fichas.map(ficha => {
             const isProximaBadge = ficha.letra === proximaLetraHub;
@@ -638,7 +638,7 @@ export default function Treinos() {
 
       {/* ── Histórico Recente ─────────────────────────────────────────── */}
       <section>
-        <div className="flex items-center justify-between mb-2.5">
+        <div className="flex items-center justify-between mb-2 md:mb-2.5">
           <h2 className="text-xs font-black text-gray-900 uppercase tracking-widest">Histórico Recente</h2>
           <button onClick={() => setActiveView('historico')}
             className="flex items-center gap-1 text-[10px] font-bold text-gray-500 hover:text-black transition">

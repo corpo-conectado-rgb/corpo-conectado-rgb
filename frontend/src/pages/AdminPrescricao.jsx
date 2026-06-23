@@ -231,14 +231,14 @@ export default function AdminPrescricao() {
           <button 
             onClick={salvarPrescricao}
             disabled={salvando}
-            className="flex items-center gap-2 bg-black text-white px-8 py-3.5 rounded-xl font-black hover:bg-gray-800 transition shadow-lg disabled:opacity-50"
+            className="flex items-center justify-center gap-2 bg-black text-white px-5 md:px-8 py-3.5 rounded-xl font-black hover:bg-gray-800 transition shadow-lg disabled:opacity-50 min-w-[120px]"
           >
-            {salvando ? 'Compilando...' : <><Save size={18} /> Salvar Prescrição</>}
+            {salvando ? 'Compilando...' : <><Save size={18} /> <span className="hidden md:inline">Salvar Prescrição</span><span className="md:hidden">Salvar</span></>}
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         
         {/* COLUNA ESQUERDA: Copiloto e Info Base */}
         <div className="lg:col-span-1 space-y-6">
@@ -263,7 +263,7 @@ export default function AdminPrescricao() {
         </div>
 
         {/* COLUNA DIREITA/CENTRO: Builder Studio */}
-        <div className="lg:col-span-3 space-y-6">
+        <div className="lg:col-span-3 xl:col-span-4 space-y-6">
           {/* Config. Globais da Ficha */}
           <div className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
              <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-6 border-b border-gray-100 pb-2">Arquitetura Master da Ficha</h2>
@@ -352,7 +352,7 @@ export default function AdminPrescricao() {
 
                      {/* Popover de Grupos Musculares */}
                      {menuAbertoDiaIdx === diaIdx && (
-                        <div className="absolute top-12 left-12 w-[320px] bg-white border border-gray-200 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] z-[100] p-4 animate-fade-in cursor-default">
+                        <div className="absolute top-12 left-0 md:left-12 w-[280px] md:w-[360px] max-h-[50vh] overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] z-[100] p-4 animate-fade-in cursor-default">
                            {GRUPOS_MUSCULARES.map((categoria, cIdx) => (
                              <div key={cIdx} className="mb-4 last:mb-0">
                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 border-b border-gray-100 pb-1">{categoria.cat}</p>
@@ -397,7 +397,7 @@ export default function AdminPrescricao() {
                   ) : (
                     <div className="space-y-3">
                       {dia.exercicios.map((ex, exIdx) => (
-                        <div key={exIdx} className="flex flex-col md:flex-row items-center gap-3 p-3 bg-gray-50 border border-gray-100 rounded-xl pt-4 relative group">
+                        <div key={exIdx} className="flex flex-col lg:flex-row items-center gap-3 p-3 bg-gray-50 border border-gray-100 rounded-xl pt-4 relative group">
                            
                            {/* Botão de excluir ex. */}
                            <button onClick={()=>removerEx(diaIdx, exIdx)} className="absolute -top-2 -right-2 w-6 h-6 bg-red-100 text-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
@@ -405,13 +405,13 @@ export default function AdminPrescricao() {
                            </button>
 
                            <div className="flex items-center justify-center font-black text-sm w-6 text-gray-400">{exIdx + 1}</div>
-                           <input type="text" placeholder="Nome da Máquina/Técnica" value={ex.nome} onChange={e=>updateEx(diaIdx, exIdx, 'nome', e.target.value)} className="flex-[3] bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-black text-gray-900 outline-none min-w-[200px]" />
+                           <input type="text" placeholder="Nome da Máquina/Técnica" value={ex.nome} onChange={e=>updateEx(diaIdx, exIdx, 'nome', e.target.value)} className="flex-[3] w-full lg:w-auto bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-black text-gray-900 outline-none min-w-0 md:min-w-[200px]" />
                            <div className="flex gap-2 flex-1 w-full relative">
                              <input type="number" placeholder="Séries" value={ex.series} onChange={e=>updateEx(diaIdx, exIdx, 'series', e.target.value)} className="w-full bg-white border border-gray-200 rounded-lg px-2 py-2 text-center text-sm font-bold placeholder-gray-400" />
                              <input type="text" placeholder="Reps" value={ex.repeticoes} onChange={e=>updateEx(diaIdx, exIdx, 'repeticoes', e.target.value)} className="w-[80px] bg-white border border-gray-200 rounded-lg px-2 py-2 text-center text-sm font-bold placeholder-gray-400" />
                              <input type="number" placeholder="Desc.(s)" value={ex.descanso} onChange={e=>updateEx(diaIdx, exIdx, 'descanso', e.target.value)} className="w-[80px] bg-white border border-gray-200 rounded-lg px-2 py-2 text-center text-sm font-bold placeholder-gray-400" />
                            </div>
-                           <input type="text" placeholder="Drop-set, 2 steps..." value={ex.observacoes} onChange={e=>updateEx(diaIdx, exIdx, 'observacoes', e.target.value)} className="flex-[2] bg-transparent border-b border-gray-200 rounded-none px-2 py-2.5 text-xs font-medium text-gray-500 outline-none" />
+                           <input type="text" placeholder="Drop-set, 2 steps..." value={ex.observacoes} onChange={e=>updateEx(diaIdx, exIdx, 'observacoes', e.target.value)} className="flex-[2] w-full lg:w-auto bg-transparent border-b border-gray-200 rounded-none px-2 py-2.5 text-xs font-medium text-gray-500 outline-none" />
                         </div>
                       ))}
                     </div>

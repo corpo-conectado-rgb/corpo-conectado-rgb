@@ -42,13 +42,13 @@ export default function Perfil() {
       {/* Header Area */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-5 gap-4">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Meus Dados</h1>
-          <p className="text-gray-500 font-medium mt-0.5 text-sm">Central de informações e histórico biológico.</p>
+          <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Meus Dados</h1>
+          <p className="text-gray-500 font-medium mt-0.5 text-[11px] md:text-sm">Central de informações e histórico biológico.</p>
         </div>
         
         {/* Status Badge Dinâmico */}
-        <div className={`flex items-center gap-2 px-4 py-2 ${isProfileComplete ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'} rounded-full text-sm font-bold border ${isProfileComplete ? 'border-green-200' : 'border-amber-200'}`}>
-          {isProfileComplete ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+        <div className={`flex items-center justify-center w-full md:w-auto gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 ${isProfileComplete ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'} rounded-xl md:rounded-full text-[10px] md:text-sm font-bold border ${isProfileComplete ? 'border-green-200' : 'border-amber-200'}`}>
+          {isProfileComplete ? <CheckCircle2 size={14} className="md:w-4 md:h-4" /> : <AlertCircle size={14} className="md:w-4 md:h-4" />}
           {isProfileComplete ? 'Perfil 100% Completo' : 'Perfil Incompleto'}
         </div>
       </div>
@@ -56,7 +56,7 @@ export default function Perfil() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         
         {/* Card 1: Corpo & Segurança (Identidade Visual Preta) */}
-        <div className="bg-black text-white rounded-3xl p-6 md:p-7 shadow-xl relative overflow-hidden group">
+        <div className="bg-black text-white rounded-3xl p-4 md:p-7 shadow-xl relative overflow-hidden group">
           <div className="absolute top-6 right-6 opacity-[0.08] group-hover:opacity-[0.15] transition-opacity pointer-events-none">
             <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           </div>
@@ -73,7 +73,7 @@ export default function Perfil() {
               </div>
             </div>
 
-            <div className="mt-6 mb-4 grid grid-cols-3 gap-3 p-3 bg-white/10 rounded-2xl backdrop-blur-sm border border-white/5">
+            <div className="mt-4 md:mt-6 mb-3 md:mb-4 grid grid-cols-3 gap-2 md:gap-3 p-2 md:p-3 bg-white/10 rounded-2xl backdrop-blur-sm border border-white/5">
               <div>
                 <p className="text-[9px] uppercase tracking-widest text-gray-400 font-bold mb-0.5">Idade</p>
                 <p className="font-black text-lg">{user?.idade || '--'}</p>
@@ -98,7 +98,7 @@ export default function Perfil() {
         <div className="space-y-4">
           
           {/* Card 2: Alvo Estratégico */}
-          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-3xl p-4 md:p-6 border border-gray-100 shadow-sm">
              <div className="flex items-start justify-between mb-1">
                <h2 className="text-[10px] uppercase tracking-widest text-gray-400 font-bold flex items-center gap-1.5">
                  <Goal size={14} className="text-black" /> Direcionamento Físico
@@ -112,7 +112,7 @@ export default function Perfil() {
           </div>
 
           {/* Card 3: Rotina & Hábitos */}
-          <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-3xl p-4 md:p-6 border border-gray-100 shadow-sm">
              <h2 className="text-[10px] uppercase tracking-widest text-gray-400 font-bold flex items-center gap-1.5 mb-4">
                <Activity size={14} className="text-black" /> Logística
              </h2>
@@ -143,7 +143,7 @@ export default function Perfil() {
         </div>
 
         {/* Card 4: Ficha Médica (ocupa largura total abaixo dos outros) */}
-        <div className="md:col-span-2 bg-gradient-to-br from-white to-gray-50 rounded-3xl p-6 border border-gray-100 shadow-sm relative overflow-hidden">
+        <div className="md:col-span-2 bg-gradient-to-br from-white to-gray-50 rounded-3xl p-4 md:p-6 border border-gray-100 shadow-sm relative overflow-hidden">
            <div className="absolute -right-4 -bottom-6 text-gray-100/50 pointer-events-none">
              <ShieldAlert size={120} />
            </div>

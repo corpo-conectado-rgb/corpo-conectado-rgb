@@ -106,7 +106,7 @@ export default function AdminSolicitacoes() {
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap ${filter === f ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                className={`px-4 py-1.5 text-xs lg:text-sm font-bold rounded-lg transition-all whitespace-nowrap ${filter === f ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
               >
                 {f === 'PENDENTE' ? 'Pendentes' : f === 'APROVADA' ? 'Aprovadas' : f === 'RECUSADA' ? 'Recusadas' : 'Todas'}
               </button>
@@ -117,7 +117,7 @@ export default function AdminSolicitacoes() {
 
       {/* Lista de Solicitações */}
       <div className="flex-1 min-h-0 px-6 lg:px-8 pb-6 lg:pb-8 overflow-y-auto bg-gray-50/50">
-        <div className="max-w-4xl mx-auto py-4 space-y-4">
+        <div className="max-w-4xl mx-auto xl:max-w-6xl py-4 space-y-4">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="w-8 h-8 border-4 border-gray-200 border-t-black rounded-full animate-spin"></div>
@@ -130,7 +130,7 @@ export default function AdminSolicitacoes() {
             </div>
           ) : (
             filteredSolicitacoes.map(sol => (
-              <div key={sol.id} className={`bg-white rounded-2xl border ${sol.status === 'PENDENTE' ? 'border-gray-200 shadow-sm' : 'border-gray-100 opacity-75'} p-5 transition-all`}>
+              <div key={sol.id} className={`bg-white rounded-2xl border ${sol.status === 'PENDENTE' ? 'border-gray-200 shadow-sm' : 'border-gray-100 opacity-75'} p-4 md:p-5 transition-all`}>
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gray-100 to-gray-50 border border-gray-200 flex items-center justify-center text-gray-600 font-black shadow-sm shrink-0">
@@ -159,7 +159,7 @@ export default function AdminSolicitacoes() {
                     </div>
                   </div>
                   
-                  <div className="flex flex-row md:flex-col items-center justify-start md:justify-end gap-2 shrink-0 md:pl-4 md:border-l border-gray-100 md:w-36">
+                  <div className="flex flex-row md:flex-col items-center justify-start md:justify-end gap-2 shrink-0 md:pl-4 md:border-l border-gray-100 md:w-36 lg:w-44">
                     <button 
                       onClick={() => navigate(`/admin/prescricao/${sol.aluno_id}`)}
                       className="px-4 py-2 w-full text-[10px] font-black uppercase tracking-wider bg-black text-white rounded-xl hover:bg-gray-800 transition active:scale-95 text-center"
