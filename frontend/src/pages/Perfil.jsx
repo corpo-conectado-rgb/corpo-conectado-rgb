@@ -1,9 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { CheckCircle2, AlertCircle, Goal, Activity, Timer, MapPin, ShieldAlert, Edit3 } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Goal, Activity, Timer, MapPin, ShieldAlert, Edit3, X, Check } from 'lucide-react';
+import { apiFetch } from '../services/api';
 
 export default function Perfil() {
   const { user } = useAuth();
+  
+  const [showSolicitacao, setShowSolicitacao] = useState(false);
+  const [solicitacaoSuccess, setSolicitacaoSuccess] = useState(false);
+  const [solicitacaoForm, setSolicitacaoForm] = useState({ tipo: 'REAVALIACAO', mensagem: '' });
+  const [enviandoSolicitacao, setEnviandoSolicitacao] = useState(false);
+
+  const handleEnviarSolicitacao = async (e) => {
+    e.preventDefault();
+    if (!solicitacaoForm.mensagem.trim()) return;
+    try {
+      setEnviandoSolicitacao(true);
+      await apiFetch('/solicitacoes', {
+        method: 'POST',
+        body: JSON.stringify(solicitacaoForm)
+      });
+      setSolicitacaoSuccess(true);
+      setTimeout(() => {
+        setShowSolicitacao(false);
+        setSolicitacaoSuccess(false);
+        setSolicitacaoForm({ tipo: 'REAVALIACAO', mensagem: '' });
+      }, 4000);
+    } catch (err) {
+      alert('Erro ao enviar: ' + err.message);
+    } finally {
+      setEnviandoSolicitacao(false);
+    }
+  };
 
   // Verifica se todos os principais campos da anamnese estão preenchidos para definir o status
   const isProfileComplete = user?.idade && user?.peso && user?.altura && user?.objetivo;
@@ -147,13 +175,74 @@ export default function Perfil() {
 
       </div>
 
-      {/* Botão de Edição Reservado para o Futuro */}
+      {/* Botão de Solicitar Ajuste */}
       <div className="mt-6 text-center">
         <button className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-black transition-colors"
-                onClick={() => alert("Para alterar suas métricas base, procure seu treinador via suporte.")}>
+                onClick={() => setShowSolicitacao(true)}>
            <Edit3 size={12} /> Solicitar Ajuste Físico
         </button>
       </div>
+
+      {/* ── MODAL DE SOLICITAÇÃO ──────────────────────────────────────── */}
+      {showSolicitacao && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => !solicitacaoSuccess && setShowSolicitacao(false)} />
+          <div className="relative bg-white w-full max-w-sm rounded-3xl shadow-2xl animate-scale-in flex flex-col overflow-hidden">
+            
+            {solicitacaoSuccess ? (
+              <div className="p-8 flex flex-col items-center justify-center text-center animate-fade-in gap-4">
+                <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 mb-2">
+                  <Check size={32} strokeWidth={3} />
+                </div>
+                <h3 className="text-xl font-black text-gray-900 tracking-tight">Solicitação Enviada!</h3>
+                <p className="text-sm text-gray-500 font-medium">
+                  Sua solicitação foi encaminhada para análise da administração com sucesso. O Alfred o notificará assim que houver uma resposta.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                  <h3 className="text-lg font-black text-gray-900 tracking-tight">Falar com Treinador</h3>
+                  <button onClick={() => setShowSolicitacao(false)} className="text-gray-400 hover:text-black">
+                    <X size={20} />
+                  </button>
+                </div>
+                <form onSubmit={handleEnviarSolicitacao} className="p-6 flex flex-col gap-4">
+                  <div>
+                    <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5 block">Tipo de Pedido</label>
+                    <select 
+                      value={solicitacaoForm.tipo}
+                      onChange={e => setSolicitacaoForm(prev => ({ ...prev, tipo: e.target.value }))}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-black"
+                    >
+                      <option value="REAVALIACAO">Solicitar Reavaliação (Métricas/Novo Ciclo)</option>
+                      <option value="AJUSTE_TREINO">Dúvida ou Troca de Exercício</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5 block">Sua Mensagem</label>
+                    <textarea 
+                      value={solicitacaoForm.mensagem}
+                      onChange={e => setSolicitacaoForm(prev => ({ ...prev, mensagem: e.target.value }))}
+                      placeholder="Descreva detalhadamente o que gostaria de alterar em seus dados ou no seu plano atual..."
+                      rows={4}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 outline-none focus:border-black resize-none"
+                      required
+                    />
+                  </div>
+                  <button 
+                    type="submit" 
+                    disabled={enviandoSolicitacao || !solicitacaoForm.mensagem.trim()}
+                    className="w-full bg-black text-white font-black uppercase tracking-widest text-xs py-4 rounded-xl mt-2 disabled:opacity-50 active:scale-95 transition-all"
+                  >
+                    {enviandoSolicitacao ? 'Enviando...' : 'Enviar Solicitação'}
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );

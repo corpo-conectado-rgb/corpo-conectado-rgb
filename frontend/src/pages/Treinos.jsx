@@ -42,8 +42,10 @@ export default function Treinos() {
   const [salvando, setSalvando] = useState(false);
   const [proximaLetra, setProximaLetra] = useState(null);
   const [showSolicitacao, setShowSolicitacao] = useState(false);
+  const [solicitacaoSuccess, setSolicitacaoSuccess] = useState(false);
   const [solicitacaoForm, setSolicitacaoForm] = useState({ tipo: 'AJUSTE_TREINO', mensagem: '' });
   const [enviandoSolicitacao, setEnviandoSolicitacao] = useState(false);
+  const [notificacoes, setNotificacoes] = useState([]);
   const timerRef = useRef(null);
   const descansoRef = useRef(null);
 
@@ -67,15 +69,17 @@ export default function Treinos() {
 
     // 2. Buscar os dados mais recentes do servidor em background (ou foreground se não houver cache)
     try {
-      const [fichasData, statsData, histData] = await Promise.all([
+      const [fichasData, statsData, histData, notificacoesData] = await Promise.all([
         apiFetch('/workouts/my-sheet'),
         apiFetch('/workouts/stats').catch(() => null),
         apiFetch('/workouts/history?limit=5').catch(() => []),
+        apiFetch('/solicitacoes/aluno/notificacoes').catch(() => [])
       ]);
       
       setFichas(fichasData);
       setStats(statsData);
       setHistorico(histData);
+      setNotificacoes(notificacoesData);
       
       // 3. Atualizar o cache para o próximo acesso
       localStorage.setItem('corpoConectado_treinos_cache', JSON.stringify({ fichasData, statsData, histData }));
@@ -529,6 +533,30 @@ export default function Treinos() {
         </div>
       </header>
 
+      {/* ── Notificações do Alfred ──────────────────────────────────────── */}
+      {notificacoes.length > 0 && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 flex gap-4 animate-fade-in">
+          <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-sm shadow-blue-500/20">
+            {/* Alfred "Face" icon */}
+            <span className="font-black text-lg">A</span>
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-black text-blue-900 mb-1">Resposta do Treinador</h3>
+            <p className="text-xs text-blue-800 leading-relaxed">
+              Olá! Sua solicitação recente foi <strong className={notificacoes[0].status === 'APROVADA' ? 'text-emerald-600' : 'text-red-600'}>{notificacoes[0].status.toLowerCase()}</strong>.
+              <br />
+              <span className="italic mt-1 block">"{notificacoes[0].observacao_admin}"</span>
+            </p>
+            <button 
+              onClick={() => setNotificacoes([])} // Apenas dismiss visual simples
+              className="mt-2 text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:text-blue-800 transition"
+            >
+              Entendi, fechar
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── Hero: Próximo Treino ──────────────────────────────────────── */}
       {fichaProxima && (
         <div className="relative rounded-xl overflow-hidden bg-black text-white shadow-lg">
@@ -651,45 +679,60 @@ export default function Treinos() {
       {/* ── MODAL DE SOLICITAÇÃO ──────────────────────────────────────── */}
       {showSolicitacao && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => setShowSolicitacao(false)} />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => !solicitacaoSuccess && setShowSolicitacao(false)} />
           <div className="relative bg-white w-full max-w-sm rounded-3xl shadow-2xl animate-scale-in flex flex-col overflow-hidden">
-            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-              <h3 className="text-lg font-black text-gray-900 tracking-tight">Falar com Treinador</h3>
-              <button onClick={() => setShowSolicitacao(false)} className="text-gray-400 hover:text-black">
-                <X size={20} />
-              </button>
-            </div>
-            <form onSubmit={handleEnviarSolicitacao} className="p-6 flex flex-col gap-4">
-              <div>
-                <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5 block">Tipo de Pedido</label>
-                <select 
-                  value={solicitacaoForm.tipo}
-                  onChange={e => setSolicitacaoForm(prev => ({ ...prev, tipo: e.target.value }))}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-black"
-                >
-                  <option value="AJUSTE_TREINO">Ajuste ou Dúvida no Treino</option>
-                  <option value="REAVALIACAO">Solicitar Reavaliação (Mês novo)</option>
-                </select>
+            
+            {solicitacaoSuccess ? (
+              <div className="p-8 flex flex-col items-center justify-center text-center animate-fade-in gap-4">
+                <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 mb-2">
+                  <CheckCircle2 size={32} strokeWidth={3} />
+                </div>
+                <h3 className="text-xl font-black text-gray-900 tracking-tight">Solicitação Enviada!</h3>
+                <p className="text-sm text-gray-500 font-medium">
+                  Sua solicitação foi encaminhada para análise da administração. O Alfred o notificará assim que houver uma resposta.
+                </p>
               </div>
-              <div>
-                <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5 block">Sua Mensagem</label>
-                <textarea 
-                  value={solicitacaoForm.mensagem}
-                  onChange={e => setSolicitacaoForm(prev => ({ ...prev, mensagem: e.target.value }))}
-                  placeholder="Escreva aqui se está sentindo dores, dúvidas na execução ou motivo da troca..."
-                  rows={4}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 outline-none focus:border-black resize-none"
-                  required
-                />
-              </div>
-              <button 
-                type="submit" 
-                disabled={enviandoSolicitacao || !solicitacaoForm.mensagem.trim()}
-                className="w-full bg-black text-white font-black uppercase tracking-widest text-xs py-4 rounded-xl mt-2 disabled:opacity-50 active:scale-95 transition-all"
-              >
-                {enviandoSolicitacao ? 'Enviando...' : 'Enviar Solicitação'}
-              </button>
-            </form>
+            ) : (
+              <>
+                <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                  <h3 className="text-lg font-black text-gray-900 tracking-tight">Falar com Treinador</h3>
+                  <button onClick={() => setShowSolicitacao(false)} className="text-gray-400 hover:text-black">
+                    <X size={20} />
+                  </button>
+                </div>
+                <form onSubmit={handleEnviarSolicitacao} className="p-6 flex flex-col gap-4">
+                  <div>
+                    <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5 block">Tipo de Pedido</label>
+                    <select 
+                      value={solicitacaoForm.tipo}
+                      onChange={e => setSolicitacaoForm(prev => ({ ...prev, tipo: e.target.value }))}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-black"
+                    >
+                      <option value="AJUSTE_TREINO">Ajuste ou Dúvida no Treino</option>
+                      <option value="REAVALIACAO">Solicitar Reavaliação (Mês novo)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs font-black text-gray-500 uppercase tracking-widest mb-1.5 block">Sua Mensagem</label>
+                    <textarea 
+                      value={solicitacaoForm.mensagem}
+                      onChange={e => setSolicitacaoForm(prev => ({ ...prev, mensagem: e.target.value }))}
+                      placeholder="Escreva aqui se está sentindo dores, dúvidas na execução ou motivo da troca..."
+                      rows={4}
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 outline-none focus:border-black resize-none"
+                      required
+                    />
+                  </div>
+                  <button 
+                    type="submit" 
+                    disabled={enviandoSolicitacao || !solicitacaoForm.mensagem.trim()}
+                    className="w-full bg-black text-white font-black uppercase tracking-widest text-xs py-4 rounded-xl mt-2 disabled:opacity-50 active:scale-95 transition-all"
+                  >
+                    {enviandoSolicitacao ? 'Enviando...' : 'Enviar Solicitação'}
+                  </button>
+                </form>
+              </>
+            )}
           </div>
         </div>
       )}
