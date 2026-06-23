@@ -73,7 +73,7 @@ export default function Login() {
 
         {/* Ícone — Protagonista */}
         <div className="w-[100px] h-[100px] flex items-center justify-center mb-3">
-          <img src="/CC_Icone.png" alt="Corpo Conectado" className="w-full h-full object-contain drop-shadow-2xl" />
+          <img src="/Icone_Corpo_Conectado_Premium.png" alt="Corpo Conectado" className="w-full h-full object-contain drop-shadow-2xl" />
         </div>
 
         {/* Assinatura da marca */}

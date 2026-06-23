@@ -11,7 +11,7 @@ export default function Welcome() {
       <div className="relative z-10 flex flex-col items-center gap-6">
         {/* Ícone */}
         <img 
-          src="/CC_Icone.png" 
+          src="/Icone_Corpo_Conectado_Premium.png" 
           alt="Corpo Conectado Logo" 
           className="max-h-[40vh] max-w-[65%] w-auto object-contain animate-fade-up drop-shadow-xl" 
           style={{ animationDuration: '0.8s' }}
