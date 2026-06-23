@@ -21,7 +21,7 @@ export default function AdminSolicitacoes() {
   const fetchSolicitacoes = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('@CorpoConectado:token');
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/solicitacoes/admin`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -41,7 +41,7 @@ export default function AdminSolicitacoes() {
 
     try {
       setSubmitting(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('@CorpoConectado:token');
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/solicitacoes/admin/${actionModal.id}/${actionModal.type}`, {
         method: 'PUT',
         headers: { 
