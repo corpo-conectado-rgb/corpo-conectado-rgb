@@ -23,8 +23,12 @@ export default function Dashboard() {
           apiFetch('/dashboard'),
           apiFetch('/solicitacoes/aluno/notificacoes').catch(() => [])
         ]);
+        
+        const dismissedIds = JSON.parse(localStorage.getItem('@CorpoConectado:dismissedNotifs') || '[]');
+        const unreadNotifs = notifs.filter(n => !dismissedIds.includes(n.id));
+
         setData(result);
-        setNotificacoes(notifs);
+        setNotificacoes(unreadNotifs);
       } catch (err) {
         console.error('Falha ao carregar dashboard', err);
       } finally {
@@ -49,8 +53,13 @@ export default function Dashboard() {
   else if (data.streakSemanas > 0) insightText = `Excelente ritmo! Continue assim para bater 4 semanas seguidas.`;
   else if (data.totalSessoes > 0 && data.diasDesdeUltimoTreino !== null) insightText = `Faz ${data.diasDesdeUltimoTreino} dias desde o seu último treino. Que tal agendar a próxima sessão?`;
 
-  const dismissNotificacao = (index) => {
-    setNotificacoes(prev => prev.filter((_, i) => i !== index));
+  const handleDismissNotificacao = (notif) => {
+    setNotificacoes(prev => prev.filter(n => n.id !== notif.id));
+    const dismissedIds = JSON.parse(localStorage.getItem('@CorpoConectado:dismissedNotifs') || '[]');
+    if (!dismissedIds.includes(notif.id)) {
+      dismissedIds.push(notif.id);
+      localStorage.setItem('@CorpoConectado:dismissedNotifs', JSON.stringify(dismissedIds));
+    }
   };
 
   return (
@@ -79,7 +88,7 @@ export default function Dashboard() {
                 </p>
               )}
               <button 
-                onClick={() => setNotificacoes(prev => prev.slice(1))}
+                onClick={() => handleDismissNotificacao(notificacoes[0])}
                 className={`mt-1.5 text-[9px] font-bold uppercase tracking-widest transition ${notificacoes[0].status === 'APROVADA' ? 'text-emerald-500 hover:text-emerald-700' : 'text-red-500 hover:text-red-700'}`}
               >
                 Entendi, fechar

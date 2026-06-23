@@ -16,14 +16,21 @@ export default function FloatingAlfred() {
   const fetchNotificacoes = async () => {
     try {
       const data = await apiFetch('/solicitacoes/aluno/notificacoes');
-      setNotificacoes(data);
+      const dismissedIds = JSON.parse(localStorage.getItem('@CorpoConectado:dismissedNotifs') || '[]');
+      const unreadNotifs = data.filter(n => !dismissedIds.includes(n.id));
+      setNotificacoes(unreadNotifs);
     } catch (err) {
       console.error('Erro ao buscar notificações do Alfred:', err);
     }
   };
 
-  const dismissNotificacao = (index) => {
-    setNotificacoes(prev => prev.filter((_, i) => i !== index));
+  const handleDismissNotificacao = (notif) => {
+    setNotificacoes(prev => prev.filter(n => n.id !== notif.id));
+    const dismissedIds = JSON.parse(localStorage.getItem('@CorpoConectado:dismissedNotifs') || '[]');
+    if (!dismissedIds.includes(notif.id)) {
+      dismissedIds.push(notif.id);
+      localStorage.setItem('@CorpoConectado:dismissedNotifs', JSON.stringify(dismissedIds));
+    }
   };
 
   // Fecha o popover se clicar fora dele
@@ -106,7 +113,7 @@ export default function FloatingAlfred() {
 
                     <div className="mt-3 flex justify-end">
                       <button 
-                        onClick={() => dismissNotificacao(idx)}
+                        onClick={() => handleDismissNotificacao(notif)}
                         className={`text-[9px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg transition-colors ${notif.status === 'APROVADA' ? 'bg-emerald-200/50 text-emerald-700 hover:bg-emerald-200' : 'bg-red-200/50 text-red-700 hover:bg-red-200'}`}
                       >
                         Marcar como lida
