@@ -21,7 +21,8 @@ export default function Sidebar({ isOpen, onClose }) {
   ];
 
   const adminMenu = user?.role === 'admin' ? [
-    { name: 'Gestão de Fichas', icon: FileText, path: '/admin/alunos' }
+    { name: 'Gestão de Fichas', icon: FileText, path: '/admin/alunos' },
+    { name: 'Solicitações', icon: Activity, path: '/admin/solicitacoes' }
   ] : [];
 
   return (

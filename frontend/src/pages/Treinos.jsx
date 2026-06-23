@@ -41,6 +41,9 @@ export default function Treinos() {
   const [treinoFinalizado, setTreinoFinalizado] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [proximaLetra, setProximaLetra] = useState(null);
+  const [showSolicitacao, setShowSolicitacao] = useState(false);
+  const [solicitacaoForm, setSolicitacaoForm] = useState({ tipo: 'AJUSTE_TREINO', mensagem: '' });
+  const [enviandoSolicitacao, setEnviandoSolicitacao] = useState(false);
   const timerRef = useRef(null);
   const descansoRef = useRef(null);
 
@@ -506,8 +509,14 @@ export default function Treinos() {
     <div className="flex flex-col gap-4 animate-fade-in pb-4">
 
       {/* Header */}
-      <header>
+      <header className="flex items-center justify-between">
         <h1 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight">Meus Treinos</h1>
+        <button 
+          onClick={() => setShowSolicitacao(true)}
+          className="text-xs font-black uppercase tracking-widest bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-black px-4 py-2 rounded-xl transition"
+        >
+          Pedir Ajuste
+        </button>
       </header>
 
       {/* ── Hero: Próximo Treino ──────────────────────────────────────── */}
