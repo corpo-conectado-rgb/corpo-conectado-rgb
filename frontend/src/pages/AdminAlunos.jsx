@@ -395,9 +395,6 @@ export default function AdminAlunos() {
               )}
             </div>
 
-            <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-black text-white font-black hover:bg-gray-800 transition shadow-lg text-sm tracking-wide">
-              <UserPlus size={16} /> Novo Cadastramento
-            </button>
           </div>
         </div>
 
