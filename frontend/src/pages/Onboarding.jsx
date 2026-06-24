@@ -451,21 +451,21 @@ export default function Onboarding() {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Tempo Livre</label>
-          <select name="habitos_tempo" value={formData.habitos_tempo} onChange={handleChange} className={`input-glass w-full appearance-none ${!formData.habitos_tempo ? '!text-gray-500 !font-medium' : ''}`}>
+          <select name="habitos_tempo" value={formData.habitos_tempo} onChange={handleChange} className={`input-glass w-full appearance-none text-center font-bold [color-scheme:dark] ${!formData.habitos_tempo ? '!text-gray-500' : 'text-white'}`}>
             <option value="" disabled hidden>Duração?</option>
-            <option value="30 a 45 min" className="bg-[#17171A] text-white font-black">30 a 45 min</option>
-            <option value="45 a 60 min" className="bg-[#17171A] text-white font-black">45 a 60 min</option>
-            <option value="Mais de 60 min" className="bg-[#17171A] text-white font-black">Mais de 60 min</option>
+            <option value="30 a 45 min" className="bg-[#17171A] text-white font-black text-left">30-45 min</option>
+            <option value="45 a 60 min" className="bg-[#17171A] text-white font-black text-left">45-60 min</option>
+            <option value="Mais de 60 min" className="bg-[#17171A] text-white font-black text-left">+60 min</option>
           </select>
         </div>
         <div>
           <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Local</label>
-          <select name="habitos_local" value={formData.habitos_local} onChange={handleChange} className={`input-glass w-full appearance-none ${!formData.habitos_local ? '!text-gray-500 !font-medium' : ''}`}>
+          <select name="habitos_local" value={formData.habitos_local} onChange={handleChange} className={`input-glass w-full appearance-none text-center font-bold [color-scheme:dark] ${!formData.habitos_local ? '!text-gray-500' : 'text-white'}`}>
             <option value="" disabled hidden>Aonde treina?</option>
-            <option value="Smart Fit" className="bg-[#17171A] text-white font-black">Smart Fit</option>
-            <option value="Pratique" className="bg-[#17171A] text-white font-black">Pratique</option>
-            <option value="Contorno" className="bg-[#17171A] text-white font-black">Contorno</option>
-            <option value="Outro" className="bg-[#17171A] text-white font-black">Outro</option>
+            <option value="Smart Fit" className="bg-[#17171A] text-white font-black text-left">Smart Fit</option>
+            <option value="Pratique" className="bg-[#17171A] text-white font-black text-left">Pratique</option>
+            <option value="Contorno" className="bg-[#17171A] text-white font-black text-left">Contorno</option>
+            <option value="Outro" className="bg-[#17171A] text-white font-black text-left">Outro</option>
           </select>
         </div>
       </div>
