@@ -438,11 +438,13 @@ export default function Onboarding() {
 
       <div>
         <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Frequência Semanal</label>
-        <select name="habitos_freq" value={formData.habitos_freq} onChange={handleChange} className={`input-glass w-full appearance-none ${!formData.habitos_freq ? '!text-gray-500 !font-medium' : ''}`}>
+        <select name="habitos_freq" value={formData.habitos_freq} onChange={handleChange} className={`input-glass w-full appearance-none text-center font-bold [color-scheme:dark] ${!formData.habitos_freq ? '!text-gray-500' : 'text-white'}`}>
           <option value="" disabled hidden>Quantos dias?</option>
-          <option value="1 a 2 dias" className="bg-[#17171A] text-white font-black">1 a 2 dias</option>
-          <option value="3 a 4 dias" className="bg-[#17171A] text-white font-black">3 a 4 dias</option>
-          <option value="5 dias ou mais" className="bg-[#17171A] text-white font-black">5 dias ou mais</option>
+          {[1, 2, 3, 4, 5, 6, 7].map(num => (
+            <option key={num} value={`${num} dia${num > 1 ? 's' : ''}`} className="bg-[#17171A] text-white font-black text-left">
+              {num} dia{num > 1 ? 's' : ''} por semana
+            </option>
+          ))}
         </select>
       </div>
 
