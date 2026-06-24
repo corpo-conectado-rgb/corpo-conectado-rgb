@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, CheckCircle, Search, User, Filter, XCircle, X } from 'lucide-react';
+import { Mail, CheckCircle, Search, User, Filter, XCircle, X, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../services/api';
 
@@ -137,11 +137,17 @@ export default function AdminSolicitacoes() {
                       {sol.aluno_nome ? sol.aluno_nome.charAt(0).toUpperCase() : <User size={20} />}
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-base font-black text-gray-900">{sol.aluno_nome || 'Aluno'}</h3>
-                        <span className={`text-[9px] uppercase tracking-widest font-black px-2 py-0.5 rounded border ${getTipoStyle(sol.tipo)}`}>
-                          {getTipoLabel(sol.tipo)}
-                        </span>
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base font-black text-gray-900">{sol.aluno_nome || 'Aluno'}</h3>
+                          <span className={`text-[9px] uppercase tracking-widest font-black px-2 py-0.5 rounded border ${getTipoStyle(sol.tipo)}`}>
+                            {getTipoLabel(sol.tipo)}
+                          </span>
+                        </div>
+                        {/* Ícone de Excluir Ocultado conforme solicitado */}
+                        <button className="hidden text-gray-300 hover:text-red-500 transition-colors p-1" title="Excluir Solicitação">
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                       <div className="text-xs font-medium text-gray-400 mb-3">
                         Enviado em {formatDate(sol.data_criacao)}
