@@ -61,6 +61,16 @@ export default function AdminSolicitacoes() {
     setObservacao('');
   };
 
+  const deletarSolicitacao = async (id) => {
+    if (!window.confirm('Tem certeza que deseja excluir esta solicitação permanentemente?')) return;
+    try {
+      await apiFetch(`/solicitacoes/admin/${id}`, { method: 'DELETE' });
+      setSolicitacoes(prev => prev.filter(s => s.id !== id));
+    } catch (err) {
+      alert('Erro ao excluir: ' + err.message);
+    }
+  };
+
   const filteredSolicitacoes = solicitacoes.filter(s => {
     if (filter === 'TODAS') return true;
     return s.status === filter;
@@ -130,7 +140,7 @@ export default function AdminSolicitacoes() {
             </div>
           ) : (
             filteredSolicitacoes.map(sol => (
-              <div key={sol.id} className={`bg-white rounded-2xl border ${sol.status === 'PENDENTE' ? 'border-gray-200 shadow-sm' : 'border-gray-100 opacity-75'} p-4 md:p-5 transition-all`}>
+              <div key={sol.id} className={`group bg-white rounded-2xl border ${sol.status === 'PENDENTE' ? 'border-gray-200 shadow-sm' : 'border-gray-100 opacity-75'} p-4 md:p-5 transition-all`}>
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gray-100 to-gray-50 border border-gray-200 flex items-center justify-center text-gray-600 font-black shadow-sm shrink-0">
@@ -144,8 +154,8 @@ export default function AdminSolicitacoes() {
                             {getTipoLabel(sol.tipo)}
                           </span>
                         </div>
-                        {/* Ícone de Excluir Ocultado conforme solicitado */}
-                        <button className="hidden text-gray-300 hover:text-red-500 transition-colors p-1" title="Excluir Solicitação">
+                        {/* Ícone de Excluir que aparece ao passar o mouse */}
+                        <button onClick={() => deletarSolicitacao(sol.id)} className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all p-1" title="Excluir Solicitação">
                           <Trash2 size={16} />
                         </button>
                       </div>

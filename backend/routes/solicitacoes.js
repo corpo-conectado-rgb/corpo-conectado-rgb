@@ -137,6 +137,28 @@ router.put('/admin/:id/recusar', authMiddleware, async (req, res) => {
   }
 });
 
+// DELETE /admin/:id - Admin exclui permanentemente a solicitação
+router.delete('/admin/:id', authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Acesso negado.' });
+
+    const solicitacaoId = req.params.id;
+    const sheet = await getSheet('solicitacoes', SOLICITACOES_HEADERS);
+    const rows = await sheet.getRows();
+    const row = rows.find(r => r.get('id') === solicitacaoId);
+    
+    if (!row) return res.status(404).json({ error: 'Solicitação não encontrada.' });
+
+    await row.delete();
+    invalidateCache('solicitacoes');
+
+    res.json({ message: 'Solicitação excluída com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao excluir solicitação:', error);
+    res.status(500).json({ error: 'Erro ao excluir solicitação.' });
+  }
+});
+
 // GET /aluno/notificacoes - Retorna as notificações mais recentes para o aluno
 router.get('/aluno/notificacoes', authMiddleware, async (req, res) => {
   try {
