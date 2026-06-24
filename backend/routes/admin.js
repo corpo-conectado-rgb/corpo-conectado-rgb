@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
-const { getSheet, getCachedRows, invalidateCache } = require('../services/googleSheets');
+const { getDoc, getSheet, getCachedRows, invalidateCache } = require('../services/googleSheets');
 const adminMiddleware = require('../middlewares/adminMiddleware');
 const { calcularIdade } = require('../utils/dateUtils');
 
@@ -313,9 +313,40 @@ router.delete('/usuarios/:id', adminMiddleware, async (req, res) => {
     const userExsRows = exsRows.filter(r => diasIds.includes(r.get('dia_treino_id')));
     rowsToDelete.push(...userExsRows);
 
-    // Deletar fisicamente (de trás pra frente é mais seguro com APIs baseadas em índices, mas o google-spreadsheet trata isso pela instância da linha)
+    // Deletar fisicamente via batchUpdate para evitar limite de requisições da API (Quota 429)
+    const doc = await getDoc();
+    
+    const rowsBySheet = {};
     for (const row of rowsToDelete) {
-      await row.delete();
+      const sheetId = row._worksheet.sheetId;
+      if (!rowsBySheet[sheetId]) rowsBySheet[sheetId] = [];
+      rowsBySheet[sheetId].push(row.rowNumber);
+    }
+
+    const batchRequests = [];
+    for (const sheetId in rowsBySheet) {
+      // Ordenar decrescente para não bagunçar os índices ao deletar
+      const sortedRowNumbers = [...new Set(rowsBySheet[sheetId])].sort((a, b) => b - a);
+      for (const rowNum of sortedRowNumbers) {
+        batchRequests.push({
+          deleteDimension: {
+            range: {
+              sheetId: parseInt(sheetId),
+              dimension: 'ROWS',
+              startIndex: rowNum - 1,
+              endIndex: rowNum
+            }
+          }
+        });
+      }
+    }
+
+    if (batchRequests.length > 0) {
+      await doc.auth.request({
+        method: 'POST',
+        url: `https://sheets.googleapis.com/v4/spreadsheets/${doc.spreadsheetId}:batchUpdate`,
+        data: { requests: batchRequests }
+      });
     }
 
     // Invalidar todo o cache associado
