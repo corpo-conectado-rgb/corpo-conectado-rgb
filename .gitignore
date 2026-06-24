@@ -34,6 +34,7 @@ temp_crop/
 !tailwind.config.js
 !vite.config.js
 !tsconfig.json
+!frontend/public/manifest.json
 
 # Projeto docs (opcional, pode remover se quiser versionar)
 projeto/
