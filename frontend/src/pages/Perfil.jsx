@@ -175,13 +175,7 @@ export default function Perfil() {
 
       </div>
 
-      {/* Botão de Solicitar Ajuste */}
-      <div className="mt-6 text-center">
-        <button className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-black transition-colors"
-                onClick={() => setShowSolicitacao(true)}>
-           <Edit3 size={12} /> Solicitar Ajuste Físico
-        </button>
-      </div>
+
 
       {/* ── MODAL DE SOLICITAÇÃO ──────────────────────────────────────── */}
       {showSolicitacao && (
