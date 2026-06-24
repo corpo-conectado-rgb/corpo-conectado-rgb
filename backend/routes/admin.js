@@ -3,6 +3,7 @@ const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const { getSheet, getCachedRows, invalidateCache } = require('../services/googleSheets');
 const adminMiddleware = require('../middlewares/adminMiddleware');
+const { calcularIdade } = require('../utils/dateUtils');
 
 // Helper para pegar detalhes de um usuário incluindo a anamnese
 async function fetchFullUser(userRowId, baseUser) {
@@ -11,7 +12,9 @@ async function fetchFullUser(userRowId, baseUser) {
     const rows = await getCachedRows('anamnese', []);
     const row = rows.find(r => r.get('id_usuario') === userRowId);
     if (row) {
-      userDetails.idade = row.get('idade');
+      const dataNascimento = row.get('data_nascimento');
+      userDetails.data_nascimento = dataNascimento;
+      userDetails.idade = dataNascimento ? calcularIdade(dataNascimento) : row.get('idade');
       userDetails.altura = row.get('altura');
       userDetails.peso = row.get('peso');
       userDetails.sexo = row.get('sexo');

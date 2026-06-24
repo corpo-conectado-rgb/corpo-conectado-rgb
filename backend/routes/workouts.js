@@ -14,7 +14,7 @@ const HISTORICO_HEADERS = [
 // Headers da anamnese (mesmo padrão do auth.js)
 const ANAMNESE_HEADERS = [
   'id_usuario', 'idade', 'altura', 'peso', 'sexo', 'objetivo',
-  'nivel_fisico', 'lesoes_criticas', 'habitos_freq', 'habitos_tempo', 'habitos_local'
+  'nivel_fisico', 'lesoes_criticas', 'habitos_freq', 'habitos_tempo', 'habitos_local', 'data_nascimento'
 ];
 
 // Dias da semana em português

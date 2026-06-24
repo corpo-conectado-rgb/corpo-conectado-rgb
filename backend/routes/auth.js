@@ -5,11 +5,12 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { getSheet, getCachedRows, invalidateCache } = require('../services/googleSheets');
 const authMiddleware = require('../middlewares/authMiddleware');
+const { calcularIdade } = require('../utils/dateUtils');
 
 const USERS_SHEET = 'usuarios';
 const ANAMNESE_SHEET = 'anamnese';
 const HEADERS = ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role'];
-const ANAMNESE_HEADERS = ['id_usuario', 'idade', 'altura', 'peso', 'sexo', 'objetivo', 'nivel_fisico', 'lesoes_criticas', 'habitos_freq', 'habitos_tempo', 'habitos_local'];
+const ANAMNESE_HEADERS = ['id_usuario', 'idade', 'altura', 'peso', 'sexo', 'objetivo', 'nivel_fisico', 'lesoes_criticas', 'habitos_freq', 'habitos_tempo', 'habitos_local', 'data_nascimento'];
 
 // Função Helper para buscar dados completos de anamnese e impedir repetição de código
 async function fetchCompleteProfile(userRowId) {
@@ -19,8 +20,12 @@ async function fetchCompleteProfile(userRowId) {
     const anamneseRow = anamneseRows.find(r => r.get('id_usuario') === userRowId);
     
     if (anamneseRow) {
+      const dataNascimento = anamneseRow.get('data_nascimento');
+      const idadeFixa = anamneseRow.get('idade');
+      
       profileData = {
-        idade: anamneseRow.get('idade'),
+        data_nascimento: dataNascimento,
+        idade: dataNascimento ? calcularIdade(dataNascimento) : idadeFixa,
         altura: anamneseRow.get('altura'),
         peso: anamneseRow.get('peso'),
         sexo: anamneseRow.get('sexo'),
@@ -73,10 +78,12 @@ router.post('/register-full', async (req, res) => {
   try {
     const { 
       nome, email, senha, 
-      idade, altura, peso, sexo, 
+      data_nascimento, altura, peso, sexo, 
       objetivo, nivel, lesoes, 
       habitos_freq, habitos_tempo, habitos_local 
     } = req.body;
+
+    const idade = data_nascimento ? calcularIdade(data_nascimento) : '';
 
     const userSheet = await getSheet(USERS_SHEET, HEADERS);
     const userRows = await getCachedRows(USERS_SHEET, HEADERS);
@@ -111,7 +118,8 @@ router.post('/register-full', async (req, res) => {
       lesoes_criticas: lesoes || '',
       habitos_freq: habitos_freq || '',
       habitos_tempo: habitos_tempo || '',
-      habitos_local: habitos_local || ''
+      habitos_local: habitos_local || '',
+      data_nascimento: data_nascimento || ''
     });
 
     invalidateCache(ANAMNESE_SHEET);
@@ -122,7 +130,7 @@ router.post('/register-full', async (req, res) => {
       token, 
       user: { 
         id: newId, nome, email, role: 'user',
-        idade, altura, peso, sexo,
+        data_nascimento, idade, altura, peso, sexo,
         objetivo, nivel_fisico: nivel,
         lesoes_criticas: lesoes,
         habitos_freq, habitos_tempo, habitos_local

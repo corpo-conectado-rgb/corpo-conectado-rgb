@@ -3,6 +3,7 @@ const router = express.Router();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const adminMiddleware = require('../middlewares/adminMiddleware');
 const { getCachedRows } = require('../services/googleSheets');
+const { calcularIdade } = require('../utils/dateUtils');
 
 // Headers das abas do Google Sheets
 const HISTORICO_HEADERS = [
@@ -12,7 +13,7 @@ const HISTORICO_HEADERS = [
 ];
 const ANAMNESE_HEADERS = [
   'id_usuario', 'idade', 'altura', 'peso', 'sexo', 'objetivo',
-  'nivel_fisico', 'lesoes_criticas', 'habitos_freq', 'habitos_tempo', 'habitos_local'
+  'nivel_fisico', 'lesoes_criticas', 'habitos_freq', 'habitos_tempo', 'habitos_local', 'data_nascimento'
 ];
 
 const DIAS_SEMANA = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
@@ -28,8 +29,10 @@ async function buildStudentContext(userId) {
     const anamneseRows = await getCachedRows('anamnese', ANAMNESE_HEADERS);
     const row = anamneseRows.find(r => r.get('id_usuario') === userId);
     if (row) {
+      const dataNascimento = row.get('data_nascimento');
       ctx.anamnese = {
-        idade: row.get('idade'),
+        data_nascimento: dataNascimento,
+        idade: dataNascimento ? calcularIdade(dataNascimento) : row.get('idade'),
         altura: row.get('altura'),
         peso: row.get('peso'),
         sexo: row.get('sexo'),

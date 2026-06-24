@@ -4,6 +4,29 @@ import { useAuth } from '../contexts/AuthContext';
 import { Loader2, ArrowLeft, ArrowRight, Dumbbell, Target, User, Activity, Flame, ShieldAlert, Timer, MapPin, Eye, EyeOff } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
+function calcularIdade(dataNascimento) {
+  if (!dataNascimento) return null;
+  const partes = dataNascimento.split('-');
+  if (partes.length !== 3) return null;
+
+  const anoNasc = parseInt(partes[0], 10);
+  const mesNasc = parseInt(partes[1], 10) - 1;
+  const diaNasc = parseInt(partes[2], 10);
+
+  const hoje = new Date();
+  const dataNascObj = new Date(anoNasc, mesNasc, diaNasc);
+
+  let idade = hoje.getFullYear() - dataNascObj.getFullYear();
+  const mesAtual = hoje.getMonth();
+  const diaAtual = hoje.getDate();
+
+  if (mesAtual < mesNasc || (mesAtual === mesNasc && diaAtual < diaNasc)) {
+    idade--;
+  }
+
+  return idade >= 0 ? idade : 0;
+}
+
 export default function Onboarding() {
   const navigate = useNavigate();
   const { registerFull } = useAuth();
@@ -23,7 +46,7 @@ export default function Onboarding() {
     email: '',
     senha: '',
     confirmarSenha: '',
-    idade: '',
+    data_nascimento: '',
     altura: '',
     peso: '',
     sexo: '',
@@ -48,32 +71,22 @@ export default function Onboarding() {
     let newVal = currentVal + amount;
     if (newVal < min) newVal = min;
     
-    // Se for idade (que é int), não usa decimais na renderização
-    if (field === 'idade') {
-        setFormData({ ...formData, [field]: Math.round(newVal).toString() });
-    } else {
-        // Reduz o arredondamento pra 2 casas
-        // Remove os zeros desnecessários no final, ex: 75.50 -> 75.5
-        setFormData({ ...formData, [field]: Number(newVal.toFixed(2)).toString() });
-    }
+    // Reduz o arredondamento pra 2 casas
+    // Remove os zeros desnecessários no final, ex: 75.50 -> 75.5
+    setFormData({ ...formData, [field]: Number(newVal.toFixed(2)).toString() });
   };
 
   // Conversor Universal Ponto/Vírgula pro FrontEnd
   const handleMaskChange = (e, field) => {
     let val = e.target.value;
     
-    if (field === 'idade') {
-      // Idade só aceita inteiros
-      val = val.replace(/[^0-9]/g, '');
-    } else {
-      // Peso e Altura: aceitam ponto e virgula. Converte virgulas em pontos transparentemente.
-      val = val.replace(/,/g, '.');
-      const parts = val.split('.');
-      if (parts.length > 2) {
-        val = parts[0] + '.' + parts.slice(1).join('');
-      }
-      val = val.replace(/[^0-9.]/g, ''); 
+    // Peso e Altura: aceitam ponto e virgula. Converte virgulas em pontos transparentemente.
+    val = val.replace(/,/g, '.');
+    const parts = val.split('.');
+    if (parts.length > 2) {
+      val = parts[0] + '.' + parts.slice(1).join('');
     }
+    val = val.replace(/[^0-9.]/g, ''); 
     
     setFormData({ ...formData, [field]: val });
   };
@@ -116,8 +129,12 @@ export default function Onboarding() {
     }
 
     if (step === 2) {
-      if (!formData.idade || !formData.altura || !formData.peso) {
+      if (!formData.data_nascimento || !formData.altura || !formData.peso) {
         return setError('Preencha os dados biométricos básicos.');
+      }
+      const idadeCalc = calcularIdade(formData.data_nascimento);
+      if (idadeCalc === null || idadeCalc < 10 || idadeCalc > 100) {
+        return setError('Data de nascimento inválida (idade deve ser entre 10 e 100 anos).');
       }
     }
 
@@ -256,12 +273,21 @@ export default function Onboarding() {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Idade</label>
-          <div className="relative flex items-center border border-white/5 rounded-xl overflow-hidden focus-within:border-white/30 transition-colors bg-black/20">
-            <button type="button" onClick={(e) => { e.preventDefault(); adjustNumberField('idade', -1, 10); }} className="px-3 py-2 text-gray-500 hover:text-white hover:bg-white/5 flex items-center justify-center font-black transition-colors w-10 active:bg-white/10">−</button>
-            <input name="idade" value={formData.idade} onChange={(e) => handleMaskChange(e, 'idade')} type="text" inputMode="numeric" className="flex-1 w-full bg-transparent border-0 text-center font-black text-white focus:ring-0 p-0 h-[42px] outline-none" placeholder="25" />
-            <button type="button" onClick={(e) => { e.preventDefault(); adjustNumberField('idade', 1, 10); }} className="px-3 py-2 text-gray-500 hover:text-white hover:bg-white/5 flex items-center justify-center font-black transition-colors w-10 active:bg-white/10">+</button>
+          <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Data Nasc.</label>
+          <div className="relative flex flex-col justify-center border border-white/5 rounded-xl overflow-hidden focus-within:border-white/30 transition-colors bg-black/20 px-3 h-[46px]">
+            <input 
+              name="data_nascimento" 
+              value={formData.data_nascimento} 
+              onChange={handleChange} 
+              type="date" 
+              className="w-full bg-transparent border-0 text-center font-bold text-[13px] text-white focus:ring-0 p-0 outline-none [color-scheme:dark]" 
+            />
           </div>
+          {formData.data_nascimento && (
+            <p className="text-[10px] text-gray-400 font-bold mt-1.5 text-center">
+              Idade: <span className="text-white">{calcularIdade(formData.data_nascimento)} anos</span>
+            </p>
+          )}
         </div>
         <div>
           <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Gênero</label>
