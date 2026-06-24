@@ -63,7 +63,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden animate-fade-in pb-2">
+    <div className="flex flex-col h-full overflow-y-auto animate-fade-in pb-2">
       
       {/* Insight Alfred (Topo) — com notificação integrada */}
       <div className="shrink-0 bg-purple-50 border border-purple-200 rounded-2xl p-3 md:p-4 flex items-start gap-3 md:gap-4 mb-3 md:mb-6 shadow-sm">
