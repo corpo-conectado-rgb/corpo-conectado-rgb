@@ -422,7 +422,7 @@ export default function Onboarding() {
         name="lesoes"
         value={formData.lesoes}
         onChange={handleChange}
-        placeholder={`Descreva qualquer dor, lesão ou limitação de movimento.\nEx: dor no joelho ao agachar, desconforto na coluna, etc.\nCaso não tenha, deixe o campo vazio.`}
+        placeholder={`Ex: Dor no joelho, hérnia, etc.\nSe não possuir restrições, deixe em branco.`}
         className="input-glass w-full h-28 resize-none overflow-hidden placeholder-gray-600 py-3 text-sm leading-relaxed"
       />
     </div>
