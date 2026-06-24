@@ -147,12 +147,12 @@ export default function Dashboard() {
 
 
       {/* Gráfico Dinâmico */}
-      <div className="flex-1 min-h-0 bg-white border border-gray-200 shadow-sm flex flex-col p-3 md:p-6 rounded-2xl mb-2">
+      <div className="bg-white border border-gray-200 shadow-sm flex flex-col p-3 md:p-6 rounded-2xl mb-2">
         <h2 className="shrink-0 text-[10px] md:text-xs font-black text-gray-800 mb-3 md:mb-6 uppercase tracking-widest flex items-center gap-2">
           <Activity size={14} className="text-purple-600 md:w-4 md:h-4" />
           Treinos Realizados (Mês a Mês)
         </h2>
-        <div className="flex-1 min-h-[150px] w-full relative">
+        <div className="w-full h-44 md:h-64 relative">
           {data.barData && data.barData.length > 0 && data.barData.some(d => d.treinos > 0) ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data.barData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
