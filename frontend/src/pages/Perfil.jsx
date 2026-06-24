@@ -44,7 +44,6 @@ export default function Perfil() {
         <div className="flex items-center justify-between w-full md:w-auto">
           <div>
             <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Meus Dados</h1>
-            <p className="text-gray-500 font-medium mt-0.5 text-[11px] md:text-sm">Central de informações e histórico biológico.</p>
           </div>
           
           {/* Mobile Solicitações Button */}
