@@ -175,8 +175,10 @@ router.post('/complete', authMiddleware, async (req, res) => {
       }
     }
 
-    // Data de hoje no formato YYYY-MM-DD
-    const dataHoje = new Date().toISOString().split('T')[0];
+    // Data de hoje no fuso horário do Brasil (UTC-3)
+    const data = new Date();
+    data.setHours(data.getHours() - 3);
+    const dataHoje = data.toISOString().split('T')[0];
 
     const sessaoId = uuidv4();
 
