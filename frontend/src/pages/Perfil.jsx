@@ -144,7 +144,7 @@ export default function Perfil() {
                </span>
              </div>
              <p className="text-xl font-black text-black mt-2">{user?.objetivo || 'Não definido'}</p>
-             <p className="text-xs font-medium text-gray-500 mt-1">Nossa inteligência moldará seus treinos com base nesse macro-objetivo.</p>
+             <p className="text-xs font-medium text-gray-500 mt-1">Nossa inteligência organiza seus dados, e o Educador Físico monta seu treino com base no macro-objetivo.</p>
           </div>
 
           {/* Card 3: Rotina & Hábitos */}
