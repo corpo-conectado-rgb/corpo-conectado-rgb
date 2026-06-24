@@ -46,11 +46,12 @@ async function fetchCompleteProfile(userRowId) {
 // Rota Simples de Registro MANTIDA por retrocompatibilidade (se precisar)
 router.post('/register', async (req, res) => {
   try {
-    const { nome, email, senha } = req.body;
+    let { nome, email, senha } = req.body;
+    email = (email || '').toLowerCase().trim();
     const sheet = await getSheet(USERS_SHEET, HEADERS);
     const rows = await getCachedRows(USERS_SHEET, HEADERS);
 
-    const userExists = rows.find(r => r.get('email') === email);
+    const userExists = rows.find(r => (r.get('email') || '').toLowerCase().trim() === email);
     if (userExists) return res.status(400).json({ message: 'Usuário já existe' });
 
     const senha_hash = await bcrypt.hash(senha, 10);
@@ -76,18 +77,20 @@ router.post('/register', async (req, res) => {
 // A Nova Super-Rota de Onboarding Completo (Relacional)
 router.post('/register-full', async (req, res) => {
   try {
-    const { 
+    let { 
       nome, email, senha, 
       data_nascimento, altura, peso, sexo, 
       objetivo, nivel, lesoes, 
       habitos_freq, habitos_tempo, habitos_local 
     } = req.body;
 
+    email = (email || '').toLowerCase().trim();
+
     const idade = data_nascimento ? calcularIdade(data_nascimento) : '';
 
     const userSheet = await getSheet(USERS_SHEET, HEADERS);
     const userRows = await getCachedRows(USERS_SHEET, HEADERS);
-    const userExists = userRows.find(r => r.get('email') === email);
+    const userExists = userRows.find(r => (r.get('email') || '').toLowerCase().trim() === email);
     
     if (userExists) {
       return res.status(400).json({ message: 'E-mail já está em uso na plataforma.' });
@@ -143,10 +146,11 @@ router.post('/register-full', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   try {
-    const { email, senha } = req.body;
+    let { email, senha } = req.body;
+    email = (email || '').toLowerCase().trim();
     const rows = await getCachedRows(USERS_SHEET, HEADERS);
     
-    const userRow = rows.find(r => r.get('email') === email);
+    const userRow = rows.find(r => (r.get('email') || '').toLowerCase().trim() === email);
     if (!userRow) return res.status(401).json({ message: 'E-mail não cadastrado. Verifique a digitação ou crie uma conta.' });
 
     const valid = await bcrypt.compare(senha, userRow.get('senha_hash'));
