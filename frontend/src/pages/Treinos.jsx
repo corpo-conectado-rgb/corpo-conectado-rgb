@@ -538,7 +538,7 @@ export default function Treinos() {
           <button 
             onClick={() => setShowSolicitacao(true)}
             className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-black transition-all"
-            aria-label="Solicitar Ajuste"
+            aria-label="Solicitações"
           >
             <MessageSquarePlus size={20} />
           </button>
@@ -546,7 +546,7 @@ export default function Treinos() {
           {/* Tooltip elegante */}
           <div className="absolute right-0 top-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
             <div className="bg-black text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
-              Solicitar Ajuste
+              Solicitações
             </div>
           </div>
         </div>
