@@ -160,7 +160,9 @@ export default function Perfil() {
                  </div>
                  <div>
                    <p className="text-xs font-black text-black">Constância Semanal</p>
-                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mt-0.5">{user?.habitos_freq || 'Não informado'} — {user?.habitos_tempo || '0h'}/dia</p>
+                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mt-0.5">
+                     {user?.habitos_freq || 'Não informado'} — {user?.habitos_tempo ? (String(user.habitos_tempo).toLowerCase().match(/min|h/) ? user.habitos_tempo : `${user.habitos_tempo} minutos`) : 'Não informado'}
+                   </p>
                  </div>
                </div>
 
