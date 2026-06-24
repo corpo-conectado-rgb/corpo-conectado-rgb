@@ -442,7 +442,7 @@ export default function Onboarding() {
           <option value="" disabled hidden>Quantos dias?</option>
           {[1, 2, 3, 4, 5, 6, 7].map(num => (
             <option key={num} value={`${num} dia${num > 1 ? 's' : ''}`} className="bg-[#17171A] text-white font-black text-left">
-              {num} dia{num > 1 ? 's' : ''} por semana
+              {num} dia{num > 1 ? 's' : ''}
             </option>
           ))}
         </select>
