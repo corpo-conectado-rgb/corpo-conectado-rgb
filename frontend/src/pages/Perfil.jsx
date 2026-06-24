@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { CheckCircle2, AlertCircle, Goal, Activity, Timer, MapPin, ShieldAlert, Edit3, X, Check } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Goal, Activity, Timer, MapPin, ShieldAlert, Edit3, X, Check, MessageSquarePlus } from 'lucide-react';
 import { apiFetch } from '../services/api';
 
 export default function Perfil() {
@@ -41,15 +41,51 @@ export default function Perfil() {
       
       {/* Header Area */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-5 gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Meus Dados</h1>
-          <p className="text-gray-500 font-medium mt-0.5 text-[11px] md:text-sm">Central de informações e histórico biológico.</p>
+        <div className="flex items-center justify-between w-full md:w-auto">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Meus Dados</h1>
+            <p className="text-gray-500 font-medium mt-0.5 text-[11px] md:text-sm">Central de informações e histórico biológico.</p>
+          </div>
+          
+          {/* Mobile Solicitações Button */}
+          <div className="md:hidden relative group">
+            <button 
+              onClick={() => setShowSolicitacao(true)}
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-black transition-all"
+              aria-label="Solicitações"
+            >
+              <MessageSquarePlus size={20} />
+            </button>
+            <div className="absolute right-0 top-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+              <div className="bg-black text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
+                Solicitações
+              </div>
+            </div>
+          </div>
         </div>
         
-        {/* Status Badge Dinâmico */}
-        <div className={`flex items-center justify-center w-full md:w-auto gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 ${isProfileComplete ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'} rounded-xl md:rounded-full text-[10px] md:text-sm font-bold border ${isProfileComplete ? 'border-green-200' : 'border-amber-200'}`}>
-          {isProfileComplete ? <CheckCircle2 size={14} className="md:w-4 md:h-4" /> : <AlertCircle size={14} className="md:w-4 md:h-4" />}
-          {isProfileComplete ? 'Perfil 100% Completo' : 'Perfil Incompleto'}
+        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+          {/* Status Badge Dinâmico */}
+          <div className={`flex items-center justify-center flex-1 md:flex-initial gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 ${isProfileComplete ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'} rounded-xl md:rounded-full text-[10px] md:text-sm font-bold border ${isProfileComplete ? 'border-green-200' : 'border-amber-200'}`}>
+            {isProfileComplete ? <CheckCircle2 size={14} className="md:w-4 md:h-4" /> : <AlertCircle size={14} className="md:w-4 md:h-4" />}
+            {isProfileComplete ? 'Perfil 100% Completo' : 'Perfil Incompleto'}
+          </div>
+
+          {/* Desktop Solicitações Button */}
+          <div className="hidden md:block relative group">
+            <button 
+              onClick={() => setShowSolicitacao(true)}
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-black transition-all"
+              aria-label="Solicitações"
+            >
+              <MessageSquarePlus size={20} />
+            </button>
+            <div className="absolute right-0 top-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+              <div className="bg-black text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
+                Solicitações
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
