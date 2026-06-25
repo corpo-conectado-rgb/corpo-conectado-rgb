@@ -549,7 +549,6 @@ export default function Onboarding() {
                 <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                 <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
-              </div>
             </div>
           ) : loading ? (
             <div className="min-h-[300px] flex flex-col items-center justify-center animate-fade-in text-center px-4 py-8 relative z-10">
