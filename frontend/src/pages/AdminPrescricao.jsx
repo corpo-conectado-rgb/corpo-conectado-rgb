@@ -21,7 +21,7 @@ export default function AdminPrescricao() {
   const [chatOpen, setChatOpen] = useState(false);
   const [menuAbertoDiaIdx, setMenuAbertoDiaIdx] = useState(null);
   const [toast, setToast] = useState(null);
-  const { setIsOpen, registerContext, clearCopilotContext } = useCopilot();
+  const { registerContext, clearCopilotContext } = useCopilot();
 
   // Estados do Formulário Master
   const [nomeFicha, setNomeFicha] = useState('Projeto Hipertrofia 1.0');
@@ -227,12 +227,7 @@ export default function AdminPrescricao() {
           </div>
         </div>
         <div className="flex items-center gap-3 mt-4 md:mt-0">
-          <button 
-            onClick={() => setIsOpen(true)}
-            className="flex items-center gap-2 bg-purple-600 text-white px-5 py-3.5 rounded-xl font-black hover:bg-purple-700 transition shadow-lg"
-          >
-            <Bot size={16} /> Alfred
-          </button>
+
           <button 
             onClick={salvarPrescricao}
             disabled={salvando}
