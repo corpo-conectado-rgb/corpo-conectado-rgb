@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Loader2, ArrowLeft, ArrowRight, Dumbbell, Target, User, Activity, Flame, ShieldAlert, Timer, MapPin, Eye, EyeOff } from 'lucide-react';
@@ -35,6 +35,39 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false); // Flag da microinteração de finalização
+  
+  // UX: Loading Phrase Array e Animators
+  const loadingPhrases = [
+    "Criando sua conta...",
+    "Montando seu perfil para entregar recomendações precisas...",
+    "Preparando seu ambiente de treino...",
+    "Personalizando sua experiência...",
+    "Quase tudo pronto para começar sua evolução..."
+  ];
+  const [loadingPhraseIndex, setLoadingPhraseIndex] = useState(0);
+  const [fakeProgress, setFakeProgress] = useState(0);
+
+  useEffect(() => {
+    let phraseInterval;
+    let progressTimer;
+    if (loading && !success) {
+      setFakeProgress(10);
+      phraseInterval = setInterval(() => {
+        setLoadingPhraseIndex(prev => (prev + 1) % loadingPhrases.length);
+      }, 2500);
+
+      progressTimer = setInterval(() => {
+        setFakeProgress(prev => {
+          if (prev >= 95) return 95;
+          return prev + Math.random() * 8;
+        });
+      }, 300);
+    }
+    return () => {
+      clearInterval(phraseInterval);
+      clearInterval(progressTimer);
+    };
+  }, [loading, success]);
   
   // States para visibilidade visual de senha
   const [showPassword, setShowPassword] = useState(false);
@@ -154,10 +187,24 @@ export default function Onboarding() {
 
   const submitForm = async () => {
     setLoading(true);
+    setLoadingPhraseIndex(0);
+    setFakeProgress(0);
     setError('');
+    const startTime = Date.now();
+
     try {
       await registerFull(formData);
       
+      const elapsedTime = Date.now() - startTime;
+      const minimumLoadingTime = 3500; // Tempo mínimo em ms para a experiência premium de loading
+      
+      if (elapsedTime < minimumLoadingTime) {
+        await new Promise(r => setTimeout(r, minimumLoadingTime - elapsedTime));
+      }
+
+      setFakeProgress(100);
+      await new Promise(r => setTimeout(r, 400));
+
       // Engatilha Sucesso UI + Disparo de Confete Dark (Microinteração High-end)
       setSuccess(true);
       confetti({
@@ -501,6 +548,35 @@ export default function Onboarding() {
                 <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                 <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                 <div className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+              </div>
+            </div>
+          ) : loading ? (
+            <div className="min-h-[300px] flex flex-col items-center justify-center animate-fade-in text-center px-4 py-8 relative z-10">
+              <div className="relative mb-8">
+                <div className="absolute inset-0 bg-white/20 rounded-full blur-xl animate-pulse"></div>
+                <div className="w-16 h-16 bg-white rounded-full text-black flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)] relative z-10">
+                  <Loader2 className="animate-spin" size={32} />
+                </div>
+              </div>
+              
+              <h2 className="text-[20px] font-black text-white mb-4 tracking-wide">Processando</h2>
+              
+              <div className="h-6 overflow-hidden relative w-full flex justify-center">
+                <p 
+                  key={loadingPhraseIndex} 
+                  className="text-gray-400 font-medium text-[13px] absolute animate-fade-up text-center max-w-[280px]"
+                >
+                  {loadingPhrases[loadingPhraseIndex]}
+                </p>
+              </div>
+
+              {/* Barra de Progresso Simulada */}
+              <div className="w-full max-w-[200px] h-1 bg-white/10 rounded-full overflow-hidden mt-8">
+                <div 
+                  className="h-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)] rounded-full transition-all duration-300 ease-out" 
+                  style={{ width: `${fakeProgress}%` }}
+                />
               </div>
             </div>
           ) : (
