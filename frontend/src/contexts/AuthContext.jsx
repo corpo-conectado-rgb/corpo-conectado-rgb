@@ -83,8 +83,30 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // Atualiza parcialmente os dados do usuário no estado e localStorage
+  const updateUser = (partialData) => {
+    setUser(prev => {
+      const updated = { ...prev, ...partialData };
+      localStorage.setItem('@CorpoConectado:user', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // Recarrega o perfil completo do backend (GET /auth/me)
+  const refreshProfile = async () => {
+    try {
+      const data = await apiFetch('/auth/me');
+      setUser(data);
+      localStorage.setItem('@CorpoConectado:user', JSON.stringify(data));
+      return data;
+    } catch (error) {
+      console.error('Erro ao recarregar perfil:', error.message);
+      throw error;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ signed: !!user, user, login, register, registerFull, logout, loading }}>
+    <AuthContext.Provider value={{ signed: !!user, user, login, register, registerFull, logout, loading, updateUser, refreshProfile }}>
       {children}    
     </AuthContext.Provider>
   );

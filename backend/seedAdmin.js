@@ -10,7 +10,7 @@ async function seedAdminAndResetDb() {
 
     const tabsToCreate = {
       'usuarios': ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role'],
-      'anamnese': ['id_usuario', 'idade', 'altura', 'peso', 'sexo', 'objetivo', 'nivel_fisico', 'lesoes_criticas', 'habitos_freq', 'habitos_tempo', 'habitos_local', 'data_nascimento'],
+      'anamnese': ['id_usuario', 'idade', 'altura', 'peso', 'sexo', 'objetivo', 'nivel_fisico', 'lesoes_criticas', 'habitos_freq', 'habitos_tempo', 'habitos_local', 'data_nascimento', 'telefone'],
       'treinos': ['id', 'user_id', 'nome_ficha', 'tipo_divisao', 'objetivo', 'status', 'created_at'],
       'dias_treino': ['id', 'treino_id', 'letra_dia', 'foco_muscular'],
       'exercicios': ['id', 'dia_treino_id', 'ordem', 'nome', 'series', 'repeticoes', 'carga', 'descanso', 'observacoes'],

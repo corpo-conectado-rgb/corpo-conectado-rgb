@@ -10,7 +10,7 @@ const { calcularIdade } = require('../utils/dateUtils');
 const USERS_SHEET = 'usuarios';
 const ANAMNESE_SHEET = 'anamnese';
 const HEADERS = ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role'];
-const ANAMNESE_HEADERS = ['id_usuario', 'idade', 'altura', 'peso', 'sexo', 'objetivo', 'nivel_fisico', 'lesoes_criticas', 'habitos_freq', 'habitos_tempo', 'habitos_local', 'data_nascimento'];
+const ANAMNESE_HEADERS = ['id_usuario', 'idade', 'altura', 'peso', 'sexo', 'objetivo', 'nivel_fisico', 'lesoes_criticas', 'habitos_freq', 'habitos_tempo', 'habitos_local', 'data_nascimento', 'telefone'];
 
 // Função Helper para buscar dados completos de anamnese e impedir repetição de código
 async function fetchCompleteProfile(userRowId) {
@@ -35,6 +35,7 @@ async function fetchCompleteProfile(userRowId) {
         habitos_freq: anamneseRow.get('habitos_freq'),
         habitos_tempo: anamneseRow.get('habitos_tempo'),
         habitos_local: anamneseRow.get('habitos_local'),
+        telefone: anamneseRow.get('telefone') || '',
       };
     }
   } catch (err) {
@@ -195,6 +196,55 @@ router.get('/me', authMiddleware, async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT /profile - Aluno atualiza campos de edição direta (telefone e local de treino)
+router.put('/profile', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { telefone, habitos_local, nome } = req.body;
+
+    // Campos controlados que NÃO podem ser alterados diretamente
+    const camposControlados = ['peso', 'altura', 'objetivo', 'nivel_fisico', 'habitos_freq', 'lesoes_criticas', 'sexo', 'data_nascimento', 'idade'];
+    const tentouAlterarControlado = camposControlados.some(campo => req.body[campo] !== undefined);
+    if (tentouAlterarControlado) {
+      return res.status(403).json({ error: 'Campos controlados só podem ser alterados via solicitação ao administrador.' });
+    }
+
+    const anamneseSheet = await getSheet(ANAMNESE_SHEET, ANAMNESE_HEADERS);
+    const anamneseRows = await anamneseSheet.getRows();
+    const anamneseRow = anamneseRows.find(r => r.get('id_usuario') === userId);
+
+    if (!anamneseRow) {
+      return res.status(404).json({ error: 'Perfil de anamnese não encontrado.' });
+    }
+
+    // Atualizar campos diretos na anamnese
+    if (telefone !== undefined) anamneseRow.set('telefone', telefone.trim());
+    if (habitos_local !== undefined) anamneseRow.set('habitos_local', habitos_local.trim());
+    await anamneseRow.save();
+    invalidateCache(ANAMNESE_SHEET);
+
+    // Se o nome foi alterado, atualizar também na tabela de usuários
+    // NOTA: Nome requer aprovação, mas mantemos a lógica aqui para uso interno pelo admin
+    // O frontend NÃO enviará 'nome' diretamente — isso só será usado pelo fluxo de aprovação
+
+    // Retornar perfil atualizado
+    const profileData = await fetchCompleteProfile(userId);
+    const userRows = await getCachedRows(USERS_SHEET, HEADERS);
+    const userRow = userRows.find(r => r.get('id') === userId);
+
+    res.json({
+      id: userId,
+      nome: userRow?.get('nome'),
+      email: userRow?.get('email'),
+      role: userRow?.get('role') || 'user',
+      ...profileData
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar perfil:', error);
+    res.status(500).json({ error: 'Erro ao atualizar perfil.' });
   }
 });
 

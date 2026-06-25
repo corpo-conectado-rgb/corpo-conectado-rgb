@@ -104,6 +104,56 @@ router.put('/admin/:id/aprovar', authMiddleware, async (req, res) => {
     await row.save();
     invalidateCache('solicitacoes');
 
+    // Se for ALTERACAO_DADOS, aplicar as mudanças automaticamente
+    if (row.get('tipo') === 'ALTERACAO_DADOS') {
+      try {
+        const mensagemJSON = JSON.parse(row.get('mensagem'));
+        const alteracoes = mensagemJSON.alteracoes || [];
+        const alunoId = row.get('aluno_id');
+
+        if (alteracoes.length > 0) {
+          // Headers das tabelas
+          const ANAMNESE_HEADERS = ['id_usuario', 'idade', 'altura', 'peso', 'sexo', 'objetivo', 'nivel_fisico', 'lesoes_criticas', 'habitos_freq', 'habitos_tempo', 'habitos_local', 'data_nascimento', 'telefone'];
+          const USERS_HEADERS = ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role'];
+
+          // Buscar a linha da anamnese do aluno
+          const anamneseSheet = await getSheet('anamnese', ANAMNESE_HEADERS);
+          const anamneseRows = await anamneseSheet.getRows();
+          const anamneseRow = anamneseRows.find(r => r.get('id_usuario') === alunoId);
+
+          // Campos que ficam na tabela 'usuarios' (não na anamnese)
+          const camposUsuario = ['nome'];
+          // Campos que ficam na anamnese
+          const camposAnamnese = ['peso', 'altura', 'objetivo', 'nivel_fisico', 'habitos_freq', 'lesoes_criticas', 'telefone', 'habitos_local', 'habitos_tempo'];
+
+          for (const alt of alteracoes) {
+            if (camposUsuario.includes(alt.campo)) {
+              // Atualizar na tabela usuarios
+              const usersSheet = await getSheet('usuarios', USERS_HEADERS);
+              const usersRows = await usersSheet.getRows();
+              const userRow = usersRows.find(r => r.get('id') === alunoId);
+              if (userRow) {
+                userRow.set(alt.campo, alt.para);
+                await userRow.save();
+                invalidateCache('usuarios');
+              }
+            } else if (camposAnamnese.includes(alt.campo) && anamneseRow) {
+              anamneseRow.set(alt.campo, alt.para);
+            }
+          }
+
+          // Salvar todas as alterações da anamnese de uma vez
+          if (anamneseRow) {
+            await anamneseRow.save();
+            invalidateCache('anamnese');
+          }
+        }
+      } catch (parseErr) {
+        console.error('Erro ao aplicar alterações automáticas (não crítico):', parseErr);
+        // Não falhar a aprovação se a aplicação automática falhar
+      }
+    }
+
     res.json({ message: 'Solicitação aprovada com sucesso.' });
   } catch (error) {
     console.error('Erro ao aprovar solicitação:', error);

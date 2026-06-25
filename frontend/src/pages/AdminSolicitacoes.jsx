@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, CheckCircle, Search, User, Filter, XCircle, X, Trash2 } from 'lucide-react';
+import { Mail, CheckCircle, Search, User, Filter, XCircle, X, Trash2, ArrowRight, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../services/api';
 
@@ -92,6 +92,7 @@ export default function AdminSolicitacoes() {
       case 'ATUALIZAR_INFORMACOES': return 'Atualizar Informações';
       case 'AJUSTE_TREINO': return 'Ajuste / Dúvida de Treino';
       case 'REAVALIACAO': return 'Reavaliação / Novo Ciclo';
+      case 'ALTERACAO_DADOS': return 'Alteração de Dados';
       default: return tipo;
     }
   };
@@ -103,7 +104,18 @@ export default function AdminSolicitacoes() {
       case 'ATUALIZAR_INFORMACOES': return 'bg-emerald-50 text-emerald-600 border-emerald-200/50';
       case 'AJUSTE_TREINO': return 'bg-amber-50 text-amber-600 border-amber-200/50';
       case 'REAVALIACAO': return 'bg-purple-50 text-purple-600 border-purple-200/50';
+      case 'ALTERACAO_DADOS': return 'bg-orange-50 text-orange-600 border-orange-200/50';
       default: return 'bg-gray-50 text-gray-600 border-gray-200/50';
+    }
+  };
+
+  // Tenta parsear o JSON de ALTERACAO_DADOS
+  const parseAlteracaoDados = (mensagem) => {
+    try {
+      const data = JSON.parse(mensagem);
+      return data.alteracoes || [];
+    } catch {
+      return null;
     }
   };
 
@@ -182,7 +194,33 @@ export default function AdminSolicitacoes() {
                         Enviado em {formatDate(sol.data_criacao)}
                       </div>
                       <div className="text-sm text-gray-700 bg-gray-50 rounded-xl p-4 border border-gray-100 mb-2">
-                        {sol.mensagem}
+                        {sol.tipo === 'ALTERACAO_DADOS' ? (() => {
+                          const alteracoes = parseAlteracaoDados(sol.mensagem);
+                          if (!alteracoes) return sol.mensagem;
+                          return (
+                            <div className="space-y-2">
+                              {alteracoes.map((alt, idx) => (
+                                <div key={idx} className={`flex items-center gap-3 rounded-lg p-2.5 border ${alt.impacta_prescricao ? 'bg-red-50/40 border-red-100' : 'bg-white border-gray-100'}`}>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-0.5">
+                                      <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{alt.label}</span>
+                                      {alt.impacta_prescricao && (
+                                        <span className="text-[8px] font-black text-red-600 bg-red-100 px-1.5 py-0.5 rounded uppercase tracking-widest flex items-center gap-0.5">
+                                          <AlertTriangle size={8} /> Impacta Treino
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs font-medium text-gray-400 line-through truncate">{alt.de || 'Vazio'}</span>
+                                      <ArrowRight size={12} className="text-orange-500 shrink-0" />
+                                      <span className="text-xs font-black text-orange-700 truncate">{alt.para}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })() : sol.mensagem}
                       </div>
                       {/* Observação do Admin se houver */}
                       {(sol.status === 'APROVADA' || sol.status === 'RECUSADA') && sol.observacao_admin && (
