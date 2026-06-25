@@ -690,7 +690,7 @@ export default function Treinos() {
             ) : (
               <>
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                  <h3 className="text-lg font-black text-gray-900 tracking-tight">Falar com Treinador</h3>
+                  <h3 className="text-lg font-black text-gray-900 tracking-tight">Falar com o Educador</h3>
                   <button onClick={() => setShowSolicitacao(false)} className="text-gray-400 hover:text-black">
                     <X size={20} />
                   </button>
