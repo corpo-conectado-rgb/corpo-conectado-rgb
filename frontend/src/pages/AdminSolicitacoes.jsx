@@ -12,6 +12,7 @@ export default function AdminSolicitacoes() {
 
   // Estado do Modal de Ação (Aprovar/Recusar)
   const [actionModal, setActionModal] = useState({ show: false, id: null, type: null }); // type: 'aprovar' | 'recusar'
+  const [deleteModal, setDeleteModal] = useState({ show: false, id: null, nome: '' });
   const [observacao, setObservacao] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -61,13 +62,21 @@ export default function AdminSolicitacoes() {
     setObservacao('');
   };
 
-  const deletarSolicitacao = async (id) => {
-    if (!window.confirm('Tem certeza que deseja excluir esta solicitação permanentemente?')) return;
+  const fecharDeleteModal = () => {
+    setDeleteModal({ show: false, id: null, nome: '' });
+  };
+
+  const deletarSolicitacao = async () => {
+    if (!deleteModal.id) return;
     try {
-      await apiFetch(`/solicitacoes/admin/${id}`, { method: 'DELETE' });
-      setSolicitacoes(prev => prev.filter(s => s.id !== id));
+      setSubmitting(true);
+      await apiFetch(`/solicitacoes/admin/${deleteModal.id}`, { method: 'DELETE' });
+      setSolicitacoes(prev => prev.filter(s => s.id !== deleteModal.id));
+      fecharDeleteModal();
     } catch (err) {
       alert('Erro ao excluir: ' + err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -155,7 +164,7 @@ export default function AdminSolicitacoes() {
                           </span>
                         </div>
                         {/* Ícone de Excluir que aparece ao passar o mouse */}
-                        <button onClick={() => deletarSolicitacao(sol.id)} className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all p-1" title="Excluir Solicitação">
+                        <button onClick={() => setDeleteModal({ show: true, id: sol.id, nome: sol.aluno_nome || 'Aluno' })} className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all p-1" title="Excluir Solicitação">
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -246,6 +255,38 @@ export default function AdminSolicitacoes() {
                 {submitting ? 'Confirmando...' : 'Confirmar Ação'}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Exclusão */}
+      {deleteModal.show && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={fecharDeleteModal} />
+          <div className="relative bg-white w-full max-w-sm rounded-3xl shadow-2xl animate-scale-in flex flex-col overflow-hidden text-center p-6">
+            <div className="mx-auto w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4">
+              <Trash2 size={28} />
+            </div>
+            <h3 className="text-xl font-black text-gray-900 mb-2">Excluir Solicitação?</h3>
+            <p className="text-sm text-gray-500 font-medium mb-6">
+              Você está prestes a excluir a solicitação de <span className="font-bold text-gray-900">{deleteModal.nome}</span>. Esta ação apagará a mensagem permanentemente e não poderá ser desfeita.
+            </p>
+            <div className="flex flex-col gap-2">
+              <button 
+                onClick={deletarSolicitacao}
+                disabled={submitting}
+                className="w-full bg-red-500 hover:bg-red-600 text-white font-black uppercase tracking-widest text-xs py-4 rounded-xl disabled:opacity-50 active:scale-95 transition-all"
+              >
+                {submitting ? 'Excluindo...' : 'Sim, Excluir'}
+              </button>
+              <button 
+                onClick={fecharDeleteModal}
+                disabled={submitting}
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-black uppercase tracking-widest text-xs py-4 rounded-xl disabled:opacity-50 active:scale-95 transition-all"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}
