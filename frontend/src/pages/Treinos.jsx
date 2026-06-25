@@ -43,7 +43,7 @@ export default function Treinos() {
   const [proximaLetra, setProximaLetra] = useState(null);
   const [showSolicitacao, setShowSolicitacao] = useState(false);
   const [solicitacaoSuccess, setSolicitacaoSuccess] = useState(false);
-  const [solicitacaoForm, setSolicitacaoForm] = useState({ tipo: 'AJUSTE_TREINO', mensagem: '' });
+  const [solicitacaoForm, setSolicitacaoForm] = useState({ tipo: 'DUVIDA_EXECUCAO', mensagem: '' });
   const [enviandoSolicitacao, setEnviandoSolicitacao] = useState(false);
   const timerRef = useRef(null);
   const descansoRef = useRef(null);
@@ -259,7 +259,7 @@ export default function Treinos() {
       setTimeout(() => {
         setShowSolicitacao(false);
         setSolicitacaoSuccess(false);
-        setSolicitacaoForm({ tipo: 'AJUSTE_TREINO', mensagem: '' });
+        setSolicitacaoForm({ tipo: 'DUVIDA_EXECUCAO', mensagem: '' });
       }, 4000);
     } catch (err) {
       alert('Erro ao enviar: ' + err.message);
@@ -703,8 +703,9 @@ export default function Treinos() {
                       onChange={e => setSolicitacaoForm(prev => ({ ...prev, tipo: e.target.value }))}
                       className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-black"
                     >
-                      <option value="AJUSTE_TREINO">Ajuste ou Dúvida no Treino</option>
-                      <option value="REAVALIACAO">Solicitar Reavaliação (Mês novo)</option>
+                      <option value="DUVIDA_EXECUCAO">Dúvida de Execução</option>
+                      <option value="SUBSTITUIR_EXERCICIO">Substituir Exercício</option>
+                      <option value="ATUALIZAR_INFORMACOES">Atualizar Informações</option>
                     </select>
                   </div>
                   <div>

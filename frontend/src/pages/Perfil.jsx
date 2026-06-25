@@ -8,7 +8,7 @@ export default function Perfil() {
   
   const [showSolicitacao, setShowSolicitacao] = useState(false);
   const [solicitacaoSuccess, setSolicitacaoSuccess] = useState(false);
-  const [solicitacaoForm, setSolicitacaoForm] = useState({ tipo: 'REAVALIACAO', mensagem: '' });
+  const [solicitacaoForm, setSolicitacaoForm] = useState({ tipo: 'DUVIDA_EXECUCAO', mensagem: '' });
   const [enviandoSolicitacao, setEnviandoSolicitacao] = useState(false);
 
   const handleEnviarSolicitacao = async (e) => {
@@ -24,7 +24,7 @@ export default function Perfil() {
       setTimeout(() => {
         setShowSolicitacao(false);
         setSolicitacaoSuccess(false);
-        setSolicitacaoForm({ tipo: 'REAVALIACAO', mensagem: '' });
+        setSolicitacaoForm({ tipo: 'DUVIDA_EXECUCAO', mensagem: '' });
       }, 4000);
     } catch (err) {
       alert('Erro ao enviar: ' + err.message);
@@ -246,8 +246,9 @@ export default function Perfil() {
                       onChange={e => setSolicitacaoForm(prev => ({ ...prev, tipo: e.target.value }))}
                       className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-black"
                     >
-                      <option value="REAVALIACAO">Solicitar Reavaliação (Métricas/Novo Ciclo)</option>
-                      <option value="AJUSTE_TREINO">Dúvida ou Troca de Exercício</option>
+                      <option value="DUVIDA_EXECUCAO">Dúvida de Execução</option>
+                      <option value="SUBSTITUIR_EXERCICIO">Substituir Exercício</option>
+                      <option value="ATUALIZAR_INFORMACOES">Atualizar Informações</option>
                     </select>
                   </div>
                   <div>
