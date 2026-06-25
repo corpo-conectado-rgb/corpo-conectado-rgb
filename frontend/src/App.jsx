@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { CopilotProvider } from './contexts/CopilotContext';
 import DashboardLayout from './layout/DashboardLayout';
 import Placeholder from './pages/Placeholder';
 import Dashboard from './pages/Dashboard';
@@ -75,9 +76,11 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <CopilotProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </CopilotProvider>
     </AuthProvider>
   );
 }

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, BrainCircuit, Dumbbell, AlertTriangle, Activity, User, PlusCircle, Trash, Trash2, X, CalendarDays, MinusCircle, Bot, Loader2 } from 'lucide-react';
 import { apiFetch } from '../services/api';
 import Toast from '../components/Toast';
-import AssistenteIA from '../components/AssistenteIA';
+import { useCopilot } from '../contexts/CopilotContext';
 
 export default function AdminPrescricao() {
   const { id } = useParams();
@@ -21,7 +21,7 @@ export default function AdminPrescricao() {
   const [chatOpen, setChatOpen] = useState(false);
   const [menuAbertoDiaIdx, setMenuAbertoDiaIdx] = useState(null);
   const [toast, setToast] = useState(null);
-  const [assistenteOpen, setAssistenteOpen] = useState(false);
+  const { setIsOpen, registerContext, clearCopilotContext } = useCopilot();
 
   // Estados do Formulário Master
   const [nomeFicha, setNomeFicha] = useState('Projeto Hipertrofia 1.0');
@@ -150,49 +150,54 @@ export default function AdminPrescricao() {
   };
 
   // Handler para ações vindas do Assistente IA (ex: injetar exercícios na ficha)
-  const handleApplyIAAction = (action) => {
+  const handleApplyIAAction = React.useCallback((action) => {
     if (action.tipo === 'gerar_exercicios' && action.dias) {
-      const novosDias = [...diasTreino];
-      const nextLetras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+      setDiasTreino(prevDias => {
+        const novosDias = [...prevDias];
+        const nextLetras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 
-      for (const diaSugerido of action.dias) {
-        // Procura se já existe um dia com essa letra
-        const idx = novosDias.findIndex(d => d.letra_dia === diaSugerido.letra_dia);
-        if (idx !== -1) {
-          // Adiciona exercícios ao dia existente
-          const exsFormatados = (diaSugerido.exercicios || []).map(ex => ({
-            nome: ex.nome || '',
-            series: ex.series || 3,
-            repeticoes: ex.repeticoes || '10-12',
-            descanso: ex.descanso || 60,
-            carga: '',
-            observacoes: ex.observacoes || ''
-          }));
-          novosDias[idx].exercicios = [...novosDias[idx].exercicios, ...exsFormatados];
-          if (diaSugerido.foco_muscular && !novosDias[idx].foco_muscular) {
-            novosDias[idx].foco_muscular = diaSugerido.foco_muscular;
-          }
-        } else {
-          // Cria novo dia
-          novosDias.push({
-            letra_dia: diaSugerido.letra_dia || nextLetras[novosDias.length] || 'X',
-            foco_muscular: diaSugerido.foco_muscular || '',
-            exercicios: (diaSugerido.exercicios || []).map(ex => ({
+        for (const diaSugerido of action.dias) {
+          const idx = novosDias.findIndex(d => d.letra_dia === diaSugerido.letra_dia);
+          if (idx !== -1) {
+            const exsFormatados = (diaSugerido.exercicios || []).map(ex => ({
               nome: ex.nome || '',
               series: ex.series || 3,
               repeticoes: ex.repeticoes || '10-12',
               descanso: ex.descanso || 60,
               carga: '',
               observacoes: ex.observacoes || ''
-            }))
-          });
+            }));
+            novosDias[idx].exercicios = [...novosDias[idx].exercicios, ...exsFormatados];
+            if (diaSugerido.foco_muscular && !novosDias[idx].foco_muscular) {
+              novosDias[idx].foco_muscular = diaSugerido.foco_muscular;
+            }
+          } else {
+            novosDias.push({
+              letra_dia: diaSugerido.letra_dia || nextLetras[novosDias.length] || 'X',
+              foco_muscular: diaSugerido.foco_muscular || '',
+              exercicios: (diaSugerido.exercicios || []).map(ex => ({
+                nome: ex.nome || '',
+                series: ex.series || 3,
+                repeticoes: ex.repeticoes || '10-12',
+                descanso: ex.descanso || 60,
+                carga: '',
+                observacoes: ex.observacoes || ''
+              }))
+            });
+          }
         }
-      }
-
-      setDiasTreino(novosDias);
+        return novosDias;
+      });
       setToast({ message: 'Treino gerado pela IA aplicado com sucesso! ✨', type: 'success' });
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (aluno) {
+      registerContext('PRESCRICAO', { alunoId: id, alunoNome: aluno.nome }, { onApplyAction: handleApplyIAAction });
+    }
+    return () => clearCopilotContext();
+  }, [aluno, id, registerContext, clearCopilotContext, handleApplyIAAction]);
 
   if (loading) return <div className="p-12 text-center font-bold text-gray-500">Decodificando dados estruturais...</div>;
 
@@ -223,7 +228,7 @@ export default function AdminPrescricao() {
         </div>
         <div className="flex items-center gap-3 mt-4 md:mt-0">
           <button 
-            onClick={() => setAssistenteOpen(true)}
+            onClick={() => setIsOpen(true)}
             className="flex items-center gap-2 bg-purple-600 text-white px-5 py-3.5 rounded-xl font-black hover:bg-purple-700 transition shadow-lg"
           >
             <Bot size={16} /> Alfred
@@ -427,14 +432,7 @@ export default function AdminPrescricao() {
         </div>
       </div>
 
-      {/* --- Assistente IA Consultivo (Drawer) --- */}
-      <AssistenteIA
-        isOpen={assistenteOpen}
-        onClose={() => setAssistenteOpen(false)}
-        alunoId={id}
-        alunoNome={aluno?.nome || 'Aluno'}
-        onApplyAction={handleApplyIAAction}
-      />
+      {/* Assistente IA (Drawer) removido, agora usa FloatingAlfred via Context */}
     </div>
   );
 }

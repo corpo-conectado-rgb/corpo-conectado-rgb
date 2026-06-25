@@ -2,9 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Bot, X, CheckCircle, XCircle, Bell, MessageSquare } from 'lucide-react';
 import { apiFetch } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
+import { useCopilot } from '../contexts/CopilotContext';
+import AssistenteIA from './AssistenteIA';
 
 export default function FloatingAlfred() {
-  const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
+  const { isOpen, setIsOpen, activeContext, contextData, actions } = useCopilot();
   const [notificacoes, setNotificacoes] = useState([]);
   const location = useLocation();
   const popoverRef = useRef(null);
@@ -59,7 +63,7 @@ export default function FloatingAlfred() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [setIsOpen]);
 
   // Não renderizar no Dashboard ou Home, pois lá já tem o Alfred principal
   if (location.pathname === '/dashboard' || location.pathname === '/') {
@@ -69,8 +73,19 @@ export default function FloatingAlfred() {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       
-      {/* Popover do Mini Chat */}
-      {isOpen && (
+      {/* Se for Admin e estiver no contexto de Prescrição, renderizar o AssistenteIA como Drawer */}
+      {user?.role === 'admin' && activeContext === 'PRESCRICAO' && (
+        <AssistenteIA 
+          isOpen={isOpen} 
+          onClose={() => setIsOpen(false)} 
+          alunoId={contextData?.alunoId}
+          alunoNome={contextData?.alunoNome}
+          onApplyAction={actions?.onApplyAction}
+        />
+      )}
+
+      {/* Popover do Mini Chat (Para alunos ou outros contextos) */}
+      {isOpen && (!activeContext || user?.role !== 'admin') && (
         <div 
           ref={popoverRef}
           className="mb-4 w-80 sm:w-96 bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden animate-scale-in transform origin-bottom-right flex flex-col max-h-[80vh]"
