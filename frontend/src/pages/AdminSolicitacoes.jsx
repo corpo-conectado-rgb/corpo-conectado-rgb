@@ -149,7 +149,15 @@ export default function AdminSolicitacoes() {
             </div>
           ) : (
             filteredSolicitacoes.map(sol => (
-              <div key={sol.id} className={`group bg-white rounded-2xl border ${sol.status === 'PENDENTE' ? 'border-gray-200 shadow-sm' : 'border-gray-100 opacity-75'} p-4 md:p-5 transition-all`}>
+              <div key={sol.id} className={`group relative bg-white rounded-2xl border ${sol.status === 'PENDENTE' ? 'border-gray-200 shadow-sm' : 'border-gray-100 opacity-75'} p-4 md:p-5 transition-all`}>
+                {/* Ícone de Excluir absoluto no canto superior direito */}
+                <button 
+                  onClick={() => setDeleteModal({ show: true, id: sol.id, nome: sol.aluno_nome || 'Aluno' })} 
+                  className="absolute top-3 right-3 md:top-4 md:right-4 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all p-2 rounded-full" 
+                  title="Excluir Solicitação"
+                >
+                  <Trash2 size={18} />
+                </button>
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gray-100 to-gray-50 border border-gray-200 flex items-center justify-center text-gray-600 font-black shadow-sm shrink-0">
@@ -163,10 +171,6 @@ export default function AdminSolicitacoes() {
                             {getTipoLabel(sol.tipo)}
                           </span>
                         </div>
-                        {/* Ícone de Excluir que aparece ao passar o mouse */}
-                        <button onClick={() => setDeleteModal({ show: true, id: sol.id, nome: sol.aluno_nome || 'Aluno' })} className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all p-1" title="Excluir Solicitação">
-                          <Trash2 size={16} />
-                        </button>
                       </div>
                       <div className="text-xs font-medium text-gray-400 mb-3">
                         Enviado em {formatDate(sol.data_criacao)}
@@ -184,7 +188,7 @@ export default function AdminSolicitacoes() {
                     </div>
                   </div>
                   
-                  <div className="flex flex-row md:flex-col items-center justify-start md:justify-end gap-2 shrink-0 md:pl-4 md:border-l border-gray-100 md:w-36 lg:w-44">
+                  <div className="flex flex-row md:flex-col items-center justify-start md:justify-end gap-2 shrink-0 md:pl-4 md:border-l border-gray-100 md:w-36 lg:w-44 pt-6 md:pt-8">
                     <button 
                       onClick={() => navigate(`/admin/prescricao/${sol.aluno_id}`)}
                       className="px-4 py-2 w-full text-[10px] font-black uppercase tracking-wider bg-black text-white rounded-xl hover:bg-gray-800 transition active:scale-95 text-center"
