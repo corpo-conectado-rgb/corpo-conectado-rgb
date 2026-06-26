@@ -206,11 +206,11 @@ export default function Perfil() {
           </div>
 
           <div className="hidden md:flex items-center gap-2">
-            <button onClick={() => setShowSolicitacao(true)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-black transition-all">
-              <MessageSquarePlus size={20} />
-            </button>
             <button onClick={openDrawer} className="h-10 flex items-center justify-center gap-1.5 px-4 rounded-xl bg-transparent text-gray-500 hover:text-black hover:bg-gray-50 transition-all font-black text-[11px] uppercase tracking-widest">
               <Edit3 size={14} /> Atualizar Perfil
+            </button>
+            <button onClick={() => setShowSolicitacao(true)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-black transition-all">
+              <MessageSquarePlus size={20} />
             </button>
           </div>
         </div>
