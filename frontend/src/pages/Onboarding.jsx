@@ -528,7 +528,7 @@ export default function Onboarding() {
       {/* Box da Logo Dinâmica Standalone */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md flex flex-col items-center justify-center relative z-10">
         <div className="w-[74px] h-[74px] flex items-center justify-center mb-1">
-          <img src="/Icone_Corpo_Conectado_Premium.png" alt="Corpo Conectado" className="w-full h-full object-contain drop-shadow-xl" />
+          <img src="/Icone_Corpo_Conectado_Premium.png" alt="Corpo Conectado" className="w-full h-full object-contain drop-shadow-xl pointer-events-none" />
         </div>
       </div>
 

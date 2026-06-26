@@ -13,7 +13,7 @@ export default function Welcome() {
         <img 
           src="/Icone_Corpo_Conectado_Premium.png" 
           alt="Corpo Conectado Logo" 
-          className="max-h-[40vh] max-w-[65%] w-auto object-contain animate-fade-up drop-shadow-xl" 
+          className="max-h-[40vh] max-w-[65%] w-auto object-contain animate-fade-up drop-shadow-xl pointer-events-none" 
           style={{ animationDuration: '0.8s' }}
         />
 
