@@ -8,12 +8,21 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadStorageData = () => {
+    const loadStorageData = async () => {
       const storageUser = localStorage.getItem('@CorpoConectado:user');
       const storageToken = localStorage.getItem('@CorpoConectado:token');
 
       if (storageUser && storageToken) {
         setUser(JSON.parse(storageUser));
+        
+        // Fetch fresh data in the background to sync any admin approvals
+        try {
+          const data = await apiFetch('/auth/me');
+          setUser(data);
+          localStorage.setItem('@CorpoConectado:user', JSON.stringify(data));
+        } catch (err) {
+          console.error('Background profile sync failed:', err.message);
+        }
       }
       setLoading(false);
     };
