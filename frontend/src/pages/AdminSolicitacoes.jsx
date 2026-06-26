@@ -87,11 +87,11 @@ export default function AdminSolicitacoes() {
 
   const getTipoLabel = (tipo) => {
     switch (tipo) {
-      case 'DUVIDA_EXECUCAO': return 'Dúvida de Execução';
-      case 'SUBSTITUIR_EXERCICIO': return 'Substituir Exercício';
-      case 'ATUALIZAR_INFORMACOES': return 'Atualizar Informações';
-      case 'AJUSTE_TREINO': return 'Ajuste / Dúvida de Treino';
-      case 'REAVALIACAO': return 'Reavaliação / Novo Ciclo';
+      case 'IMPLEMENTACAO': return 'Implementação';
+      case 'FINANCEIRO': return 'Financeiro';
+      case 'FICHA': return 'Ficha';
+      case 'EXECUCAO': return 'Execução';
+      case 'APLICATIVO': return 'Aplicativo';
       case 'ALTERACAO_DADOS': return 'Alteração de Dados';
       default: return tipo;
     }
@@ -99,11 +99,11 @@ export default function AdminSolicitacoes() {
 
   const getTipoStyle = (tipo) => {
     switch (tipo) {
-      case 'DUVIDA_EXECUCAO': return 'bg-blue-50 text-blue-600 border-blue-200/50';
-      case 'SUBSTITUIR_EXERCICIO': return 'bg-amber-50 text-amber-600 border-amber-200/50';
-      case 'ATUALIZAR_INFORMACOES': return 'bg-emerald-50 text-emerald-600 border-emerald-200/50';
-      case 'AJUSTE_TREINO': return 'bg-amber-50 text-amber-600 border-amber-200/50';
-      case 'REAVALIACAO': return 'bg-purple-50 text-purple-600 border-purple-200/50';
+      case 'IMPLEMENTACAO': return 'bg-blue-50 text-blue-600 border-blue-200/50';
+      case 'FINANCEIRO': return 'bg-emerald-50 text-emerald-600 border-emerald-200/50';
+      case 'FICHA': return 'bg-purple-50 text-purple-600 border-purple-200/50';
+      case 'EXECUCAO': return 'bg-amber-50 text-amber-600 border-amber-200/50';
+      case 'APLICATIVO': return 'bg-indigo-50 text-indigo-600 border-indigo-200/50';
       case 'ALTERACAO_DADOS': return 'bg-orange-50 text-orange-600 border-orange-200/50';
       default: return 'bg-gray-50 text-gray-600 border-gray-200/50';
     }
