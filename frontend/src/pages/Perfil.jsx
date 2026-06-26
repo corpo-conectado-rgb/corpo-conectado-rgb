@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { CheckCircle2, AlertCircle, Goal, Activity, Timer, MapPin, ShieldAlert, Edit3, X, Check, MessageSquarePlus, Phone, ArrowRight, Lock, Loader2, User as UserIcon, Scale, CalendarHeart, ClipboardList, Shield } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Goal, Activity, Timer, MapPin, ShieldAlert, Settings2, X, Check, MessageSquarePlus, Phone, ArrowRight, Lock, Loader2, User as UserIcon, Scale, CalendarHeart, ClipboardList, Shield } from 'lucide-react';
 import { apiFetch } from '../services/api';
 
 // Definição dos campos editáveis e suas regras
@@ -189,7 +189,13 @@ export default function Perfil() {
             <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Meus Dados</h1>
           </div>
           
-          <div className="md:hidden relative group">
+          <div className="md:hidden flex items-center gap-2">
+            <button 
+              onClick={openDrawer}
+              className="h-10 flex items-center justify-center gap-1.5 px-3 rounded-xl bg-transparent text-gray-500 hover:text-black hover:bg-gray-50 transition-all font-black text-[11px] uppercase tracking-widest"
+            >
+              <Settings2 size={16} /> Editar
+            </button>
             <button 
               onClick={() => setShowSolicitacao(true)}
               className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-black transition-all"
@@ -207,7 +213,7 @@ export default function Perfil() {
 
           <div className="hidden md:flex items-center gap-2">
             <button onClick={openDrawer} className="h-10 flex items-center justify-center gap-1.5 px-4 rounded-xl bg-transparent text-gray-500 hover:text-black hover:bg-gray-50 transition-all font-black text-[11px] uppercase tracking-widest">
-              <Edit3 size={14} /> Atualizar Perfil
+              <Settings2 size={14} /> Atualizar Perfil
             </button>
             <button onClick={() => setShowSolicitacao(true)} className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-black transition-all">
               <MessageSquarePlus size={20} />
@@ -226,12 +232,7 @@ export default function Perfil() {
         </div>
       )}
 
-      {/* FAB Mobile Editar */}
-      <div className="md:hidden fixed bottom-6 right-6 z-40">
-        <button onClick={openDrawer} className="w-14 h-14 bg-black text-white rounded-full shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
-          <Edit3 size={24} />
-        </button>
-      </div>
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         
