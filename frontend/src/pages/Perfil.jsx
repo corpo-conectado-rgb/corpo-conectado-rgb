@@ -166,7 +166,18 @@ export default function Perfil() {
     }
   };
 
-  const isProfileComplete = user?.idade && user?.peso && user?.altura && user?.objetivo;
+  // Verifica se todas as informações do perfil estão preenchidas (exceto lesões, que é opcional)
+  const isProfileComplete = 
+    user?.nome && 
+    user?.telefone && 
+    user?.idade && 
+    user?.sexo && 
+    user?.peso && 
+    user?.altura && 
+    user?.objetivo && 
+    user?.nivel_fisico && 
+    user?.habitos_freq && 
+    user?.habitos_local;
 
   return (
     <div className="max-w-4xl mx-auto pb-4 animate-fade-in relative">
