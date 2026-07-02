@@ -59,7 +59,7 @@ async function isDeviceActivationRequired() {
   try {
     const configRows = await getCachedRows(CONFIG_SHEET, CONFIG_HEADERS);
     const row = configRows.find(r => r.get('chave') === 'REQUIRE_DEVICE_ACTIVATION');
-    return row && row.get('valor') === 'true';
+    return row && String(row.get('valor')).toLowerCase() === 'true';
   } catch {
     return false;
   }
