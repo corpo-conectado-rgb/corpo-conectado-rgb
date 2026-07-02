@@ -26,8 +26,8 @@ export default function AdminConfiguracoes() {
     try {
       setConfigLoading(true);
       const data = await apiFetch('/config');
-      // O backend retorna um objeto { REQUIRE_DEVICE_ACTIVATION: 'true', ... }
-      setRequireActivation(data.REQUIRE_DEVICE_ACTIVATION === 'true');
+      // O backend retorna um objeto { REQUIRE_DEVICE_ACTIVATION: 'true' ou 'TRUE', ... }
+      setRequireActivation(String(data.REQUIRE_DEVICE_ACTIVATION).toLowerCase() === 'true');
     } catch (err) {
       console.error('Erro ao carregar configuração:', err.message);
     } finally {
