@@ -250,7 +250,7 @@ export default function AdminConfiguracoes() {
                   <div key={disp.id} className={`group relative bg-white rounded-2xl border ${disp.status === 'PENDENTE' ? 'border-gray-200 shadow-sm' : 'border-gray-100 opacity-75'} p-4 md:p-5 transition-all`}>
                     {/* Botão Excluir hover */}
                     <button
-                      onClick={() => setDeleteModal({ show: true, id: disp.id, nome: disp.usuario_nome || 'Usuário' })}
+                      onClick={() => setDeleteModal({ show: true, id: disp.id, nome: disp.user_nome || 'Usuário' })}
                       className="absolute top-3 right-3 md:top-4 md:right-4 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all p-2 rounded-full"
                       title="Excluir Dispositivo"
                     >
@@ -261,26 +261,26 @@ export default function AdminConfiguracoes() {
                       <div className="flex items-start gap-4 flex-1">
                         {/* Avatar */}
                         <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gray-100 to-gray-50 border border-gray-200 flex items-center justify-center text-gray-600 font-black shadow-sm shrink-0">
-                          {disp.usuario_nome ? disp.usuario_nome.charAt(0).toUpperCase() : <User size={20} />}
+                          {disp.user_nome ? disp.user_nome.charAt(0).toUpperCase() : <User size={20} />}
                         </div>
 
                         <div className="flex-1 min-w-0">
                           {/* Nome + Status Badge */}
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-base font-black text-gray-900 truncate">{disp.usuario_nome || 'Usuário'}</h3>
+                            <h3 className="text-base font-black text-gray-900 truncate">{disp.user_nome || 'Usuário'}</h3>
                             <span className={`text-[9px] uppercase tracking-widest font-black px-2 py-0.5 rounded border ${getStatusStyle(disp.status)}`}>
                               {getStatusLabel(disp.status)}
                             </span>
                           </div>
 
                           {/* Email */}
-                          <p className="text-xs text-gray-400 font-medium mb-3 truncate">{disp.usuario_email || '--'}</p>
+                          <p className="text-xs text-gray-400 font-medium mb-3 truncate">{disp.user_email || '--'}</p>
 
                           {/* Info Card */}
                           <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex flex-col sm:flex-row sm:items-center gap-4">
                             <div className="flex items-center gap-2">
                               <Monitor size={16} className="text-gray-400 shrink-0" />
-                              <span className="text-sm text-gray-700 font-medium">{disp.dispositivo_nome || 'Dispositivo desconhecido'}</span>
+                              <span className="text-sm text-gray-700 font-medium">{disp.device_name || 'Dispositivo desconhecido'}</span>
                             </div>
                             <div className="sm:ml-auto flex items-center gap-3">
                               <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Código</span>
@@ -292,7 +292,7 @@ export default function AdminConfiguracoes() {
 
                           {/* Data */}
                           <div className="text-xs font-medium text-gray-400 mt-3">
-                            Solicitado em {formatDate(disp.data_criacao)}
+                            Solicitado em {formatDate(disp.data_solicitacao)}
                           </div>
                         </div>
                       </div>
