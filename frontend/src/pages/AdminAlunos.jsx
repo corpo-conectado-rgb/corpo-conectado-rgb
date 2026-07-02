@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, UserPlus, Filter, MoreVertical, Edit3, Eye, FileText, X, Clock, Dumbbell, ChevronDown, ChevronUp, CalendarDays, RotateCcw, Check, Trash2, AlertTriangle } from 'lucide-react';
 import { apiFetch } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
+import PDFPreviewModal from '../components/pdf/PDFPreviewModal';
 
 // Helper: calcula dias restantes a partir de string "dd/mm/yyyy"
 const calcDiasRestantes = (dataTerminoStr) => {
@@ -33,6 +35,8 @@ export default function AdminAlunos() {
   const [alunoParaExcluir, setAlunoParaExcluir] = useState(null); // Modal de exclusão
   const [loadingExclusao, setLoadingExclusao] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
+  const [showPDF, setShowPDF] = useState(false);
+  const { user: adminUser } = useAuth();
   const navigate = useNavigate();
 
   // ── FILTROS ──────────────────────────────────────────────────────────
@@ -656,6 +660,19 @@ export default function AdminAlunos() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
+                <div className="relative group">
+                  <button
+                    onClick={() => setShowPDF(true)}
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-50 text-blue-500 hover:text-white hover:bg-blue-500 transition"
+                  >
+                    <FileText size={15} />
+                  </button>
+                  <div className="absolute right-0 top-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[110]">
+                    <div className="bg-black text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
+                      Gerar PDF
+                    </div>
+                  </div>
+                </div>
                 <button
                   onClick={() => setAlunoParaExcluir(drawerAluno)}
                   className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 text-red-500 hover:text-white hover:bg-red-500 transition"
@@ -738,6 +755,21 @@ export default function AdminAlunos() {
           </div>
         </div>
       )}
+
+      {/* Modal PDF Preview */}
+      <PDFPreviewModal
+        isOpen={showPDF}
+        onClose={() => setShowPDF(false)}
+        aluno={drawerAluno}
+        profissional={adminUser ? { nome: adminUser.nome, email: adminUser.email } : null}
+        treinos={fichaAberta?.map(dia => ({
+          letra: dia.letra_dia,
+          nome: dia.foco_muscular,
+          foco_muscular: dia.foco_muscular,
+          objetivo: drawerAluno?.objetivo,
+          exercicios: dia.exercicios
+        })) || []}
+      />
 
       {/* ── MODAL DE CONFIRMAÇÃO DE EXCLUSÃO ──────────────────────────────── */}
       {alunoParaExcluir && (

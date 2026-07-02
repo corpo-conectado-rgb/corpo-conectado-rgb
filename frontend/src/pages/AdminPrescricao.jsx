@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, BrainCircuit, Dumbbell, AlertTriangle, Activity, User, PlusCircle, Trash, Trash2, X, CalendarDays, MinusCircle, Bot, Loader2, FileText } from 'lucide-react';
+import { ArrowLeft, Save, BrainCircuit, Dumbbell, AlertTriangle, Activity, User, PlusCircle, Trash, Trash2, X, CalendarDays, MinusCircle, Bot, Loader2 } from 'lucide-react';
 import { apiFetch } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
-import PDFPreviewModal from '../components/pdf/PDFPreviewModal';
 import Toast from '../components/Toast';
 import { useCopilot } from '../contexts/CopilotContext';
 
@@ -23,9 +21,7 @@ export default function AdminPrescricao() {
   const [chatOpen, setChatOpen] = useState(false);
   const [menuAbertoDiaIdx, setMenuAbertoDiaIdx] = useState(null);
   const [toast, setToast] = useState(null);
-  const [showPDF, setShowPDF] = useState(false);
   const { registerContext, clearCopilotContext } = useCopilot();
-  const { user: adminUser } = useAuth();
 
   // Estados do Formulário Master
   const [nomeFicha, setNomeFicha] = useState('Projeto Hipertrofia 1.0');
@@ -233,15 +229,6 @@ export default function AdminPrescricao() {
         <div className="flex items-center gap-3 mt-4 md:mt-0">
 
           <button 
-            onClick={() => setShowPDF(true)}
-            className="flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-200 px-4 py-3.5 rounded-xl font-black hover:bg-gray-50 transition shadow-sm"
-            title="Visualizar PDF"
-          >
-            <FileText size={18} />
-            <span className="hidden md:inline text-sm">Visualizar PDF</span>
-          </button>
-
-          <button 
             onClick={salvarPrescricao}
             disabled={salvando}
             className="flex items-center justify-center gap-2 bg-black text-white px-5 md:px-8 py-3.5 rounded-xl font-black hover:bg-gray-800 transition shadow-lg disabled:opacity-50 min-w-[120px]"
@@ -250,21 +237,6 @@ export default function AdminPrescricao() {
           </button>
         </div>
       </div>
-
-      {/* Modal PDF Preview */}
-      <PDFPreviewModal
-        isOpen={showPDF}
-        onClose={() => setShowPDF(false)}
-        aluno={aluno}
-        profissional={adminUser ? { nome: adminUser.nome, email: adminUser.email } : null}
-        treinos={diasTreino.map(dia => ({
-          letra: dia.letra_dia,
-          nome: dia.foco_muscular,
-          foco_muscular: dia.foco_muscular,
-          objetivo: focoMacro,
-          exercicios: dia.exercicios
-        }))}
-      />
 
       <div className="grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         
