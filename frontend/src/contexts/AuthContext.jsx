@@ -1,7 +1,32 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { apiFetch } from '../services/api';
+import { API_URL } from '../services/api';
 
 const AuthContext = createContext({});
+
+// Gera ou recupera um ID único para este dispositivo
+function getDeviceId() {
+  let deviceId = localStorage.getItem('@CorpoConectado:deviceId');
+  if (!deviceId) {
+    deviceId = crypto.randomUUID();
+    localStorage.setItem('@CorpoConectado:deviceId', deviceId);
+  }
+  return deviceId;
+}
+
+// Detecta o nome do dispositivo baseado no User Agent
+function getDeviceName() {
+  const ua = navigator.userAgent;
+  if (/iPhone/i.test(ua)) return 'iPhone Safari';
+  if (/iPad/i.test(ua)) return 'iPad Safari';
+  if (/Android/i.test(ua) && /Chrome/i.test(ua)) return 'Chrome Android';
+  if (/Android/i.test(ua)) return 'Android Browser';
+  if (/Chrome/i.test(ua)) return 'Chrome Desktop';
+  if (/Firefox/i.test(ua)) return 'Firefox';
+  if (/Safari/i.test(ua)) return 'Safari Desktop';
+  if (/Edge/i.test(ua)) return 'Microsoft Edge';
+  return 'Navegador desconhecido';
+}
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -67,23 +92,32 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    try {
-      const data = await apiFetch('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, senha: password }), // Ensure backend expects 'senha'
-      });
-
-      const { user, token } = data;
-
-      setUser(user);
-      localStorage.setItem('@CorpoConectado:user', JSON.stringify(user));
-      localStorage.setItem('@CorpoConectado:token', token);
-
-      return true;
-    } catch (error) {
-      console.error("Erro no login:", error.message);
-      throw error;
+    const deviceId = getDeviceId();
+    const deviceName = getDeviceName();
+    
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, senha: password, deviceId, deviceName }),
+    });
+    
+    const data = await response.json();
+    
+    // Se o dispositivo precisa de ativação, retorna o objeto para o Login.jsx tratar
+    if (!response.ok && data.requiresActivation) {
+      return { requiresActivation: true, ...data };
     }
+    
+    if (!response.ok) {
+      throw new Error(data.message || data.error || 'Erro no login');
+    }
+
+    const { user, token } = data;
+    setUser(user);
+    localStorage.setItem('@CorpoConectado:user', JSON.stringify(user));
+    localStorage.setItem('@CorpoConectado:token', token);
+
+    return { success: true };
   };
 
   const logout = () => {
@@ -115,7 +149,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ signed: !!user, user, login, register, registerFull, logout, loading, updateUser, refreshProfile }}>
+    <AuthContext.Provider value={{ signed: !!user, user, login, register, registerFull, logout, loading, updateUser, refreshProfile, getDeviceId }}>
       {children}    
     </AuthContext.Provider>
   );

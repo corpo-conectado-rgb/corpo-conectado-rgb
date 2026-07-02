@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LogIn, UserPlus, Loader2, Eye, EyeOff } from 'lucide-react';
+import { LogIn, UserPlus, Loader2, Eye, EyeOff, ShieldCheck, ShieldAlert, RefreshCw } from 'lucide-react';
+import { API_URL } from '../services/api';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, getDeviceId } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -15,6 +16,11 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState('');
+
+  // Device Activation State
+  const [activationState, setActivationState] = useState(null); // null | { code, denied }
+  const [pollingActive, setPollingActive] = useState(false);
+  const pollingRef = useRef(null);
 
   // Recupera o último e-mail apenas como sugestão
   useEffect(() => {
@@ -46,15 +52,68 @@ export default function Login() {
     return () => timeouts.forEach(clearTimeout);
   }, [loading]);
 
+  // Polling para verificar se o dispositivo foi aprovado
+  useEffect(() => {
+    if (!pollingActive || !activationState) return;
+
+    const checkStatus = async () => {
+      try {
+        const deviceId = getDeviceId();
+        const response = await fetch(`${API_URL}/auth/login/status-aparelho`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, senha: password, deviceId }),
+        });
+        
+        const data = await response.json();
+        
+        if (data.approved) {
+          // Dispositivo aprovado! Salvar dados e redirecionar
+          setPollingActive(false);
+          localStorage.setItem('@CorpoConectado:user', JSON.stringify(data.user));
+          localStorage.setItem('@CorpoConectado:token', data.token);
+          localStorage.setItem('@CorpoConectado:lastEmail', email);
+          window.location.reload(); // Force reload to pick up new auth state
+        } else if (data.denied) {
+          setPollingActive(false);
+          setActivationState(prev => ({ ...prev, denied: true }));
+        }
+      } catch {
+        // Silently ignore polling errors
+      }
+    };
+
+    // Check immediately, then every 5 seconds
+    checkStatus();
+    pollingRef.current = setInterval(checkStatus, 5000);
+
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, [pollingActive, activationState, email, password, getDeviceId]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setActivationState(null);
 
     try {
-      await login(email, password);
-      localStorage.setItem('@CorpoConectado:lastEmail', email);
-      navigate('/');
+      const result = await login(email, password);
+      
+      if (result.requiresActivation) {
+        // Dispositivo não autorizado
+        if (result.activationDenied) {
+          setActivationState({ code: null, denied: true });
+        } else {
+          setActivationState({ code: result.activationCode, denied: false });
+          setPollingActive(true);
+        }
+        localStorage.setItem('@CorpoConectado:lastEmail', email);
+      } else if (result.success) {
+        localStorage.setItem('@CorpoConectado:lastEmail', email);
+        navigate('/');
+      }
     } catch (err) {
       setError(err.message || 'Falha na autenticação. Verifique os dados.');
     } finally {
@@ -62,6 +121,90 @@ export default function Login() {
     }
   };
 
+  const handleBackToLogin = () => {
+    setActivationState(null);
+    setPollingActive(false);
+    if (pollingRef.current) clearInterval(pollingRef.current);
+    setError('');
+  };
+
+  // ========== TELA DE AGUARDANDO ATIVAÇÃO ==========
+  if (activationState) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center px-4 bg-[var(--color-noir-navy)] font-sans relative overflow-hidden">
+        {/* Background Glow */}
+        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[var(--color-noir-accent)]/40 rounded-full blur-[100px] pointer-events-none"></div>
+        
+        <div className="relative z-10 flex flex-col items-center w-full max-w-[420px]">
+          {/* Logo */}
+          <div className="w-[80px] h-[80px] flex items-center justify-center mb-4">
+            <img src="/Icone_Corpo_Conectado_Premium.png" alt="Corpo Conectado" className="w-full h-full object-contain drop-shadow-2xl pointer-events-none" />
+          </div>
+
+          {/* Card Glass */}
+          <div className="w-full backdrop-blur-xl bg-white/[0.03] border border-white/[0.05] rounded-[1.5rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] py-8 px-6 sm:px-8 text-center">
+            
+            {activationState.denied ? (
+              // === DISPOSITIVO RECUSADO ===
+              <>
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
+                  <ShieldAlert size={32} className="text-red-400" />
+                </div>
+                <h2 className="text-lg font-black text-white mb-2">Acesso Negado</h2>
+                <p className="text-sm text-gray-400 mb-6 leading-relaxed">
+                  Este dispositivo foi recusado pelo administrador. Entre em contato para solicitar acesso.
+                </p>
+                <button 
+                  onClick={handleBackToLogin}
+                  className="btn-bright w-full flex items-center justify-center gap-2"
+                >
+                  <LogIn size={16} /> Voltar ao Login
+                </button>
+              </>
+            ) : (
+              // === AGUARDANDO APROVAÇÃO ===
+              <>
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-500/10 flex items-center justify-center animate-pulse">
+                  <ShieldCheck size={32} className="text-amber-400" />
+                </div>
+                <h2 className="text-lg font-black text-white mb-2">Ativação de Dispositivo</h2>
+                <p className="text-sm text-gray-400 mb-6 leading-relaxed">
+                  Dispositivo não reconhecido. Informe o código abaixo ao administrador para liberar seu acesso.
+                </p>
+                
+                {/* Código de Ativação */}
+                {activationState.code && (
+                  <div className="mb-6">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Código de Ativação</p>
+                    <div className="bg-white/[0.06] border border-white/10 rounded-2xl py-4 px-6 inline-block">
+                      <span className="text-3xl font-black text-white tracking-[0.3em] font-mono">
+                        {activationState.code}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Status de polling */}
+                <div className="flex items-center justify-center gap-2 text-xs text-gray-500 mb-6">
+                  <RefreshCw size={12} className="animate-spin" />
+                  <span>Aguardando aprovação do administrador...</span>
+                </div>
+                
+                <button 
+                  onClick={handleBackToLogin}
+                  className="text-[10px] font-bold text-gray-500 hover:text-white transition-colors uppercase tracking-wider py-2"
+                >
+                  ← Voltar ao Login
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ========== TELA NORMAL DE LOGIN ==========
   return (
     <div className="h-screen flex flex-col items-center justify-center px-4 bg-[var(--color-noir-navy)] font-sans relative overflow-hidden">
       

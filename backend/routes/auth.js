@@ -11,6 +11,10 @@ const USERS_SHEET = 'usuarios';
 const ANAMNESE_SHEET = 'anamnese';
 const HEADERS = ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role'];
 const ANAMNESE_HEADERS = ['id_usuario', 'idade', 'altura', 'peso', 'sexo', 'objetivo', 'nivel_fisico', 'lesoes_criticas', 'habitos_freq', 'habitos_tempo', 'habitos_local', 'data_nascimento', 'telefone'];
+const DISPOSITIVOS_SHEET = 'dispositivos';
+const DISPOSITIVOS_HEADERS = ['id', 'user_id', 'user_nome', 'user_email', 'device_id', 'device_name', 'codigo_ativacao', 'status', 'data_solicitacao', 'data_autorizacao'];
+const CONFIG_SHEET = 'configuracoes';
+const CONFIG_HEADERS = ['chave', 'valor'];
 
 // Função Helper para buscar dados completos de anamnese e impedir repetição de código
 async function fetchCompleteProfile(userRowId) {
@@ -42,6 +46,23 @@ async function fetchCompleteProfile(userRowId) {
     console.log('Sem dados de anamnese encontrados para o usuário falha silenciosa.');
   }
   return profileData;
+}
+
+function generateActivationCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+  return code;
+}
+
+async function isDeviceActivationRequired() {
+  try {
+    const configRows = await getCachedRows(CONFIG_SHEET, CONFIG_HEADERS);
+    const row = configRows.find(r => r.get('chave') === 'REQUIRE_DEVICE_ACTIVATION');
+    return row && row.get('valor') === 'true';
+  } catch {
+    return false;
+  }
 }
 
 // Rota Simples de Registro MANTIDA por retrocompatibilidade (se precisar)
@@ -159,6 +180,67 @@ router.post('/login', async (req, res) => {
 
     const userId = userRow.get('id');
     const role = userRow.get('role') || 'user';
+
+    // --- Device Activation Check ---
+    const deviceId = req.body.deviceId;
+    const deviceName = req.body.deviceName || 'Navegador desconhecido';
+    
+    if (await isDeviceActivationRequired() && role !== 'admin') {
+      if (deviceId) {
+        const dispRows = await getCachedRows(DISPOSITIVOS_SHEET, DISPOSITIVOS_HEADERS);
+        const existingDevice = dispRows.find(r => r.get('user_id') === userId && r.get('device_id') === deviceId);
+        
+        if (existingDevice) {
+          const status = existingDevice.get('status');
+          if (status === 'RECUSADO') {
+            return res.status(403).json({ 
+              requiresActivation: true, 
+              activationDenied: true,
+              message: 'Este dispositivo foi recusado pelo administrador.' 
+            });
+          }
+          if (status === 'PENDENTE') {
+            return res.status(403).json({ 
+              requiresActivation: true, 
+              activationCode: existingDevice.get('codigo_ativacao'),
+              message: 'Aguardando aprovação do administrador.' 
+            });
+          }
+          // status === 'AUTORIZADO' -> continue login normally
+        } else {
+          // New device - create activation request
+          const codigo = generateActivationCode();
+          const dispSheet = await getSheet(DISPOSITIVOS_SHEET, DISPOSITIVOS_HEADERS);
+          await dispSheet.addRow({
+            id: uuidv4(),
+            user_id: userId,
+            user_nome: userRow.get('nome'),
+            user_email: userRow.get('email'),
+            device_id: deviceId,
+            device_name: deviceName,
+            codigo_ativacao: codigo,
+            status: 'PENDENTE',
+            data_solicitacao: new Date().toISOString(),
+            data_autorizacao: ''
+          });
+          invalidateCache(DISPOSITIVOS_SHEET);
+          
+          return res.status(403).json({ 
+            requiresActivation: true, 
+            activationCode: codigo,
+            message: 'Dispositivo não reconhecido. Informe o código ao administrador.' 
+          });
+        }
+      } else {
+        // No deviceId sent - generate one for legacy clients
+        return res.status(403).json({ 
+          requiresActivation: true, 
+          message: 'Atualização necessária. Recarregue a página.' 
+        });
+      }
+    }
+    // --- End Device Activation Check ---
+
     const token = jwt.sign({ id: userId, role }, process.env.JWT_SECRET || 'secret_super_seguro_para_desenvolvimento', { expiresIn: '7d' });
     
     const profileData = await fetchCompleteProfile(userId);
@@ -173,6 +255,63 @@ router.post('/login', async (req, res) => {
         ...profileData 
       } 
     });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /login/status-aparelho - Aluno verifica se seu dispositivo foi aprovado
+router.post('/login/status-aparelho', async (req, res) => {
+  try {
+    let { email, senha, deviceId } = req.body;
+    email = (email || '').toLowerCase().trim();
+    
+    if (!email || !senha || !deviceId) {
+      return res.status(400).json({ message: 'Dados incompletos.' });
+    }
+    
+    // Re-validate credentials
+    const rows = await getCachedRows(USERS_SHEET, HEADERS);
+    const userRow = rows.find(r => (r.get('email') || '').toLowerCase().trim() === email);
+    if (!userRow) return res.status(401).json({ message: 'Credenciais inválidas.' });
+    
+    const valid = await bcrypt.compare(senha, userRow.get('senha_hash'));
+    if (!valid) return res.status(401).json({ message: 'Credenciais inválidas.' });
+    
+    const userId = userRow.get('id');
+    const dispRows = await getCachedRows(DISPOSITIVOS_SHEET, DISPOSITIVOS_HEADERS);
+    const device = dispRows.find(r => r.get('user_id') === userId && r.get('device_id') === deviceId);
+    
+    if (!device) {
+      return res.status(404).json({ approved: false, message: 'Dispositivo não encontrado.' });
+    }
+    
+    const status = device.get('status');
+    
+    if (status === 'AUTORIZADO') {
+      const role = userRow.get('role') || 'user';
+      const token = jwt.sign({ id: userId, role }, process.env.JWT_SECRET || 'secret_super_seguro_para_desenvolvimento', { expiresIn: '7d' });
+      const profileData = await fetchCompleteProfile(userId);
+      
+      return res.json({ 
+        approved: true, 
+        token, 
+        user: { 
+          id: userId, 
+          nome: userRow.get('nome'), 
+          email: userRow.get('email'),
+          role,
+          ...profileData 
+        } 
+      });
+    }
+    
+    if (status === 'RECUSADO') {
+      return res.json({ approved: false, denied: true, message: 'Dispositivo recusado pelo administrador.' });
+    }
+    
+    // Still PENDENTE
+    return res.json({ approved: false, message: 'Aguardando aprovação.' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

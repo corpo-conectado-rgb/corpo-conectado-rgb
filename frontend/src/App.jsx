@@ -12,6 +12,7 @@ import SemPermissao from './pages/SemPermissao';
 import AdminAlunos from './pages/AdminAlunos';
 import AdminPrescricao from './pages/AdminPrescricao';
 import AdminSolicitacoes from './pages/AdminSolicitacoes';
+import AdminConfiguracoes from './pages/AdminConfiguracoes';
 import Welcome from './pages/Welcome';
 
 // Componente para proteger rotas privadas
@@ -66,6 +67,7 @@ function AppRoutes() {
         <Route path="admin/alunos" element={<AdminRoute><AdminAlunos /></AdminRoute>} />
         <Route path="admin/solicitacoes" element={<AdminRoute><AdminSolicitacoes /></AdminRoute>} />
         <Route path="admin/prescricao/:id" element={<AdminRoute><AdminPrescricao /></AdminRoute>} />
+        <Route path="admin/configuracoes" element={<AdminRoute><AdminConfiguracoes /></AdminRoute>} />
       </Route>
       
       <Route path="*" element={<Navigate to="/" replace />} />
