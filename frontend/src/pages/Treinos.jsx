@@ -2,9 +2,11 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Dumbbell, Play, CheckCircle2, Circle, ChevronRight, ChevronUp, ChevronLeft,
   Flame, Target, Zap, Clock, BarChart3, Trophy, X,
-  ArrowLeft, ArrowRight, Timer, History, Minus, Plus, MessageSquarePlus
+  ArrowLeft, ArrowRight, Timer, History, Minus, Plus, MessageSquarePlus, FileText
 } from 'lucide-react';
 import { apiFetch } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
+import PDFPreviewModal from '../components/pdf/PDFPreviewModal';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 const formatTime = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
@@ -19,6 +21,7 @@ const DIAS_SEMANA_CURTO = { 'Domingo': 'Dom', 'Segunda-feira': 'Seg', 'Terça-fe
 
 // ─── Componente Principal ────────────────────────────────────────────────────
 export default function Treinos() {
+  const { user } = useAuth();
   // ─── State ──────────────────────────────────────────────────────────────
   const [fichas, setFichas] = useState([]);
   const [stats, setStats] = useState(null);
@@ -45,6 +48,7 @@ export default function Treinos() {
   const [solicitacaoSuccess, setSolicitacaoSuccess] = useState(false);
   const [solicitacaoForm, setSolicitacaoForm] = useState({ tipo: 'DUVIDA_EXECUCAO', mensagem: '' });
   const [enviandoSolicitacao, setEnviandoSolicitacao] = useState(false);
+  const [showPDF, setShowPDF] = useState(false);
   const timerRef = useRef(null);
   const descansoRef = useRef(null);
 
@@ -534,23 +538,48 @@ export default function Treinos() {
       {/* Header */}
       <header className="flex items-center justify-between">
         <h1 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight">Meus Treinos</h1>
-        <div className="relative group">
-          <button 
-            onClick={() => setShowSolicitacao(true)}
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-black transition-all"
-            aria-label="Solicitações"
-          >
-            <MessageSquarePlus size={20} />
-          </button>
-          
-          {/* Tooltip elegante */}
-          <div className="absolute right-0 top-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-            <div className="bg-black text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
-              Solicitações
+        <div className="flex items-center gap-2">
+          {/* Botão Exportar PDF */}
+          <div className="relative group">
+            <button
+              onClick={() => setShowPDF(true)}
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-black transition-all"
+              aria-label="Exportar PDF"
+            >
+              <FileText size={20} />
+            </button>
+            <div className="absolute right-0 top-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+              <div className="bg-black text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
+                Exportar PDF
+              </div>
+            </div>
+          </div>
+          {/* Botão Solicitações */}
+          <div className="relative group">
+            <button 
+              onClick={() => setShowSolicitacao(true)}
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-black transition-all"
+              aria-label="Solicitações"
+            >
+              <MessageSquarePlus size={20} />
+            </button>
+            <div className="absolute right-0 top-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+              <div className="bg-black text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
+                Solicitações
+              </div>
             </div>
           </div>
         </div>
       </header>
+
+      {/* Modal PDF Preview */}
+      <PDFPreviewModal
+        isOpen={showPDF}
+        onClose={() => setShowPDF(false)}
+        aluno={user}
+        profissional={null}
+        treinos={fichas}
+      />
 
       {/* ── Hero: Próximo Treino ──────────────────────────────────────── */}
       {fichaProxima && (
