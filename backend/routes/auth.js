@@ -89,8 +89,8 @@ router.post('/register', async (req, res) => {
     });
 
     invalidateCache(USERS_SHEET);
-    const token = jwt.sign({ id: newId, role: 'user' }, process.env.JWT_SECRET || 'secret_super_seguro_para_desenvolvimento', { expiresIn: '7d' });
-    res.status(201).json({ token, user: { id: newId, nome, email } });
+    
+    res.status(201).json({ message: 'Usuário registrado com sucesso.' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -148,19 +148,9 @@ router.post('/register-full', async (req, res) => {
     });
 
     invalidateCache(ANAMNESE_SHEET);
-    const token = jwt.sign({ id: newId, role: 'user' }, process.env.JWT_SECRET || 'secret_super_seguro_para_desenvolvimento', { expiresIn: '7d' });
+    invalidateCache(ANAMNESE_SHEET);
     
-    // Retorna o pacote FULL ja populado
-    res.status(201).json({ 
-      token, 
-      user: { 
-        id: newId, nome, email, role: 'user',
-        data_nascimento, idade, altura, peso, sexo,
-        objetivo, nivel_fisico: nivel,
-        lesoes_criticas: lesoes,
-        habitos_freq, habitos_tempo, habitos_local
-      } 
-    });
+    res.status(201).json({ message: 'Conta criada com sucesso.' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

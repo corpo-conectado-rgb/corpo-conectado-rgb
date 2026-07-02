@@ -193,10 +193,10 @@ export default function Onboarding() {
     const startTime = Date.now();
 
     try {
-      await registerFull(formData);
+      const result = await registerFull(formData);
       
       const elapsedTime = Date.now() - startTime;
-      const minimumLoadingTime = 3500; // Tempo mínimo em ms para a experiência premium de loading
+      const minimumLoadingTime = 3500;
       
       if (elapsedTime < minimumLoadingTime) {
         await new Promise(r => setTimeout(r, minimumLoadingTime - elapsedTime));
@@ -205,7 +205,13 @@ export default function Onboarding() {
       setFakeProgress(100);
       await new Promise(r => setTimeout(r, 400));
 
-      // Engatilha Sucesso UI + Disparo de Confete Dark (Microinteração High-end)
+      if (result && result.requiresActivation) {
+        // Redireciona para o login para mostrar a tela de ativação
+        navigate('/login', { state: { email: formData.email, requiresActivation: true, activationCode: result.activationCode } });
+        return;
+      }
+
+      // Engatilha Sucesso UI + Disparo de Confete Dark
       setSuccess(true);
       confetti({
         particleCount: 160,
@@ -215,7 +221,7 @@ export default function Onboarding() {
         disableForReducedMotion: true
       });
 
-      // Aguarda 4200ms para leitura confortável e queda completa do confete
+      // Aguarda 4200ms para leitura
       setTimeout(() => {
         navigate('/');
       }, 4200);

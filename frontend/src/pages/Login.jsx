@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { LogIn, UserPlus, Loader2, Eye, EyeOff, ShieldCheck, ShieldAlert, RefreshCw } from 'lucide-react';
 import { API_URL } from '../services/api';
@@ -7,6 +7,7 @@ import { API_URL } from '../services/api';
 export default function Login() {
   const { login, getDeviceId } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [email, setEmail] = useState('');
   const [suggestedEmail, setSuggestedEmail] = useState('');
@@ -21,6 +22,18 @@ export default function Login() {
   const [activationState, setActivationState] = useState(null); // null | { code, denied }
   const [pollingActive, setPollingActive] = useState(false);
   const pollingRef = useRef(null);
+
+  // Se veio do Onboarding com requiresActivation, exibe a tela de ativação
+  useEffect(() => {
+    if (location.state?.requiresActivation && location.state?.email) {
+      setEmail(location.state.email);
+      setActivationState({ code: location.state.activationCode, denied: false });
+      setPollingActive(true);
+      
+      // Limpa o state para não reativar se der refresh
+      navigate('/login', { replace: true, state: {} });
+    }
+  }, [location.state, navigate]);
 
   // Recupera o último e-mail apenas como sugestão
   useEffect(() => {

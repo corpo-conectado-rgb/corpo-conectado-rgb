@@ -57,16 +57,12 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (nome, email, password) => {
     try {
-      const data = await apiFetch('/auth/register', {
+      await apiFetch('/auth/register', {
         method: 'POST',
         body: JSON.stringify({ nome, email, senha: password }),
       });
 
-      const { user, token } = data;
-      setUser(user);
-      localStorage.setItem('@CorpoConectado:user', JSON.stringify(user));
-      localStorage.setItem('@CorpoConectado:token', token);
-      return true;
+      return await login(email, password);
     } catch (error) {
       console.error("Erro no cadastro:", error.message);
       throw error;
@@ -75,16 +71,12 @@ export const AuthProvider = ({ children }) => {
 
   const registerFull = async (payload) => {
     try {
-      const data = await apiFetch('/auth/register-full', {
+      await apiFetch('/auth/register-full', {
         method: 'POST',
         body: JSON.stringify(payload),
       });
 
-      const { user, token } = data;
-      setUser(user);
-      localStorage.setItem('@CorpoConectado:user', JSON.stringify(user));
-      localStorage.setItem('@CorpoConectado:token', token);
-      return true;
+      return await login(payload.email, payload.senha);
     } catch (error) {
       console.error("Erro no cadastro onboarding:", error.message);
       throw error;
