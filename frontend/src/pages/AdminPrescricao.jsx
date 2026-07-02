@@ -268,7 +268,7 @@ export default function AdminPrescricao() {
           <div className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
              <h2 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-6 border-b border-gray-100 pb-2">Arquitetura Master da Ficha</h2>
              
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                <div>
                   <label className="block text-[10px] uppercase font-black tracking-widest text-gray-500 mb-2">Nome Comercial</label>
                   <input type="text" value={nomeFicha} onChange={e=>setNomeFicha(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 focus:border-black outline-none transition" />
@@ -278,10 +278,6 @@ export default function AdminPrescricao() {
                   <select value={tipoDivisao} onChange={e=>setTipoDivisao(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 focus:border-black outline-none transition appearance-none">
                     <option>A/B</option><option>A/B/C</option><option>A/B/C/D</option><option>Full Body</option><option>Upper/Lower</option>
                   </select>
-               </div>
-               <div>
-                  <label className="block text-[10px] uppercase font-black tracking-widest text-gray-500 mb-2">Macro Objetivo</label>
-                  <input type="text" value={focoMacro} onChange={e=>setFocoMacro(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 focus:border-black outline-none transition" />
                </div>
              </div>
 
