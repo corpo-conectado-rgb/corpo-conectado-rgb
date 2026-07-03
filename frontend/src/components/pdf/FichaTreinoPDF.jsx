@@ -73,16 +73,19 @@ const styles = StyleSheet.create({
 
   // ─── Info Cards ──────────────────────────────────────
   infoRow: {
-    flexDirection: 'row',
-    gap: 12,
     marginBottom: 20,
   },
   infoCard: {
-    flex: 1,
     backgroundColor: COLORS.gray100,
     borderRadius: 6,
     padding: 12,
     borderLeft: `3px solid ${COLORS.navyAccent}`,
+  },
+  infoGrid: {
+    flexDirection: 'row',
+  },
+  infoGridCol: {
+    flex: 1,
   },
   infoCardTitle: {
     fontSize: 7,
@@ -90,11 +93,11 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 2,
     fontFamily: 'Helvetica-Bold',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   infoField: {
     flexDirection: 'row',
-    marginBottom: 3,
+    marginBottom: 4,
   },
   infoLabel: {
     fontSize: 8,
@@ -261,60 +264,42 @@ export default function FichaTreinoPDF({ aluno, profissional, treinos, dataEmiss
           </View>
         </View>
 
-        {/* ═══ Informações do Aluno e Profissional ═══ */}
+        {/* ═══ Informações do Treinamento ═══ */}
         <View style={styles.infoRow}>
-          {/* Card Aluno */}
           <View style={styles.infoCard}>
-            <Text style={styles.infoCardTitle}>Aluno</Text>
-            <View style={styles.infoField}>
-              <Text style={styles.infoLabel}>Nome:</Text>
-              <Text style={styles.infoValue}>{aluno?.nome || '--'}</Text>
+            <Text style={styles.infoCardTitle}>Dados do Aluno e Ficha</Text>
+            <View style={styles.infoGrid}>
+              <View style={styles.infoGridCol}>
+                <View style={styles.infoField}>
+                  <Text style={styles.infoLabel}>Aluno:</Text>
+                  <Text style={styles.infoValue}>{aluno?.nome || '--'}</Text>
+                </View>
+                {aluno?.idade && (
+                  <View style={styles.infoField}>
+                    <Text style={styles.infoLabel}>Idade:</Text>
+                    <Text style={styles.infoValue}>{aluno.idade} anos</Text>
+                  </View>
+                )}
+                {aluno?.peso && (
+                  <View style={styles.infoField}>
+                    <Text style={styles.infoLabel}>Peso:</Text>
+                    <Text style={styles.infoValue}>{aluno.peso} kg</Text>
+                  </View>
+                )}
+              </View>
+              <View style={styles.infoGridCol}>
+                {aluno?.altura && (
+                  <View style={styles.infoField}>
+                    <Text style={styles.infoLabel}>Altura:</Text>
+                    <Text style={styles.infoValue}>{aluno.altura} m</Text>
+                  </View>
+                )}
+                <View style={styles.infoField}>
+                  <Text style={styles.infoLabel}>Foco Macro:</Text>
+                  <Text style={styles.infoValue}>{treinos?.[0]?.objetivo || aluno?.objetivo || '--'}</Text>
+                </View>
+              </View>
             </View>
-            {aluno?.idade && (
-              <View style={styles.infoField}>
-                <Text style={styles.infoLabel}>Idade:</Text>
-                <Text style={styles.infoValue}>{aluno.idade} anos</Text>
-              </View>
-            )}
-            {aluno?.peso && (
-              <View style={styles.infoField}>
-                <Text style={styles.infoLabel}>Peso:</Text>
-                <Text style={styles.infoValue}>{aluno.peso} kg</Text>
-              </View>
-            )}
-            {aluno?.altura && (
-              <View style={styles.infoField}>
-                <Text style={styles.infoLabel}>Altura:</Text>
-                <Text style={styles.infoValue}>{aluno.altura} m</Text>
-              </View>
-            )}
-            {aluno?.objetivo && (
-              <View style={styles.infoField}>
-                <Text style={styles.infoLabel}>Objetivo:</Text>
-                <Text style={styles.infoValue}>{aluno.objetivo}</Text>
-              </View>
-            )}
-          </View>
-
-          {/* Card Profissional */}
-          <View style={styles.infoCard}>
-            <Text style={styles.infoCardTitle}>Profissional</Text>
-            <View style={styles.infoField}>
-              <Text style={styles.infoLabel}>Prescrito por:</Text>
-              <Text style={styles.infoValue}>{profissional?.nome || 'Equipe Corpo Conectado'}</Text>
-            </View>
-            {profissional?.email && (
-              <View style={styles.infoField}>
-                <Text style={styles.infoLabel}>Contato:</Text>
-                <Text style={styles.infoValue}>{profissional.email}</Text>
-              </View>
-            )}
-            {aluno?.objetivo && (
-              <View style={styles.infoField}>
-                <Text style={styles.infoLabel}>Foco Macro:</Text>
-                <Text style={styles.infoValue}>{treinos?.[0]?.objetivo || aluno.objetivo}</Text>
-              </View>
-            )}
           </View>
         </View>
 
