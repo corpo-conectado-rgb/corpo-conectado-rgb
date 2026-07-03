@@ -38,9 +38,11 @@ export default function Treinos() {
   const [seriesState, setSeriesState] = useState({}); // { "exId_serieIdx": { concluida, carga, reps } }
   const [tempoTotal, setTempoTotal] = useState(0);
   const [horaInicio, setHoraInicio] = useState(null);
+  const [horaInicioTimestamp, setHoraInicioTimestamp] = useState(null);
   const [descansoAtivo, setDescansoAtivo] = useState(false);
   const [descansoSeg, setDescansoSeg] = useState(0);
   const [descansoMax, setDescansoMax] = useState(0);
+  const [descansoFimTimestamp, setDescansoFimTimestamp] = useState(null);
   const [treinoFinalizado, setTreinoFinalizado] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [proximaLetra, setProximaLetra] = useState(null);
@@ -113,22 +115,33 @@ export default function Treinos() {
 
   // Timer principal
   useEffect(() => {
-    if (activeView === 'foco' && !treinoFinalizado) {
-      timerRef.current = setInterval(() => setTempoTotal(t => t + 1), 1000);
+    if (activeView === 'foco' && !treinoFinalizado && horaInicioTimestamp) {
+      timerRef.current = setInterval(() => {
+        const now = Date.now();
+        setTempoTotal(Math.floor((now - horaInicioTimestamp) / 1000));
+      }, 1000);
     }
     return () => clearInterval(timerRef.current);
-  }, [activeView, treinoFinalizado]);
+  }, [activeView, treinoFinalizado, horaInicioTimestamp]);
 
   // Timer de descanso
   useEffect(() => {
-    if (descansoAtivo && descansoSeg > 0) {
-      descansoRef.current = setInterval(() => setDescansoSeg(s => {
-        if (s <= 1) { clearInterval(descansoRef.current); setDescansoAtivo(false); return 0; }
-        return s - 1;
-      }), 1000);
+    if (descansoAtivo && descansoFimTimestamp) {
+      descansoRef.current = setInterval(() => {
+        const now = Date.now();
+        const restante = Math.ceil((descansoFimTimestamp - now) / 1000);
+        
+        if (restante <= 0) {
+          clearInterval(descansoRef.current);
+          setDescansoSeg(0);
+          setDescansoAtivo(false);
+        } else {
+          setDescansoSeg(restante);
+        }
+      }, 1000);
     }
     return () => clearInterval(descansoRef.current);
-  }, [descansoAtivo, descansoSeg]);
+  }, [descansoAtivo, descansoFimTimestamp]);
 
   // ─── Ações ──────────────────────────────────────────────────────────────
   const iniciarTreino = async (ficha) => {
@@ -157,9 +170,11 @@ export default function Treinos() {
     setSeriesState(initialState);
     setTempoTotal(0);
     setHoraInicio(new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
+    setHoraInicioTimestamp(Date.now());
     setTreinoFinalizado(false);
     setDescansoAtivo(false);
     setDescansoSeg(0);
+    setDescansoFimTimestamp(null);
     setProximaLetra(null);
     setActiveView('foco');
   };
@@ -179,6 +194,7 @@ export default function Treinos() {
       const ex = fichaAtiva.exercicios[exIndex];
       setDescansoMax(ex.descanso);
       setDescansoSeg(ex.descanso);
+      setDescansoFimTimestamp(Date.now() + (ex.descanso * 1000));
       setDescansoAtivo(true);
     }
   };
