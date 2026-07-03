@@ -236,7 +236,17 @@ function formatDescanso(seg) {
   return `${seg}s`;
 }
 
-function formatDataEmissao() {
+function formatDataEmissao(dateString) {
+  if (dateString && typeof dateString === 'string') {
+    const [d, m, y] = dateString.split('/');
+    if (d && m && y) {
+      return new Date(y, m - 1, d).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      });
+    }
+  }
   return new Date().toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: 'long',
@@ -246,7 +256,8 @@ function formatDataEmissao() {
 
 // ─── Componente Principal ────────────────────────────────────────────────────
 export default function FichaTreinoPDF({ aluno, profissional, treinos, dataEmissao }) {
-  const data = dataEmissao || formatDataEmissao();
+  const rawDate = aluno?.data_termino || treinos?.[0]?.data_termino;
+  const data = dataEmissao || (rawDate ? formatDataEmissao(rawDate) : formatDataEmissao());
 
   return (
     <Document>
@@ -260,7 +271,7 @@ export default function FichaTreinoPDF({ aluno, profissional, treinos, dataEmiss
           </View>
           <View style={styles.headerRight}>
             <Text style={styles.headerDate}>RENOVAÇÃO DA FICHA</Text>
-            <Text style={styles.headerDateValue}>{aluno?.data_termino || treinos?.[0]?.data_termino || data}</Text>
+            <Text style={styles.headerDateValue}>{data}</Text>
           </View>
         </View>
 
