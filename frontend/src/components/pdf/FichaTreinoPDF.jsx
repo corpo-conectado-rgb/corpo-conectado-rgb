@@ -274,29 +274,48 @@ export default function FichaTreinoPDF({ aluno, profissional, treinos, dataEmiss
                   <Text style={styles.infoLabel}>Aluno:</Text>
                   <Text style={styles.infoValue}>{aluno?.nome || '--'}</Text>
                 </View>
-                {aluno?.idade && (
+                {aluno?.idade ? (
                   <View style={styles.infoField}>
                     <Text style={styles.infoLabel}>Idade:</Text>
                     <Text style={styles.infoValue}>{aluno.idade} anos</Text>
                   </View>
+                ) : (
+                  <View style={styles.infoField}>
+                    <Text style={styles.infoLabel}>Idade:</Text>
+                    <Text style={styles.infoValue}>--</Text>
+                  </View>
                 )}
-                {aluno?.peso && (
+                {aluno?.peso ? (
                   <View style={styles.infoField}>
                     <Text style={styles.infoLabel}>Peso:</Text>
                     <Text style={styles.infoValue}>{aluno.peso} kg</Text>
                   </View>
+                ) : (
+                  <View style={styles.infoField}>
+                    <Text style={styles.infoLabel}>Peso:</Text>
+                    <Text style={styles.infoValue}>--</Text>
+                  </View>
                 )}
               </View>
               <View style={styles.infoGridCol}>
-                {aluno?.altura && (
+                {aluno?.altura ? (
                   <View style={styles.infoField}>
                     <Text style={styles.infoLabel}>Altura:</Text>
                     <Text style={styles.infoValue}>{aluno.altura} m</Text>
                   </View>
+                ) : (
+                  <View style={styles.infoField}>
+                    <Text style={styles.infoLabel}>Altura:</Text>
+                    <Text style={styles.infoValue}>--</Text>
+                  </View>
                 )}
                 <View style={styles.infoField}>
-                  <Text style={styles.infoLabel}>Foco Macro:</Text>
-                  <Text style={styles.infoValue}>{treinos?.[0]?.objetivo || aluno?.objetivo || '--'}</Text>
+                  <Text style={styles.infoLabel}>Objetivo:</Text>
+                  <Text style={styles.infoValue}>{aluno?.objetivo || '--'}</Text>
+                </View>
+                <View style={styles.infoField}>
+                  <Text style={styles.infoLabel}>Constância:</Text>
+                  <Text style={styles.infoValue}>{aluno?.habitos_freq || '--'}</Text>
                 </View>
               </View>
             </View>
