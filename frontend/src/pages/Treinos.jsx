@@ -48,7 +48,7 @@ export default function Treinos() {
   const [proximaLetra, setProximaLetra] = useState(null);
   const [showSolicitacao, setShowSolicitacao] = useState(false);
   const [solicitacaoSuccess, setSolicitacaoSuccess] = useState(false);
-  const [solicitacaoForm, setSolicitacaoForm] = useState({ tipo: 'DUVIDA_EXECUCAO', mensagem: '' });
+  const [solicitacaoForm, setSolicitacaoForm] = useState({ tipo: 'IMPLEMENTACAO', mensagem: '' });
   const [enviandoSolicitacao, setEnviandoSolicitacao] = useState(false);
   const [showPDF, setShowPDF] = useState(false);
   const timerRef = useRef(null);
@@ -748,9 +748,11 @@ export default function Treinos() {
                       onChange={e => setSolicitacaoForm(prev => ({ ...prev, tipo: e.target.value }))}
                       className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-black"
                     >
-                      <option value="DUVIDA_EXECUCAO">Dúvida de Execução</option>
-                      <option value="SUBSTITUIR_EXERCICIO">Substituir Exercício</option>
-                      <option value="ATUALIZAR_INFORMACOES">Atualizar Informações</option>
+                      <option value="IMPLEMENTACAO">Implementação</option>
+                      <option value="FINANCEIRO">Financeiro</option>
+                      <option value="FICHA">Ficha</option>
+                      <option value="EXECUCAO">Execução</option>
+                      <option value="APLICATIVO">Aplicativo</option>
                     </select>
                   </div>
                   <div>
