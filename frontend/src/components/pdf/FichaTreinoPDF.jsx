@@ -1,5 +1,5 @@
 import React from 'react';
-import { Document, Page, View, Text, StyleSheet, Font } from '@react-pdf/renderer';
+import { Document, Page, View, Text, StyleSheet, Font, Image } from '@react-pdf/renderer';
 
 // ─── Cores do Tema (Azul Marinho Premium) ────────────────────────────────────
 const COLORS = {
@@ -213,6 +213,15 @@ const styles = StyleSheet.create({
     borderTopColor: COLORS.gray200,
     paddingTop: 8,
   },
+  footerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  footerLogo: {
+    width: 12,
+    height: 12,
+  },
   footerText: {
     fontSize: 7,
     color: COLORS.gray400,
@@ -375,10 +384,12 @@ export default function FichaTreinoPDF({ aluno, profissional, treinos, dataEmiss
 
         {/* ═══ Rodapé ═══ */}
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>
-            Corpo Conectado — Treinamento Inteligente
-            {profissional?.email ? `  •  ${profissional.email}` : ''}
-          </Text>
+          <View style={styles.footerLeft}>
+            <Image src="/Icone_Corpo_Conectado_Premium.png" style={styles.footerLogo} />
+            <Text style={styles.footerText}>
+              suporte.corpoconectado@gmail.com
+            </Text>
+          </View>
           <Text style={styles.footerBold} render={({ pageNumber, totalPages }) => `Página ${pageNumber} de ${totalPages}`} />
         </View>
 
