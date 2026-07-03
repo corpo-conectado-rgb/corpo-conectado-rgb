@@ -168,13 +168,12 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.offWhite,
   },
   colNum: { width: 24, textAlign: 'center' },
-  colExercicio: { flex: 3, paddingRight: 4 },
-  colGrupo: { flex: 1.5, paddingRight: 4 },
+  colExercicio: { flex: 3.5, paddingRight: 4 },
   colSeries: { width: 40, textAlign: 'center' },
   colReps: { width: 50, textAlign: 'center' },
   colCarga: { width: 40, textAlign: 'center' },
   colDescanso: { width: 45, textAlign: 'center' },
-  colObs: { flex: 1.5 },
+  colObs: { flex: 2.5 },
   thText: {
     fontSize: 6.5,
     fontFamily: 'Helvetica-Bold',
@@ -337,7 +336,6 @@ export default function FichaTreinoPDF({ aluno, profissional, treinos, dataEmiss
             <View style={styles.tableHeader}>
               <Text style={[styles.thText, styles.colNum]}>#</Text>
               <Text style={[styles.thText, styles.colExercicio]}>Exercício</Text>
-              <Text style={[styles.thText, styles.colGrupo]}>Grupo</Text>
               <Text style={[styles.thText, styles.colSeries]}>Séries</Text>
               <Text style={[styles.thText, styles.colReps]}>Reps</Text>
               <Text style={[styles.thText, styles.colCarga]}>Carga</Text>
@@ -350,7 +348,6 @@ export default function FichaTreinoPDF({ aluno, profissional, treinos, dataEmiss
               <View key={exIdx} style={[styles.tableRow, exIdx % 2 !== 0 && styles.tableRowAlt]}>
                 <Text style={[styles.tdLight, styles.colNum]}>{exIdx + 1}</Text>
                 <Text style={[styles.tdBold, styles.colExercicio]}>{ex.nome || '--'}</Text>
-                <Text style={[styles.tdText, styles.colGrupo]}>{ex.grupomuscular || treino.grupoPrimario || treino.foco_muscular || '--'}</Text>
                 <Text style={[styles.tdText, styles.colSeries]}>{ex.series || '--'}</Text>
                 <Text style={[styles.tdText, styles.colReps]}>{ex.reps || ex.repeticoes || '--'}</Text>
                 <Text style={[styles.tdText, styles.colCarga]}>{ex.carga || '--'}</Text>
