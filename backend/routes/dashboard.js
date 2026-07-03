@@ -111,8 +111,14 @@ router.get('/', authMiddleware, async (req, res) => {
       barData.push({ name: monthStr.charAt(0).toUpperCase() + monthStr.slice(1), treinos: qtdTreinos });
     }
 
-    // Pegar o último treino para mensagem
-    const diasDesdeUltimoTreino = userHist.length > 0 ? Math.floor((new Date() - new Date(userHist[0].data)) / (1000 * 60 * 60 * 24)) : null;
+    // Pegar o último treino para mensagem (Lógica ajustada para evitar bug de fuso horário)
+    let diasDesdeUltimoTreino = null;
+    if (userHist.length > 0) {
+      const d = new Date(userHist[0].data + 'T12:00:00');
+      const hoje = new Date();
+      hoje.setHours(12, 0, 0, 0);
+      diasDesdeUltimoTreino = Math.floor((hoje - d) / (1000 * 60 * 60 * 24));
+    }
 
     res.json({
       streakSemanas,
