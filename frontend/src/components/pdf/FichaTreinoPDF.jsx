@@ -259,8 +259,8 @@ export default function FichaTreinoPDF({ aluno, profissional, treinos, dataEmiss
             <Text style={styles.brandTagline}>Treinamento Inteligente</Text>
           </View>
           <View style={styles.headerRight}>
-            <Text style={styles.headerDate}>DATA DE EMISSÃO</Text>
-            <Text style={styles.headerDateValue}>{data}</Text>
+            <Text style={styles.headerDate}>RENOVAÇÃO DA FICHA</Text>
+            <Text style={styles.headerDateValue}>{aluno?.data_termino || treinos?.[0]?.data_termino || data}</Text>
           </View>
         </View>
 

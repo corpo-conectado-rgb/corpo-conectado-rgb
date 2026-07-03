@@ -108,6 +108,7 @@ router.get('/my-sheet', authMiddleware, async (req, res) => {
 
     const treinoId = activeTreino.get('id');
     const objetivo = activeTreino.get('objetivo');
+    const dataTermino = activeTreino.get('data_termino');
 
     const diasRows = await getCachedRows('dias_treino', []);
     const diasParaTreino = diasRows.filter(r => r.get('treino_id') === treinoId);
@@ -124,6 +125,7 @@ router.get('/my-sheet', authMiddleware, async (req, res) => {
         letra: dia.get('letra_dia'),
         nome: dia.get('foco_muscular'),
         objetivo: objetivo || 'Hipertrofia',
+        data_termino: dataTermino || '',
         duracao: `${45 + (exsOfDia.length * 5)} min`, // Duração dinâmica
         ativa: idx === 0, // Inicia a Letra "A" como standard ativo na visualizacao
         grupoPrimario: dia.get('foco_muscular') ? dia.get('foco_muscular').split(',')[0] : 'Geral',
