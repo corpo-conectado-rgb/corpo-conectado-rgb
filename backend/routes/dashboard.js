@@ -111,12 +111,16 @@ router.get('/', authMiddleware, async (req, res) => {
       barData.push({ name: monthStr.charAt(0).toUpperCase() + monthStr.slice(1), treinos: qtdTreinos });
     }
 
-    // Pegar o último treino para mensagem (Lógica ajustada para evitar bug de fuso horário)
+    // Pegar o último treino para mensagem (Lógica ajustada para evitar bug de fuso horário UTC do backend)
     let diasDesdeUltimoTreino = null;
     if (userHist.length > 0) {
       const d = new Date(userHist[0].data + 'T12:00:00');
-      const hoje = new Date();
-      hoje.setHours(12, 0, 0, 0);
+      
+      const agora = new Date();
+      agora.setHours(agora.getHours() - 3); // UTC-3 (Brasil)
+      const dataHojeStr = agora.toISOString().split('T')[0];
+      const hoje = new Date(dataHojeStr + 'T12:00:00');
+      
       diasDesdeUltimoTreino = Math.floor((hoje - d) / (1000 * 60 * 60 * 24));
     }
 
