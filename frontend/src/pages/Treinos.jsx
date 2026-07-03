@@ -349,8 +349,8 @@ export default function Treinos() {
       const proximaFicha = fichas.find(f => f.letra === proximaLetra);
       return (
         <div className="flex flex-col items-center justify-center min-h-[70vh] text-center gap-5 animate-fade-in px-4">
-          <div className="w-18 h-18 rounded-full bg-black flex items-center justify-center shadow-lg">
-            <Trophy size={32} className="text-yellow-400" />
+          <div className="w-24 h-24 flex items-center justify-center drop-shadow-2xl">
+            <img src="/Icone_Corpo_Conectado_Premium.png" alt="Corpo Conectado" className="w-full h-full object-contain pointer-events-none" />
           </div>
           <h2 className="text-2xl font-black text-gray-900">Treino Concluído!</h2>
 
