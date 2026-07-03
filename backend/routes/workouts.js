@@ -115,18 +115,37 @@ router.get('/my-sheet', authMiddleware, async (req, res) => {
 
     const exerciciosRows = await getCachedRows('exercicios', []);
 
+    // Calcular média real de duração por letra a partir do histórico
+    const histRows = await getCachedRows('historico_treinos', HISTORICO_HEADERS);
+    const userHist = histRows.filter(r =>
+      r.get('user_id') === req.user.id && r.get('treino_id') === treinoId
+    );
+    const mediasPorLetra = {};
+    userHist.forEach(r => {
+      const letra = r.get('letra');
+      const seg = Number(r.get('duracao_seg')) || 0;
+      if (!mediasPorLetra[letra]) mediasPorLetra[letra] = { soma: 0, qtd: 0 };
+      mediasPorLetra[letra].soma += seg;
+      mediasPorLetra[letra].qtd += 1;
+    });
+
     const fichasFrontend = diasParaTreino.map((dia, idx) => {
       const diaId = dia.get('id');
       const exsOfDia = exerciciosRows.filter(r => r.get('dia_treino_id') === diaId);
+      const letraDia = dia.get('letra_dia');
+      const stats = mediasPorLetra[letraDia];
+      const duracaoStr = (stats && stats.qtd > 0)
+        ? `${Math.round(stats.soma / stats.qtd / 60)} min`
+        : '-- min';
 
       return {
         treino_id: treinoId,
         id: diaId,
-        letra: dia.get('letra_dia'),
+        letra: letraDia,
         nome: dia.get('foco_muscular'),
         objetivo: objetivo || 'Hipertrofia',
         data_termino: dataTermino || '',
-        duracao: `${45 + (exsOfDia.length * 5)} min`, // Duração dinâmica
+        duracao: duracaoStr, // Média real do histórico do aluno
         ativa: idx === 0, // Inicia a Letra "A" como standard ativo na visualizacao
         grupoPrimario: dia.get('foco_muscular') ? dia.get('foco_muscular').split(',')[0] : 'Geral',
         exercicios: exsOfDia.map((ex, i) => ({
