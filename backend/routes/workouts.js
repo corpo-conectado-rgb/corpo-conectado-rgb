@@ -117,9 +117,7 @@ router.get('/my-sheet', authMiddleware, async (req, res) => {
 
     // Calcular média real de duração por letra a partir do histórico
     const histRows = await getCachedRows('historico_treinos', HISTORICO_HEADERS);
-    const userHist = histRows.filter(r =>
-      r.get('user_id') === req.user.id && r.get('treino_id') === treinoId
-    );
+    const userHist = histRows.filter(r => r.get('user_id') === req.user.id);
     const mediasPorLetra = {};
     userHist.forEach(r => {
       const letra = r.get('letra');
