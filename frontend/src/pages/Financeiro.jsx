@@ -3,6 +3,13 @@ import { Wallet, FileText, CheckCircle2, Clock, AlertCircle, Copy, X } from 'luc
 import { apiFetch } from '../services/api';
 import Toast from '../components/Toast';
 
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-';
+  if (dateStr.includes('T')) dateStr = dateStr.split('T')[0];
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
+};
+
 export default function Financeiro() {
   const [mensalidade, setMensalidade] = useState(null);
   const [historico, setHistorico] = useState([]);
@@ -106,14 +113,14 @@ export default function Financeiro() {
                       R$ {Number(mensalidade.valor || 0).toFixed(2).replace('.', ',')}
                     </div>
                     <p className="text-sm text-gray-500 font-medium">
-                      Vencimento: <span className="text-gray-900 font-bold">{new Date(mensalidade.data_vencimento).toLocaleDateString('pt-BR')}</span>
+                      Vencimento: <span className="text-gray-900 font-bold">{formatDate(mensalidade.data_vencimento)}</span>
                     </p>
                   </div>
 
                   {mensalidade.status === 'PAGA' && (
                     <div className="mt-6 p-3 bg-gray-50 rounded-xl flex items-center justify-between">
                       <span className="text-xs font-bold text-gray-500">Pago em</span>
-                      <span className="text-sm font-black text-gray-900">{new Date(mensalidade.data_pagamento).toLocaleDateString('pt-BR')}</span>
+                      <span className="text-sm font-black text-gray-900">{formatDate(mensalidade.data_pagamento)}</span>
                     </div>
                   )}
                 </div>
@@ -176,7 +183,7 @@ export default function Financeiro() {
                       <div>
                         <p className="text-sm font-bold text-gray-900">{item.referencia}</p>
                         <p className="text-xs text-gray-500 font-medium">
-                          {item.status === 'PAGA' ? `Pago em ${new Date(item.data_pagamento).toLocaleDateString('pt-BR')}` : `Vence em ${new Date(item.data_vencimento).toLocaleDateString('pt-BR')}`}
+                          {item.status === 'PAGA' ? `Pago em ${formatDate(item.data_pagamento)}` : `Vence em ${formatDate(item.data_vencimento)}`}
                         </p>
                       </div>
                     </div>

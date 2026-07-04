@@ -3,6 +3,13 @@ import { Wallet, Search, TrendingUp, Users, AlertCircle, FileText, CheckCircle2,
 import { apiFetch } from '../services/api';
 import Toast from '../components/Toast';
 
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-';
+  if (dateStr.includes('T')) dateStr = dateStr.split('T')[0];
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
+};
+
 export default function AdminFinanceiro() {
   const [dashboard, setDashboard] = useState({ receitaMes: 0, receitaAno: 0, totalAberto: 0, qtdInadimplentes: 0 });
   const [alunos, setAlunos] = useState([]);
@@ -302,7 +309,7 @@ export default function AdminFinanceiro() {
                         {aluno.ultima_mensalidade ? `R$ ${Number(aluno.ultima_mensalidade.valor || 0).toFixed(2).replace('.', ',')}` : '-'}
                       </td>
                       <td className="px-6 py-4 w-[20%] text-center text-xs text-gray-500 font-medium">
-                        {aluno.ultima_mensalidade ? new Date(aluno.ultima_mensalidade.vencimento).toLocaleDateString('pt-BR') : '-'}
+                        {aluno.ultima_mensalidade ? formatDate(aluno.ultima_mensalidade.vencimento) : '-'}
                       </td>
                       <td className="px-6 py-4 w-[10%] text-center">
                         {(aluno.status_mensalidade === 'PENDENTE' || aluno.status_mensalidade === 'ATRASADA') && aluno.ultima_mensalidade && (
