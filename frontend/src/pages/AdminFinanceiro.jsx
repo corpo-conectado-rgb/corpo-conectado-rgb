@@ -75,7 +75,7 @@ export default function AdminFinanceiro() {
         method: 'POST',
         body: JSON.stringify({
           user_id: novaCobranca.user_id,
-          valor: Number(novaCobranca.valor),
+          valor: Number(String(novaCobranca.valor).replace(',', '.')),
           data_vencimento: novaCobranca.data_vencimento,
           referencia: novaCobranca.referencia
         })

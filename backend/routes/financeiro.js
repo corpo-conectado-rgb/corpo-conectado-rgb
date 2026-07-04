@@ -37,7 +37,7 @@ router.get('/minha-mensalidade', authMiddleware, async (req, res) => {
 
     res.json({
       id: atual.get('id'),
-      valor: Number(atual.get('valor')),
+      valor: Number(String(atual.get('valor') || '0').replace(',', '.')),
       data_vencimento: atual.get('data_vencimento'),
       data_pagamento: atual.get('data_pagamento'),
       status: atual.get('status'),
@@ -62,7 +62,7 @@ router.get('/historico', authMiddleware, async (req, res) => {
       .filter(r => r.get('user_id') === req.user.id)
       .map(r => ({
         id: r.get('id'),
-        valor: Number(r.get('valor')),
+        valor: Number(String(r.get('valor') || '0').replace(',', '.')),
         data_vencimento: r.get('data_vencimento'),
         data_pagamento: r.get('data_pagamento'),
         status: r.get('status'),
@@ -145,7 +145,7 @@ router.get('/admin/dashboard', adminMiddleware, async (req, res) => {
 
     mensalidadesRows.forEach(r => {
       const status = r.get('status');
-      const valor = Number(r.get('valor')) || 0;
+      const valor = Number(String(r.get('valor') || '0').replace(',', '.')) || 0;
       const dataPagamentoStr = r.get('data_pagamento');
       const userId = r.get('user_id');
       
@@ -208,7 +208,7 @@ router.get('/admin/alunos', adminMiddleware, async (req, res) => {
         status_mensalidade: atual ? atual.get('status') : 'SEM_COBRANCA',
         ultima_mensalidade: atual ? {
           id: atual.get('id'),
-          valor: Number(atual.get('valor')),
+          valor: Number(String(atual.get('valor') || '0').replace(',', '.')),
           vencimento: atual.get('data_vencimento'),
           referencia: atual.get('referencia')
         } : null
