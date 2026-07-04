@@ -192,21 +192,41 @@ export default function AdminFinanceiro() {
 
         {/* KPIs (Fixo no topo) */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col justify-center">
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Receita Mensal</p>
-            <p className="text-xl md:text-2xl font-black text-gray-900 truncate">R$ {dashboard.receitaMes.toFixed(2).replace('.', ',')}</p>
+          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center justify-between">
+            <div className="flex flex-col justify-center">
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Receita Mensal</p>
+              <p className="text-xl md:text-2xl font-black text-gray-900 truncate">R$ {dashboard.receitaMes.toFixed(2).replace('.', ',')}</p>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 hidden lg:flex">
+              <TrendingUp size={18} strokeWidth={2.5} />
+            </div>
           </div>
-          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col justify-center">
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Receita Anual</p>
-            <p className="text-xl md:text-2xl font-black text-gray-900 truncate">R$ {dashboard.receitaAno.toFixed(2).replace('.', ',')}</p>
+          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center justify-between">
+            <div className="flex flex-col justify-center">
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Receita Anual</p>
+              <p className="text-xl md:text-2xl font-black text-gray-900 truncate">R$ {dashboard.receitaAno.toFixed(2).replace('.', ',')}</p>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 hidden lg:flex">
+              <Wallet size={18} strokeWidth={2.5} />
+            </div>
           </div>
-          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col justify-center">
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Em Aberto</p>
-            <p className="text-xl md:text-2xl font-black text-gray-900 truncate">R$ {dashboard.totalAberto.toFixed(2).replace('.', ',')}</p>
+          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center justify-between">
+            <div className="flex flex-col justify-center">
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Em Aberto</p>
+              <p className="text-xl md:text-2xl font-black text-gray-900 truncate">R$ {dashboard.totalAberto.toFixed(2).replace('.', ',')}</p>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 hidden lg:flex">
+              <Clock size={18} strokeWidth={2.5} />
+            </div>
           </div>
-          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col justify-center">
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Inadimplentes</p>
-            <p className="text-xl md:text-2xl font-black text-gray-900 truncate">{dashboard.qtdInadimplentes}</p>
+          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center justify-between">
+            <div className="flex flex-col justify-center">
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Inadimplentes</p>
+              <p className="text-xl md:text-2xl font-black text-gray-900 truncate">{dashboard.qtdInadimplentes}</p>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0 hidden lg:flex">
+              <AlertCircle size={18} strokeWidth={2.5} />
+            </div>
           </div>
         </div>
       </div>
