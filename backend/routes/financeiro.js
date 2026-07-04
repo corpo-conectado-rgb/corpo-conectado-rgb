@@ -27,6 +27,15 @@ router.get('/minha-mensalidade', authMiddleware, async (req, res) => {
 
     // Retorna a mensalidade mais recente/atual (a primeira)
     const atual = userMensalidades[0];
+    
+    let diasAtraso = 0;
+    if (atual.get('status') === 'ATRASADA') {
+      const hoje = new Date();
+      const vencimento = new Date(atual.get('data_vencimento'));
+      const diffTime = Math.abs(hoje - vencimento);
+      diasAtraso = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
+
     res.json({
       id: atual.get('id'),
       valor: Number(atual.get('valor')),
@@ -35,7 +44,8 @@ router.get('/minha-mensalidade', authMiddleware, async (req, res) => {
       status: atual.get('status'),
       referencia: atual.get('referencia'),
       pix_qrcode: atual.get('pix_qrcode'),
-      pix_copia_cola: atual.get('pix_copia_cola')
+      pix_copia_cola: atual.get('pix_copia_cola'),
+      dias_atraso: diasAtraso
     });
   } catch (error) {
     console.error(error);
@@ -169,6 +179,97 @@ router.get('/admin/dashboard', adminMiddleware, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erro ao gerar dashboard financeiro' });
+  }
+});
+
+// ============================================
+// GET /admin/alunos — Lista alunos e status financeiro
+// ============================================
+router.get('/admin/alunos', adminMiddleware, async (req, res) => {
+  try {
+    const usuariosRows = await getCachedRows('usuarios', ['id', 'nome', 'email', 'role']);
+    const mensalidadesRows = await getCachedRows('mensalidades', MENSALIDADES_HEADERS);
+    
+    // Pegar apenas usuários com role 'user'
+    const alunos = usuariosRows.filter(r => r.get('role') !== 'admin').map(r => ({
+      id: r.get('id'),
+      nome: r.get('nome'),
+      email: r.get('email')
+    }));
+
+    // Anexar status financeiro atual de cada aluno
+    const result = alunos.map(aluno => {
+      const alunoMensalidades = mensalidadesRows
+        .filter(r => r.get('user_id') === aluno.id)
+        .sort((a, b) => new Date(b.get('data_vencimento')) - new Date(a.get('data_vencimento')));
+
+      const atual = alunoMensalidades.length > 0 ? alunoMensalidades[0] : null;
+      
+      return {
+        ...aluno,
+        status_mensalidade: atual ? atual.get('status') : 'SEM_COBRANCA',
+        ultima_mensalidade: atual ? {
+          id: atual.get('id'),
+          valor: Number(atual.get('valor')),
+          vencimento: atual.get('data_vencimento'),
+          referencia: atual.get('referencia')
+        } : null
+      };
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao listar alunos no financeiro' });
+  }
+});
+
+// ============================================
+// POST /admin/cobranca — Gera cobrança avulsa
+// ============================================
+router.post('/admin/cobranca', adminMiddleware, async (req, res) => {
+  try {
+    const { user_id, valor, data_vencimento, referencia } = req.body;
+    
+    const usuariosRows = await getCachedRows('usuarios', ['id', 'nome', 'email']);
+    const aluno = usuariosRows.find(r => r.get('id') === user_id);
+    
+    if (!aluno) return res.status(404).json({ error: 'Aluno não encontrado' });
+    
+    // 1. Cria ou recupera o cliente no Asaas
+    const asaasCustomerId = await asaasService.createOrGetCustomer(aluno.get('nome'), aluno.get('email'));
+    
+    // 2. Gera a cobrança no Asaas
+    const description = `Mensalidade Corpo Conectado - ${referencia}`;
+    const payment = await asaasService.createPayment(asaasCustomerId, valor, data_vencimento, description);
+    
+    // 3. Pega o QR Code
+    const qrCodeData = await asaasService.getPixQRCode(payment.id);
+    
+    // 4. Salva no banco (Google Sheets)
+    const sheet = await getSheet('mensalidades', MENSALIDADES_HEADERS);
+    await sheet.addRow({
+      id: uuidv4(),
+      user_id: user_id,
+      asaas_payment_id: payment.id,
+      valor: valor,
+      data_vencimento: data_vencimento,
+      data_pagamento: '',
+      status: 'PENDENTE',
+      forma_pagamento: 'PIX',
+      referencia: referencia,
+      pix_qrcode: qrCodeData.encodedImage,
+      pix_copia_cola: qrCodeData.payload,
+      observacao: '',
+      data_criacao: new Date().toISOString()
+    });
+    
+    invalidateCache('mensalidades');
+    
+    res.json({ success: true, message: 'Cobrança gerada com sucesso' });
+  } catch (error) {
+    console.error('Erro ao gerar cobrança:', error);
+    res.status(500).json({ error: error.message || 'Erro interno ao gerar cobrança' });
   }
 });
 
