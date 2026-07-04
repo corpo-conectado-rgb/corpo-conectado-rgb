@@ -90,6 +90,18 @@ export default function AdminFinanceiro() {
     }
   };
 
+  const handleMarcarPago = async (cobrancaId) => {
+    if (!window.confirm('Confirma o recebimento desta cobrança? O aluno será liberado imediatamente.')) return;
+    try {
+      await apiFetch(`/financeiro/admin/cobranca/${cobrancaId}/pagar`, { method: 'PUT' });
+      setToast({ show: true, message: 'Cobrança marcada como paga!', type: 'success' });
+      loadData();
+    } catch (err) {
+      console.error(err);
+      setToast({ show: true, message: 'Erro ao aprovar pagamento.', type: 'error' });
+    }
+  };
+
   if (loading) {
     return (
       <div className="absolute inset-0 z-10 bg-white rounded-2xl flex items-center justify-center animate-fade-in">
@@ -238,10 +250,11 @@ export default function AdminFinanceiro() {
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead>
                 <tr className="bg-[#FAFAFA] border-b border-gray-100 text-[10px] uppercase font-black tracking-widest text-gray-400">
-                  <th className="px-6 py-4 w-[35%]">Aluno & Contato</th>
+                  <th className="px-6 py-4 w-[30%]">Aluno & Contato</th>
                   <th className="px-6 py-4 w-[20%]">Status Mensalidade</th>
                   <th className="px-6 py-4 w-[20%] text-center">Último Valor</th>
-                  <th className="px-6 py-4 w-[25%] text-center">Vencimento</th>
+                  <th className="px-6 py-4 w-[20%] text-center">Vencimento</th>
+                  <th className="px-6 py-4 w-[10%] text-center">Ações</th>
                 </tr>
               </thead>
             </table>
@@ -256,7 +269,7 @@ export default function AdminFinanceiro() {
                 ) : (
                   alunosFiltrados.map((aluno) => (
                     <tr key={aluno.id} className="hover:bg-gray-50/80 transition-all duration-300">
-                      <td className="px-6 py-4 w-[35%]">
+                      <td className="px-6 py-4 w-[30%]">
                         <div className="font-bold text-gray-900 text-sm">{aluno.nome}</div>
                         <div className="text-xs text-gray-500">{aluno.email}</div>
                       </td>
@@ -283,8 +296,19 @@ export default function AdminFinanceiro() {
                       <td className="px-6 py-4 w-[20%] text-center text-sm font-bold text-gray-900">
                         {aluno.ultima_mensalidade ? `R$ ${aluno.ultima_mensalidade.valor.toFixed(2).replace('.', ',')}` : '-'}
                       </td>
-                      <td className="px-6 py-4 w-[25%] text-center text-xs text-gray-500 font-medium">
+                      <td className="px-6 py-4 w-[20%] text-center text-xs text-gray-500 font-medium">
                         {aluno.ultima_mensalidade ? new Date(aluno.ultima_mensalidade.vencimento).toLocaleDateString('pt-BR') : '-'}
+                      </td>
+                      <td className="px-6 py-4 w-[10%] text-center">
+                        {(aluno.status_mensalidade === 'PENDENTE' || aluno.status_mensalidade === 'ATRASADA') && aluno.ultima_mensalidade && (
+                          <button 
+                            onClick={() => handleMarcarPago(aluno.ultima_mensalidade.id)}
+                            title="Marcar como Pago"
+                            className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 flex items-center justify-center mx-auto transition shadow-sm border border-emerald-100 active:scale-95"
+                          >
+                            <Check size={14} strokeWidth={3} />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))

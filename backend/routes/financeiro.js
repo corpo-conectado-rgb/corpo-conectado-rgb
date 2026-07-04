@@ -4,7 +4,6 @@ const { v4: uuidv4 } = require('uuid');
 const authMiddleware = require('../middlewares/authMiddleware');
 const adminMiddleware = require('../middlewares/adminMiddleware');
 const { getCachedRows, getSheet, invalidateCache } = require('../services/googleSheets');
-const asaasService = require('../services/asaas');
 
 const MENSALIDADES_HEADERS = ['id', 'user_id', 'asaas_payment_id', 'valor', 'data_vencimento', 'data_pagamento', 'status', 'forma_pagamento', 'referencia', 'pix_qrcode', 'pix_copia_cola', 'observacao', 'data_criacao'];
 const PLANOS_HEADERS = ['id', 'nome', 'valor', 'ativo', 'data_criacao'];
@@ -119,8 +118,7 @@ router.post('/webhook', express.json({ type: 'application/json' }), async (req, 
 
     res.json({ received: true });
   } catch (error) {
-    console.error('Erro no webhook Asaas:', error);
-    // Asaas espera 200 OK de qualquer forma para não reenviar infinitamente se não for crítico
+    console.error('Erro no webhook:', error);
     res.status(200).json({ error: error.message });
   }
 });
@@ -225,7 +223,7 @@ router.get('/admin/alunos', adminMiddleware, async (req, res) => {
 });
 
 // ============================================
-// POST /admin/cobranca — Gera cobrança avulsa
+// POST /admin/cobranca — Gera cobrança avulsa manual
 // ============================================
 router.post('/admin/cobranca', adminMiddleware, async (req, res) => {
   try {
@@ -236,31 +234,21 @@ router.post('/admin/cobranca', adminMiddleware, async (req, res) => {
     
     if (!aluno) return res.status(404).json({ error: 'Aluno não encontrado' });
     
-    // 1. Cria ou recupera o cliente no Asaas
-    const asaasCustomerId = await asaasService.createOrGetCustomer(aluno.get('nome'), aluno.get('email'));
-    
-    // 2. Gera a cobrança no Asaas
-    const description = `Mensalidade Corpo Conectado - ${referencia}`;
-    const payment = await asaasService.createPayment(asaasCustomerId, valor, data_vencimento, description);
-    
-    // 3. Pega o QR Code
-    const qrCodeData = await asaasService.getPixQRCode(payment.id);
-    
-    // 4. Salva no banco (Google Sheets)
+    // Salva no banco (Google Sheets) diretamente
     const sheet = await getSheet('mensalidades', MENSALIDADES_HEADERS);
     await sheet.addRow({
       id: uuidv4(),
       user_id: user_id,
-      asaas_payment_id: payment.id,
+      asaas_payment_id: '', // sem gateway
       valor: valor,
       data_vencimento: data_vencimento,
       data_pagamento: '',
       status: 'PENDENTE',
-      forma_pagamento: 'PIX',
+      forma_pagamento: 'PIX_MANUAL',
       referencia: referencia,
-      pix_qrcode: qrCodeData.encodedImage,
-      pix_copia_cola: qrCodeData.payload,
-      observacao: '',
+      pix_qrcode: '', // sem qr code dinamico
+      pix_copia_cola: '',
+      observacao: 'Cobrança manual gerada',
       data_criacao: new Date().toISOString()
     });
     
@@ -270,6 +258,32 @@ router.post('/admin/cobranca', adminMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Erro ao gerar cobrança:', error);
     res.status(500).json({ error: error.message || 'Erro interno ao gerar cobrança' });
+  }
+});
+
+// ============================================
+// PUT /admin/cobranca/:id/pagar — Marca cobrança como PAGA manualmente
+// ============================================
+router.put('/admin/cobranca/:id/pagar', adminMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const sheet = await getSheet('mensalidades', MENSALIDADES_HEADERS);
+    const rows = await sheet.getRows();
+    const row = rows.find(r => r.get('id') === id);
+    
+    if (!row) return res.status(404).json({ error: 'Cobrança não encontrada' });
+    
+    row.set('status', 'PAGA');
+    row.set('data_pagamento', new Date().toISOString().split('T')[0]);
+    await row.save();
+    
+    invalidateCache('mensalidades');
+    
+    res.json({ success: true, message: 'Cobrança marcada como paga!' });
+  } catch (error) {
+    console.error('Erro ao marcar como paga:', error);
+    res.status(500).json({ error: 'Erro interno ao atualizar cobrança' });
   }
 });
 

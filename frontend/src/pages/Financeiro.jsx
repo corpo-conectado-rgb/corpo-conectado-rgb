@@ -118,37 +118,35 @@ export default function Financeiro() {
                   )}
                 </div>
 
-                {/* PAGAMENTO (PIX) */}
-                {mensalidade.status !== 'PAGA' && mensalidade.pix_qrcode && (
+                {/* PAGAMENTO (PIX MANUAL) */}
+                {mensalidade.status !== 'PAGA' && (
                   <div className="p-6 md:w-1/2 bg-gray-50/50 flex flex-col items-center justify-center">
                     <h4 className="text-xs font-black uppercase tracking-widest text-gray-500 mb-4 text-center">Pagamento via PIX</h4>
                     
-                    {/* QR Code */}
-                    <div className="bg-white p-2 rounded-xl shadow-sm border border-gray-200 mb-4">
-                      <img src={`data:image/png;base64,${mensalidade.pix_qrcode}`} alt="QR Code PIX" className="w-32 h-32" />
-                    </div>
-                    
-                    {/* Copia e Cola */}
-                    <div className="w-full">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">Pix Copia e Cola</label>
+                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-4 w-full text-center">
+                      <p className="text-xs text-gray-500 font-medium mb-1">Recebedor</p>
+                      <p className="text-sm font-black text-gray-900 mb-4">Kevin Henrique da Silva Oliveira</p>
+                      
+                      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block text-left">Chave PIX (Aleatória)</label>
                       <div className="flex gap-2">
                         <input 
                           type="text" 
                           readOnly 
-                          value={mensalidade.pix_copia_cola}
-                          className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs font-medium text-gray-600 outline-none truncate"
+                          value="b33c1dd9-0e16-4731-ac5a-89f3aec755c7"
+                          className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs font-medium text-gray-600 outline-none truncate"
                         />
                         <button 
-                          onClick={() => handleCopy(mensalidade.pix_copia_cola)}
+                          onClick={() => handleCopy('b33c1dd9-0e16-4731-ac5a-89f3aec755c7')}
                           className="bg-black text-white px-3 rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center"
+                          title="Copiar chave PIX"
                         >
                           <Copy size={16} />
                         </button>
                       </div>
                     </div>
                     
-                    <p className="text-[10px] text-gray-400 mt-4 text-center font-medium">
-                      O pagamento será reconhecido automaticamente em instantes.
+                    <p className="text-[10px] text-gray-400 mt-2 text-center font-medium">
+                      Transfira exatamente o valor da mensalidade para a chave acima. O seu acesso será liberado assim que o administrador confirmar o recebimento.
                     </p>
                   </div>
                 )}
