@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Wallet, Search, TrendingUp, TrendingDown, Users, AlertCircle, FileText, CheckCircle2, ChevronDown, Clock } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Wallet, Search, TrendingUp, Users, AlertCircle, FileText, CheckCircle2, ChevronDown, Clock, Filter, Check, X, RotateCcw } from 'lucide-react';
 import { apiFetch } from '../services/api';
 import Toast from '../components/Toast';
 
@@ -15,7 +15,31 @@ export default function AdminFinanceiro() {
     data_vencimento: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 10).toISOString().split('T')[0], // next month, day 10
     referencia: `${new Date().getMonth() + 2}/${new Date().getFullYear()}`.padStart(7, '0') // simple string format mm/yyyy
   });
+  const [busca, setBusca] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [filtroStatus, setFiltroStatus] = useState([]);
+  const filterRef = useRef(null);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (filterRef.current && !filterRef.current.contains(e.target)) {
+        setShowFilters(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const toggleStatus = (status) => {
+    setFiltroStatus(prev => prev.includes(status) ? prev.filter(s => s !== status) : [...prev, status]);
+  };
+
+  const alunosFiltrados = alunos.filter(a => {
+    const matchBusca = a.nome.toLowerCase().includes(busca.toLowerCase()) || a.email.toLowerCase().includes(busca.toLowerCase());
+    const matchStatus = filtroStatus.length === 0 || filtroStatus.includes(a.status_mensalidade);
+    return matchBusca && matchStatus;
+  });
 
   useEffect(() => {
     loadData();
@@ -79,121 +103,175 @@ export default function AdminFinanceiro() {
 
   return (
     <div className="absolute inset-0 z-10 bg-white rounded-2xl flex flex-col overflow-hidden animate-fade-in">
-      <div className="px-6 lg:px-8 pt-6 lg:pt-8 pb-4 flex-shrink-0 border-b border-gray-100">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      
+      {/* HEADER FIXO */}
+      <div className="px-6 lg:px-8 xl:px-10 pt-6 lg:pt-8 pb-4 flex-shrink-0">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-5 gap-4">
           <div>
             <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
               <Wallet className="text-gray-900" size={32} strokeWidth={2.5} /> Gestão Financeira
             </h1>
-            <p className="text-sm text-gray-500 font-medium mt-1">Visão geral do faturamento e alunos.</p>
+            <p className="text-gray-500 font-medium mt-1">Visão geral do faturamento e controle de inadimplência.</p>
           </div>
-          <button 
-            onClick={() => setShowModal(true)}
-            className="bg-black text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-gray-800 transition-colors active:scale-95 shadow-md self-start md:self-auto"
-          >
-            + Nova Cobrança
-          </button>
+          
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setShowModal(true)}
+              className="bg-black text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-gray-800 transition-colors active:scale-95 shadow-md self-start md:self-auto whitespace-nowrap"
+            >
+              + Nova Cobrança
+            </button>
+            {/* Botão Filtros */}
+            <div className="relative" ref={filterRef}>
+              <button 
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border text-sm font-bold transition shadow-sm whitespace-nowrap ${
+                  filtroStatus.length > 0 
+                    ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100' 
+                    : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <Filter size={16} /> Filtros
+                {filtroStatus.length > 0 && (
+                  <span className="ml-1 w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-black flex items-center justify-center">
+                    {filtroStatus.length}
+                  </span>
+                )}
+              </button>
+
+              {/* Dropdown Filtros */}
+              {showFilters && (
+                <div className="absolute right-0 top-full mt-2 w-[calc(100vw-48px)] md:w-[320px] bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 animate-fade-in overflow-hidden">
+                  <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                    <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider">Filtros</h3>
+                    <button onClick={() => setShowFilters(false)} className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-200 text-gray-400 transition">
+                      <X size={14} />
+                    </button>
+                  </div>
+                  <div className="p-5">
+                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Status da Mensalidade</label>
+                    <div className="flex flex-wrap gap-2">
+                      {['PAGA', 'PENDENTE', 'ATRASADA', 'SEM_COBRANCA'].map(opt => (
+                        <button
+                          key={opt}
+                          onClick={() => toggleStatus(opt)}
+                          className={`px-3.5 py-2 rounded-lg text-xs font-bold transition border ${
+                            filtroStatus.includes(opt)
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                              : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                          }`}
+                        >
+                          {filtroStatus.includes(opt) && <Check size={12} className="inline mr-1 -mt-0.5" />}
+                          {opt.replace('_', ' ')}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="px-5 py-4 border-t border-gray-100 bg-gray-50/30 flex justify-end">
+                    <button onClick={() => setFiltroStatus([])} className="flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-red-500 transition">
+                      <RotateCcw size={13} /> Limpar
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Caixa de Pesquisa */}
+        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex items-center gap-3 mb-5">
+          <Search size={20} className="text-gray-400 ml-2 shrink-0" />
+          <input 
+            type="text" 
+            placeholder="Buscar pelo nome ou e-mail de um atleta específico..." 
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            className="flex-1 bg-transparent border-none outline-none font-medium text-gray-700 text-sm placeholder-gray-400 p-1"
+          />
+        </div>
+
+        {/* KPIs (Fixo no topo) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col justify-center">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Receita Mensal</p>
+            <p className="text-xl md:text-2xl font-black text-gray-900 truncate">R$ {dashboard.receitaMes.toFixed(2).replace('.', ',')}</p>
+          </div>
+          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col justify-center">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Receita Anual</p>
+            <p className="text-xl md:text-2xl font-black text-gray-900 truncate">R$ {dashboard.receitaAno.toFixed(2).replace('.', ',')}</p>
+          </div>
+          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col justify-center">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Em Aberto</p>
+            <p className="text-xl md:text-2xl font-black text-gray-900 truncate">R$ {dashboard.totalAberto.toFixed(2).replace('.', ',')}</p>
+          </div>
+          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex flex-col justify-center">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Inadimplentes</p>
+            <p className="text-xl md:text-2xl font-black text-gray-900 truncate">{dashboard.qtdInadimplentes}</p>
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 px-6 lg:px-8 pb-6 overflow-y-auto bg-gray-50/50">
-        <div className="max-w-6xl mx-auto py-6 space-y-6">
-          
-          {/* KPIs */}
-          <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Receita Mensal</p>
-              <p className="text-2xl font-black text-gray-900">R$ {dashboard.receitaMes.toFixed(2).replace('.', ',')}</p>
-              <div className="flex items-center gap-1 text-emerald-600 mt-2">
-                <TrendingUp size={12} /> <span className="text-xs font-bold">No mês atual</span>
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Receita Anual</p>
-              <p className="text-2xl font-black text-gray-900">R$ {dashboard.receitaAno.toFixed(2).replace('.', ',')}</p>
-              <div className="flex items-center gap-1 text-emerald-600 mt-2">
-                <TrendingUp size={12} /> <span className="text-xs font-bold">Acumulado {new Date().getFullYear()}</span>
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Em Aberto</p>
-              <p className="text-2xl font-black text-gray-900">R$ {dashboard.totalAberto.toFixed(2).replace('.', ',')}</p>
-              <div className="flex items-center gap-1 text-amber-600 mt-2">
-                <Clock size={12} /> <span className="text-xs font-bold">Pendente/Atrasado</span>
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Inadimplentes</p>
-              <p className="text-2xl font-black text-gray-900">{dashboard.qtdInadimplentes}</p>
-              <div className="flex items-center gap-1 text-red-600 mt-2">
-                <AlertCircle size={12} /> <span className="text-xs font-bold">Alunos com atraso</span>
-              </div>
-            </div>
-          </section>
-
-          {/* LISTAGEM */}
-          <section className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-             <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Listagem de Alunos</h2>
-             </div>
-             
-             {alunos.length === 0 ? (
-               <div className="p-8 text-center text-gray-500">Nenhum aluno encontrado.</div>
-             ) : (
-               <div className="overflow-x-auto">
-                 <table className="w-full text-left">
-                   <thead className="bg-gray-50 text-[10px] font-black uppercase tracking-widest text-gray-400">
-                     <tr>
-                       <th className="px-6 py-4">Aluno</th>
-                       <th className="px-6 py-4">Status Mensalidade</th>
-                       <th className="px-6 py-4 hidden md:table-cell">Último Valor</th>
-                       <th className="px-6 py-4 hidden md:table-cell">Vencimento</th>
-                     </tr>
-                   </thead>
-                   <tbody className="divide-y divide-gray-100">
-                     {alunos.map(aluno => (
-                       <tr key={aluno.id} className="hover:bg-gray-50/50 transition-colors">
-                         <td className="px-6 py-4">
-                           <div className="font-bold text-gray-900 text-sm">{aluno.nome}</div>
-                           <div className="text-xs text-gray-500">{aluno.email}</div>
-                         </td>
-                         <td className="px-6 py-4">
-                           {aluno.status_mensalidade === 'PAGA' && (
-                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-widest">
-                               <CheckCircle2 size={12} strokeWidth={3} /> PAGA
-                             </span>
-                           )}
-                           {aluno.status_mensalidade === 'PENDENTE' && (
-                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-widest">
-                               Pendente
-                             </span>
-                           )}
-                           {aluno.status_mensalidade === 'ATRASADA' && (
-                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-50 text-red-700 text-[10px] font-black uppercase tracking-widest">
-                               <AlertCircle size={12} strokeWidth={3} /> Atrasada
-                             </span>
-                           )}
-                           {aluno.status_mensalidade === 'SEM_COBRANCA' && (
-                             <span className="text-xs text-gray-400 font-medium">Sem cobranças</span>
-                           )}
-                         </td>
-                         <td className="px-6 py-4 hidden md:table-cell text-sm font-bold text-gray-900">
-                           {aluno.ultima_mensalidade ? `R$ ${aluno.ultima_mensalidade.valor.toFixed(2).replace('.', ',')}` : '-'}
-                         </td>
-                         <td className="px-6 py-4 hidden md:table-cell text-xs text-gray-500 font-medium">
-                           {aluno.ultima_mensalidade ? new Date(aluno.ultima_mensalidade.vencimento).toLocaleDateString('pt-BR') : '-'}
-                         </td>
-                       </tr>
-                     ))}
-                   </tbody>
-                 </table>
-               </div>
-             )}
-          </section>
-
+      {/* Tabela Scrollável */}
+      <div className="flex-1 min-h-0 px-6 lg:px-8 xl:px-10 pb-6 lg:pb-8">
+        <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm h-full flex flex-col">
+          <div className="flex-shrink-0 overflow-x-auto hidden lg:block">
+            <table className="w-full text-left border-collapse min-w-[800px]">
+              <thead>
+                <tr className="bg-[#FAFAFA] border-b border-gray-100 text-[10px] uppercase font-black tracking-widest text-gray-400">
+                  <th className="px-6 py-4 w-[35%]">Aluno & Contato</th>
+                  <th className="px-6 py-4 w-[20%]">Status Mensalidade</th>
+                  <th className="px-6 py-4 w-[20%] text-center">Último Valor</th>
+                  <th className="px-6 py-4 w-[25%] text-center">Vencimento</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+          <div className="flex-1 overflow-y-auto overflow-x-auto custom-scrollbar">
+            <table className="w-full text-left border-collapse min-w-[800px]">
+              <tbody className="divide-y divide-gray-100/60">
+                {alunosFiltrados.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="px-6 py-12 text-center text-gray-400 font-bold">Nenhum atleta encontrado.</td>
+                  </tr>
+                ) : (
+                  alunosFiltrados.map((aluno) => (
+                    <tr key={aluno.id} className="hover:bg-gray-50/80 transition-all duration-300">
+                      <td className="px-6 py-4 w-[35%]">
+                        <div className="font-bold text-gray-900 text-sm">{aluno.nome}</div>
+                        <div className="text-xs text-gray-500">{aluno.email}</div>
+                      </td>
+                      <td className="px-6 py-4 w-[20%]">
+                        {aluno.status_mensalidade === 'PAGA' && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-widest">
+                            <CheckCircle2 size={12} strokeWidth={3} /> PAGA
+                          </span>
+                        )}
+                        {aluno.status_mensalidade === 'PENDENTE' && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 text-[10px] font-black uppercase tracking-widest">
+                            Pendente
+                          </span>
+                        )}
+                        {aluno.status_mensalidade === 'ATRASADA' && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-50 text-red-700 text-[10px] font-black uppercase tracking-widest">
+                            <AlertCircle size={12} strokeWidth={3} /> Atrasada
+                          </span>
+                        )}
+                        {aluno.status_mensalidade === 'SEM_COBRANCA' && (
+                          <span className="text-xs text-gray-400 font-medium">Sem cobranças</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 w-[20%] text-center text-sm font-bold text-gray-900">
+                        {aluno.ultima_mensalidade ? `R$ ${aluno.ultima_mensalidade.valor.toFixed(2).replace('.', ',')}` : '-'}
+                      </td>
+                      <td className="px-6 py-4 w-[25%] text-center text-xs text-gray-500 font-medium">
+                        {aluno.ultima_mensalidade ? new Date(aluno.ultima_mensalidade.vencimento).toLocaleDateString('pt-BR') : '-'}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
