@@ -13,6 +13,8 @@ import AdminAlunos from './pages/AdminAlunos';
 import AdminPrescricao from './pages/AdminPrescricao';
 import AdminSolicitacoes from './pages/AdminSolicitacoes';
 import AdminConfiguracoes from './pages/AdminConfiguracoes';
+import Financeiro from './pages/Financeiro';
+import AdminFinanceiro from './pages/AdminFinanceiro';
 import Welcome from './pages/Welcome';
 
 // Componente para proteger rotas privadas
@@ -62,12 +64,14 @@ function AppRoutes() {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="treinos" element={<Treinos />} />
         <Route path="perfil" element={<Perfil />} />
+        <Route path="financeiro" element={<Financeiro />} />
         
         {/* Rotas Administrativas Envolvidas no Layout */}
         <Route path="admin/alunos" element={<AdminRoute><AdminAlunos /></AdminRoute>} />
         <Route path="admin/solicitacoes" element={<AdminRoute><AdminSolicitacoes /></AdminRoute>} />
         <Route path="admin/prescricao/:id" element={<AdminRoute><AdminPrescricao /></AdminRoute>} />
         <Route path="admin/configuracoes" element={<AdminRoute><AdminConfiguracoes /></AdminRoute>} />
+        <Route path="admin/financeiro" element={<AdminRoute><AdminFinanceiro /></AdminRoute>} />
       </Route>
       
       <Route path="*" element={<Navigate to="/" replace />} />
