@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, Dumbbell, Activity, User, ArrowLeft, Home, Bell, Settings, Wallet } from 'lucide-react';
+import { LayoutDashboard, FileText, Dumbbell, Activity, User, ArrowLeft, Home, Bell, Settings, Wallet, CreditCard } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -18,7 +18,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { name: 'Dashboard Central', icon: LayoutDashboard, path: '/dashboard' },
     { name: 'Meu Treino', icon: Dumbbell, path: '/treinos' },
     { name: 'Meus Dados', icon: User, path: '/perfil' },
-    { name: 'Financeiro', icon: Wallet, path: '/financeiro' },
+    { name: 'Assinatura', icon: CreditCard, path: '/financeiro' },
   ];
 
   const adminMenu = user?.role === 'admin' ? [
