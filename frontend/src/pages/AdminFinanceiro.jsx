@@ -294,7 +294,7 @@ export default function AdminFinanceiro() {
                         )}
                       </td>
                       <td className="px-6 py-4 w-[20%] text-center text-sm font-bold text-gray-900">
-                        {aluno.ultima_mensalidade ? `R$ ${aluno.ultima_mensalidade.valor.toFixed(2).replace('.', ',')}` : '-'}
+                        {aluno.ultima_mensalidade ? `R$ ${Number(aluno.ultima_mensalidade.valor || 0).toFixed(2).replace('.', ',')}` : '-'}
                       </td>
                       <td className="px-6 py-4 w-[20%] text-center text-xs text-gray-500 font-medium">
                         {aluno.ultima_mensalidade ? new Date(aluno.ultima_mensalidade.vencimento).toLocaleDateString('pt-BR') : '-'}
@@ -331,7 +331,7 @@ export default function AdminFinanceiro() {
                 disabled={gerando}
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 text-gray-500 hover:bg-gray-100 transition-colors"
               >
-                <AlertCircle size={18} />
+                <X size={18} />
               </button>
             </div>
             

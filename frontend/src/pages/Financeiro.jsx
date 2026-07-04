@@ -103,7 +103,7 @@ export default function Financeiro() {
                     </div>
                     
                     <div className="text-4xl font-black text-gray-900 tracking-tighter mb-1">
-                      R$ {mensalidade.valor.toFixed(2).replace('.', ',')}
+                      R$ {Number(mensalidade.valor || 0).toFixed(2).replace('.', ',')}
                     </div>
                     <p className="text-sm text-gray-500 font-medium">
                       Vencimento: <span className="text-gray-900 font-bold">{new Date(mensalidade.data_vencimento).toLocaleDateString('pt-BR')}</span>
@@ -181,7 +181,7 @@ export default function Financeiro() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-black text-gray-900">R$ {item.valor.toFixed(2).replace('.', ',')}</p>
+                      <p className="text-sm font-black text-gray-900">R$ {Number(item.valor || 0).toFixed(2).replace('.', ',')}</p>
                       <p className={`text-[10px] font-black uppercase tracking-widest mt-0.5 ${
                         item.status === 'PAGA' ? 'text-emerald-600' : 
                         item.status === 'ATRASADA' ? 'text-red-600' : 'text-amber-600'
