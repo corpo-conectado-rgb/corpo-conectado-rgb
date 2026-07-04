@@ -8,6 +8,7 @@ export default function AdminFinanceiro() {
   const [alunos, setAlunos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [confirmacaoPagamento, setConfirmacaoPagamento] = useState(null);
   const [gerando, setGerando] = useState(false);
   const [novaCobranca, setNovaCobranca] = useState({
     user_id: '',
@@ -90,15 +91,19 @@ export default function AdminFinanceiro() {
     }
   };
 
-  const handleMarcarPago = async (cobrancaId) => {
-    if (!window.confirm('Confirma o recebimento desta cobrança? O aluno será liberado imediatamente.')) return;
+  const executeMarcarPago = async () => {
+    if (!confirmacaoPagamento) return;
     try {
-      await apiFetch(`/financeiro/admin/cobranca/${cobrancaId}/pagar`, { method: 'PUT' });
+      setGerando(true);
+      await apiFetch(`/financeiro/admin/cobranca/${confirmacaoPagamento.ultima_mensalidade.id}/pagar`, { method: 'PUT' });
       setToast({ show: true, message: 'Cobrança marcada como paga!', type: 'success' });
+      setConfirmacaoPagamento(null);
       loadData();
     } catch (err) {
       console.error(err);
       setToast({ show: true, message: 'Erro ao aprovar pagamento.', type: 'error' });
+    } finally {
+      setGerando(false);
     }
   };
 
@@ -302,7 +307,7 @@ export default function AdminFinanceiro() {
                       <td className="px-6 py-4 w-[10%] text-center">
                         {(aluno.status_mensalidade === 'PENDENTE' || aluno.status_mensalidade === 'ATRASADA') && aluno.ultima_mensalidade && (
                           <button 
-                            onClick={() => handleMarcarPago(aluno.ultima_mensalidade.id)}
+                            onClick={() => setConfirmacaoPagamento(aluno)}
                             title="Marcar como Pago"
                             className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-100 flex items-center justify-center mx-auto transition shadow-sm border border-emerald-100 active:scale-95"
                           >
@@ -401,6 +406,44 @@ export default function AdminFinanceiro() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL CONFIRMAÇÃO DE PAGAMENTO */}
+      {confirmacaoPagamento && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !gerando && setConfirmacaoPagamento(null)} />
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm relative overflow-hidden animate-scale-in flex flex-col">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-4 border-4 border-emerald-100">
+                <CheckCircle2 size={32} className="text-emerald-500" />
+              </div>
+              <h3 className="text-xl font-black text-gray-900 tracking-tight mb-2">Confirmar Pagamento</h3>
+              <p className="text-sm text-gray-500 font-medium">
+                Você confirma que recebeu o pagamento de <strong className="text-gray-900">{confirmacaoPagamento.nome}</strong>?
+              </p>
+              <p className="text-xs text-emerald-600 font-bold mt-3 bg-emerald-50 p-2 rounded-lg inline-block">
+                O acesso será liberado imediatamente.
+              </p>
+            </div>
+            <div className="px-6 py-4 bg-gray-50 flex gap-3 justify-end border-t border-gray-100">
+              <button
+                onClick={() => setConfirmacaoPagamento(null)}
+                disabled={gerando}
+                className="px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-700 transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={executeMarcarPago}
+                disabled={gerando}
+                className="px-5 py-2 bg-emerald-500 text-white text-sm font-black tracking-wide rounded-xl shadow-md hover:bg-emerald-600 transition active:scale-95 flex items-center gap-2"
+              >
+                {gerando ? <span className="animate-spin border-2 border-white/20 border-t-white rounded-full w-4 h-4" /> : <Check size={16} strokeWidth={3} />}
+                Confirmar
+              </button>
+            </div>
           </div>
         </div>
       )}
