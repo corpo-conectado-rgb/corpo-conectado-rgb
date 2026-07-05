@@ -205,12 +205,6 @@ export default function Onboarding() {
       setFakeProgress(100);
       await new Promise(r => setTimeout(r, 400));
 
-      if (result && result.requiresActivation) {
-        // Redireciona para o login para mostrar a tela de ativação
-        navigate('/login', { state: { email: formData.email, requiresActivation: true, activationCode: result.activationCode } });
-        return;
-      }
-
       // Engatilha Sucesso UI + Disparo de Confete Dark
       setSuccess(true);
       confetti({
@@ -223,7 +217,12 @@ export default function Onboarding() {
 
       // Aguarda 4200ms para leitura
       setTimeout(() => {
-        navigate('/');
+        if (result && result.requiresActivation) {
+          // Redireciona para o login para mostrar a tela de ativação
+          navigate('/login', { state: { email: formData.email, requiresActivation: true, activationCode: result.activationCode } });
+        } else {
+          navigate('/');
+        }
       }, 4200);
 
     } catch (err) {
