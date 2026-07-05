@@ -212,16 +212,34 @@ export default function Onboarding() {
       setFakeProgress(100);
       await new Promise(r => setTimeout(r, 400));
 
-      // Engatilha Sucesso UI + Disparo de Confete Dark
+      // Engatilha Sucesso UI + Disparo de Confete Animado (Otimizado via requestAnimationFrame)
       setSuccess(true);
-      confetti({
-        particleCount: 120,
-        spread: 100,
-        origin: { y: 0.6 },
-        colors: ['#000000', '#111827', '#E5E7EB', '#FFFFFF'],
-        disableForReducedMotion: true,
-        useWorker: true
-      });
+      
+      const duration = 2500;
+      const end = Date.now() + duration;
+
+      (function frame() {
+        confetti({
+          particleCount: 3,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0, y: 0.65 },
+          colors: ['#000000', '#111827', '#E5E7EB', '#FFFFFF'],
+          disableForReducedMotion: true
+        });
+        confetti({
+          particleCount: 3,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1, y: 0.65 },
+          colors: ['#000000', '#111827', '#E5E7EB', '#FFFFFF'],
+          disableForReducedMotion: true
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      }());
 
       // Aguarda 4200ms para leitura
       setTimeout(() => {
