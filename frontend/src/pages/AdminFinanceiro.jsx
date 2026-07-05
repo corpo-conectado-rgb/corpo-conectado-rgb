@@ -27,12 +27,17 @@ export default function AdminFinanceiro() {
   const [showFilters, setShowFilters] = useState(false);
   const [filtroStatus, setFiltroStatus] = useState([]);
   const filterRef = useRef(null);
+  const [dropdownAlunoOpen, setDropdownAlunoOpen] = useState(false);
+  const dropdownAlunoRef = useRef(null);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
 
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (filterRef.current && !filterRef.current.contains(e.target)) {
         setShowFilters(false);
+      }
+      if (dropdownAlunoRef.current && !dropdownAlunoRef.current.contains(e.target)) {
+        setDropdownAlunoOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -385,21 +390,44 @@ export default function AdminFinanceiro() {
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 flex items-center gap-1.5">
                     <Users size={12} /> Aluno Destinatário
                   </label>
-                  <div className="relative group">
-                    <select 
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all appearance-none cursor-pointer hover:bg-gray-100/80"
-                      value={novaCobranca.user_id}
-                      onChange={(e) => setNovaCobranca({ ...novaCobranca, user_id: e.target.value })}
-                      disabled={gerando}
+                  <div className="relative" ref={dropdownAlunoRef}>
+                    <div 
+                      className={`w-full bg-gray-50 border rounded-xl px-4 py-3 text-sm font-bold outline-none transition-all cursor-pointer flex items-center justify-between hover:bg-gray-100/80 ${dropdownAlunoOpen ? 'border-black ring-1 ring-black text-gray-900' : 'border-gray-200 text-gray-900'}`}
+                      onClick={() => !gerando && setDropdownAlunoOpen(!dropdownAlunoOpen)}
                     >
-                      <option value="" className="text-gray-400">Selecione um aluno na lista...</option>
-                      {alunos.map(a => (
-                        <option key={a.id} value={a.id}>{a.nome}</option>
-                      ))}
-                    </select>
-                    <div className="absolute right-4 top-3.5 pointer-events-none text-gray-400 group-focus-within:text-black transition-colors">
-                      <ChevronDown size={16} strokeWidth={3} />
+                      <span className={novaCobranca.user_id ? 'text-gray-900' : 'text-gray-400 font-normal'}>
+                        {novaCobranca.user_id ? alunos.find(a => a.id === novaCobranca.user_id)?.nome : 'Selecione um aluno na lista...'}
+                      </span>
+                      <ChevronDown size={16} strokeWidth={3} className={`text-gray-400 transition-transform ${dropdownAlunoOpen ? 'rotate-180 text-black' : ''}`} />
                     </div>
+
+                    {dropdownAlunoOpen && (
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto animate-fade-in custom-scrollbar">
+                        {alunos.length === 0 ? (
+                          <div className="px-4 py-3 text-sm text-gray-400">Nenhum aluno encontrado.</div>
+                        ) : (
+                          alunos.map(a => (
+                            <div 
+                              key={a.id} 
+                              onClick={() => {
+                                setNovaCobranca({ ...novaCobranca, user_id: a.id });
+                                setDropdownAlunoOpen(false);
+                              }}
+                              className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 last:border-0 transition-colors flex items-center justify-between"
+                            >
+                              <div>
+                                <p className="text-sm font-bold text-gray-900">{a.nome}</p>
+                                <p className="text-xs text-gray-500 font-medium">{a.email}</p>
+                              </div>
+                              {a.status_mensalidade === 'PENDENTE' && <span className="bg-yellow-100 text-yellow-700 text-[9px] font-black uppercase px-2 py-1 rounded-md">Pendente</span>}
+                              {a.status_mensalidade === 'ATRASADA' && <span className="bg-red-100 text-red-700 text-[9px] font-black uppercase px-2 py-1 rounded-md">Atrasada</span>}
+                              {a.status_mensalidade === 'PAGA' && <span className="bg-emerald-100 text-emerald-700 text-[9px] font-black uppercase px-2 py-1 rounded-md">Em dia</span>}
+                              {a.status_mensalidade === 'SEM_COBRANCA' && <span className="bg-gray-100 text-gray-600 text-[9px] font-black uppercase px-2 py-1 rounded-md">S/ Cobrança</span>}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
