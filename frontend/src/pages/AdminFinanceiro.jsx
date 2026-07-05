@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Wallet, Search, TrendingUp, Users, AlertCircle, FileText, CheckCircle2, ChevronDown, Clock, Filter, Check, X, RotateCcw, ArrowRight } from 'lucide-react';
+import { Wallet, Search, TrendingUp, Users, AlertCircle, FileText, CheckCircle2, ChevronDown, Clock, Filter, Check, X, RotateCcw, ArrowRight, Plus } from 'lucide-react';
 import { apiFetch } from '../services/api';
 import Toast from '../components/Toast';
 
@@ -150,12 +150,21 @@ export default function AdminFinanceiro() {
           </div>
           
           <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setShowModal(true)}
-              className="bg-black text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-gray-800 transition-colors active:scale-95 shadow-md self-start md:self-auto whitespace-nowrap"
-            >
-              + Nova Cobrança
-            </button>
+            {/* Botão Nova Cobrança (Ícone + Tooltip) */}
+            <div className="relative group flex items-center justify-center">
+              <button 
+                onClick={() => setShowModal(true)}
+                className="bg-black text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-800 transition-colors active:scale-95 shadow-md"
+              >
+                <Plus size={20} strokeWidth={2.5} />
+              </button>
+              
+              <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl z-10">
+                Gerar Cobrança
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-gray-900 rotate-45 rounded-sm"></div>
+              </div>
+            </div>
+            
             {/* Botão Filtros */}
             <div className="relative" ref={filterRef}>
               <button 
