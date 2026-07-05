@@ -104,9 +104,12 @@ export default function Onboarding() {
     let newVal = currentVal + amount;
     if (newVal < min) newVal = min;
     
-    // Reduz o arredondamento pra 2 casas
-    // Remove os zeros desnecessários no final, ex: 75.50 -> 75.5
-    setFormData({ ...formData, [field]: Number(newVal.toFixed(2)).toString() });
+    // Altura deve sempre ter 2 casas decimais (1.70). Peso pode ignorar zeros finais (75.5).
+    if (field === 'altura') {
+      setFormData({ ...formData, [field]: newVal.toFixed(2) });
+    } else {
+      setFormData({ ...formData, [field]: Number(newVal.toFixed(2)).toString() });
+    }
   };
 
   // Conversor Universal Ponto/Vírgula pro FrontEnd
@@ -142,7 +145,11 @@ export default function Onboarding() {
     }
 
     // Salva o numeral em String com ponto como manda a nossa arquitetura
-    setFormData(prev => ({ ...prev, [field]: Number(val.toFixed(2)).toString() }));
+    if (field === 'altura') {
+      setFormData(prev => ({ ...prev, [field]: val.toFixed(2) }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: Number(val.toFixed(2)).toString() }));
+    }
   };
 
   // Validações por Etapa
