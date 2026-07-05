@@ -9,7 +9,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(location.state?.email || '');
   const [suggestedEmail, setSuggestedEmail] = useState('');
   const [showEmailSuggestion, setShowEmailSuggestion] = useState(false);
   const [password, setPassword] = useState('');
@@ -19,21 +19,19 @@ export default function Login() {
   const [error, setError] = useState('');
 
   // Device Activation State
-  const [activationState, setActivationState] = useState(null); // null | { code, denied }
-  const [pollingActive, setPollingActive] = useState(false);
+  const [activationState, setActivationState] = useState(
+    location.state?.requiresActivation ? { code: location.state.activationCode, denied: false } : null
+  );
+  const [pollingActive, setPollingActive] = useState(!!location.state?.requiresActivation);
   const pollingRef = useRef(null);
 
-  // Se veio do Onboarding com requiresActivation, exibe a tela de ativação
+  // Se veio do Onboarding com requiresActivation, limpa o state do history para não reativar num refresh
   useEffect(() => {
-    if (location.state?.requiresActivation && location.state?.email) {
-      setEmail(location.state.email);
-      setActivationState({ code: location.state.activationCode, denied: false });
-      setPollingActive(true);
-      
-      // Limpa o state para não reativar se der refresh
+    if (location.state?.requiresActivation) {
       navigate('/login', { replace: true, state: {} });
     }
-  }, [location.state, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Recupera o último e-mail apenas como sugestão
   useEffect(() => {
