@@ -208,11 +208,12 @@ export default function Onboarding() {
       // Engatilha Sucesso UI + Disparo de Confete Dark
       setSuccess(true);
       confetti({
-        particleCount: 160,
-        spread: 90,
+        particleCount: 120,
+        spread: 100,
         origin: { y: 0.6 },
         colors: ['#000000', '#111827', '#E5E7EB', '#FFFFFF'],
-        disableForReducedMotion: true
+        disableForReducedMotion: true,
+        useWorker: true
       });
 
       // Aguarda 4200ms para leitura

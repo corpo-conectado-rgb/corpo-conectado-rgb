@@ -28,10 +28,10 @@ export default function Login() {
   // Se veio do Onboarding com requiresActivation, limpa o state do history para não reativar num refresh
   useEffect(() => {
     if (location.state?.requiresActivation) {
-      navigate('/login', { replace: true, state: {} });
+      // Modifica o history state diretamente sem engatilhar re-render pesado no React Router
+      window.history.replaceState({}, document.title, location.pathname);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [location]);
 
   // Recupera o último e-mail apenas como sugestão
   useEffect(() => {
