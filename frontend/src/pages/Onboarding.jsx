@@ -35,6 +35,7 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false); // Flag da microinteração de finalização
+  const [isTransitioningOut, setIsTransitioningOut] = useState(false); // Flag de transição de rota
   
   // UX: Loading Phrase Array e Animators
   const loadingPhrases = [
@@ -240,6 +241,11 @@ export default function Onboarding() {
           requestAnimationFrame(frame);
         }
       }());
+
+      // Suaviza a transição de saída escurecendo a tela antes de navegar
+      setTimeout(() => {
+        setIsTransitioningOut(true);
+      }, 3900);
 
       // Aguarda 4200ms para leitura
       setTimeout(() => {
@@ -551,7 +557,7 @@ export default function Onboarding() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col justify-center py-4 sm:px-6 lg:px-8 bg-[var(--color-noir-navy)] font-sans relative overflow-hidden">
+    <div className={`min-h-screen flex flex-col justify-center py-4 sm:px-6 lg:px-8 bg-[var(--color-noir-navy)] font-sans relative overflow-hidden transition-opacity duration-300 ${isTransitioningOut ? 'opacity-0' : 'opacity-100'}`}>
       
       {/* Background Glow Engine */}
       <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-[var(--color-noir-accent)]/30 rounded-full blur-[120px] pointer-events-none"></div>
@@ -592,10 +598,10 @@ export default function Onboarding() {
               
               <h2 className="text-[20px] font-black text-white mb-4 tracking-wide">Processando</h2>
               
-              <div className="h-6 overflow-hidden relative w-full flex justify-center">
+              <div className="h-10 overflow-hidden relative w-full flex justify-center">
                 <p 
                   key={loadingPhraseIndex} 
-                  className="text-gray-400 font-medium text-[13px] absolute animate-fade-up text-center max-w-[280px]"
+                  className="text-gray-400 font-medium text-[13px] absolute animate-fade-up text-center max-w-[280px] leading-tight"
                 >
                   {loadingPhrases[loadingPhraseIndex]}
                 </p>
