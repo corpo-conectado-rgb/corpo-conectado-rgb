@@ -213,38 +213,17 @@ export default function Onboarding() {
       setFakeProgress(100);
       await new Promise(r => setTimeout(r, 400));
 
-      // Engatilha Sucesso UI + Disparo de Confete (curto e leve)
+      // Engatilha Sucesso UI + Disparo de Confete Dark (Elegante e Original)
       setSuccess(true);
       
-      const duration = 1800;
-      const end = Date.now() + duration;
-
-      (function frame() {
-        confetti({
-          particleCount: 2,
-          angle: 60,
-          spread: 55,
-          origin: { x: 0, y: 0.65 },
-          colors: ['#000000', '#111827', '#E5E7EB', '#FFFFFF'],
-          disableForReducedMotion: true,
-          gravity: 1.2,
-          ticks: 150
-        });
-        confetti({
-          particleCount: 2,
-          angle: 120,
-          spread: 55,
-          origin: { x: 1, y: 0.65 },
-          colors: ['#000000', '#111827', '#E5E7EB', '#FFFFFF'],
-          disableForReducedMotion: true,
-          gravity: 1.2,
-          ticks: 150
-        });
-
-        if (Date.now() < end) {
-          requestAnimationFrame(frame);
-        }
-      }());
+      confetti({
+        particleCount: 160,
+        spread: 90,
+        origin: { y: 0.6 },
+        colors: ['#000000', '#111827', '#E5E7EB', '#FFFFFF'],
+        disableForReducedMotion: true,
+        useWorker: true
+      });
 
       // Fade-out suave antes de navegar
       setTimeout(() => {
