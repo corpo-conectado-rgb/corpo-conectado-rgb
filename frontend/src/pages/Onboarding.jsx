@@ -213,28 +213,32 @@ export default function Onboarding() {
       setFakeProgress(100);
       await new Promise(r => setTimeout(r, 400));
 
-      // Engatilha Sucesso UI + Disparo de Confete Animado (Otimizado via requestAnimationFrame)
+      // Engatilha Sucesso UI + Disparo de Confete (curto e leve)
       setSuccess(true);
       
-      const duration = 2500;
+      const duration = 1800;
       const end = Date.now() + duration;
 
       (function frame() {
         confetti({
-          particleCount: 3,
+          particleCount: 2,
           angle: 60,
           spread: 55,
           origin: { x: 0, y: 0.65 },
           colors: ['#000000', '#111827', '#E5E7EB', '#FFFFFF'],
-          disableForReducedMotion: true
+          disableForReducedMotion: true,
+          gravity: 1.2,
+          ticks: 150
         });
         confetti({
-          particleCount: 3,
+          particleCount: 2,
           angle: 120,
           spread: 55,
           origin: { x: 1, y: 0.65 },
           colors: ['#000000', '#111827', '#E5E7EB', '#FFFFFF'],
-          disableForReducedMotion: true
+          disableForReducedMotion: true,
+          gravity: 1.2,
+          ticks: 150
         });
 
         if (Date.now() < end) {
@@ -242,20 +246,20 @@ export default function Onboarding() {
         }
       }());
 
-      // Suaviza a transição de saída escurecendo a tela antes de navegar
+      // Fade-out suave antes de navegar
       setTimeout(() => {
+        confetti.reset(); // Libera o canvas e para qualquer animação restante
         setIsTransitioningOut(true);
-      }, 3900);
+      }, 3500);
 
-      // Aguarda 4200ms para leitura
+      // Navega após o fade-out completar (300ms de transição CSS)
       setTimeout(() => {
         if (result && result.requiresActivation) {
-          // Redireciona para o login para mostrar a tela de ativação
           navigate('/login', { state: { email: formData.email, requiresActivation: true, activationCode: result.activationCode } });
         } else {
           navigate('/');
         }
-      }, 4200);
+      }, 3900);
 
     } catch (err) {
       setError(err.message || 'Falha ao processar o Onboarding. Tente novamente.');
