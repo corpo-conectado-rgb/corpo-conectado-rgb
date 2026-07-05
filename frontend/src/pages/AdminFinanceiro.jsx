@@ -19,7 +19,7 @@ export default function AdminFinanceiro() {
   const [gerando, setGerando] = useState(false);
   const [novaCobranca, setNovaCobranca] = useState({
     user_id: '',
-    valor: 19.90, // default requested by user
+    valor: '19,90', // default requested by user
     data_vencimento: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 10).toISOString().split('T')[0], // next month, day 10
     referencia: `${new Date().getMonth() + 2}/${new Date().getFullYear()}`.padStart(7, '0') // simple string format mm/yyyy
   });
@@ -70,6 +70,17 @@ export default function AdminFinanceiro() {
     }
   };
 
+  const handleValorChange = (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (!value) {
+      setNovaCobranca({ ...novaCobranca, valor: '' });
+      return;
+    }
+    const numericValue = parseInt(value, 10) / 100;
+    const formatted = numericValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    setNovaCobranca({ ...novaCobranca, valor: formatted });
+  };
+
   const handleNovaCobranca = async (e) => {
     e.preventDefault();
     if (!novaCobranca.user_id) {
@@ -82,7 +93,7 @@ export default function AdminFinanceiro() {
         method: 'POST',
         body: JSON.stringify({
           user_id: novaCobranca.user_id,
-          valor: Number(String(novaCobranca.valor).replace(',', '.')),
+          valor: Number(String(novaCobranca.valor).replace(/\./g, '').replace(',', '.')),
           data_vencimento: novaCobranca.data_vencimento,
           referencia: novaCobranca.referencia
         })
@@ -365,15 +376,17 @@ export default function AdminFinanceiro() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">Valor (R$)</label>
-                  <input 
-                    type="number" 
-                    step="0.01"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
-                    value={novaCobranca.valor}
-                    onChange={(e) => setNovaCobranca({ ...novaCobranca, valor: e.target.value })}
-                    disabled={gerando}
-                  />
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">Valor</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-3 text-sm font-bold text-gray-400">R$</span>
+                    <input 
+                      type="text" 
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
+                      value={novaCobranca.valor}
+                      onChange={handleValorChange}
+                      disabled={gerando}
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">Referência</label>
