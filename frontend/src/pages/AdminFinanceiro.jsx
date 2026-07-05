@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Wallet, Search, TrendingUp, Users, AlertCircle, FileText, CheckCircle2, ChevronDown, Clock, Filter, Check, X, RotateCcw } from 'lucide-react';
+import { Wallet, Search, TrendingUp, Users, AlertCircle, FileText, CheckCircle2, ChevronDown, Clock, Filter, Check, X, RotateCcw, ArrowRight } from 'lucide-react';
 import { apiFetch } from '../services/api';
 import Toast from '../components/Toast';
 
@@ -347,81 +347,115 @@ export default function AdminFinanceiro() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !gerando && setShowModal(false)} />
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden animate-scale-in">
-            <div className="px-6 pt-6 pb-4 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="text-xl font-black text-gray-900 tracking-tight">Nova Cobrança Avulsa</h3>
+            {/* Header Decorativo */}
+            <div className="relative h-24 bg-gradient-to-r from-gray-900 to-black p-6 flex items-center justify-between overflow-hidden">
+              <div className="absolute top-0 right-0 -mt-10 -mr-10 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+              <div className="relative z-10 flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/20">
+                  <Wallet className="text-white" size={20} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-white tracking-tight leading-none">Nova Cobrança</h3>
+                  <p className="text-gray-400 text-xs font-medium mt-1.5">Gerar fatura avulsa para um aluno</p>
+                </div>
+              </div>
               <button 
                 onClick={() => setShowModal(false)}
                 disabled={gerando}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 text-gray-500 hover:bg-gray-100 transition-colors"
+                className="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors active:scale-95"
               >
-                <X size={18} />
+                <X size={16} />
               </button>
             </div>
             
-            <form onSubmit={handleNovaCobranca} className="p-6 space-y-4">
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">Aluno</label>
-                <select 
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
-                  value={novaCobranca.user_id}
-                  onChange={(e) => setNovaCobranca({ ...novaCobranca, user_id: e.target.value })}
-                  disabled={gerando}
-                >
-                  <option value="">Selecione um aluno...</option>
-                  {alunos.map(a => (
-                    <option key={a.id} value={a.id}>{a.nome}</option>
-                  ))}
-                </select>
-              </div>
+            <form onSubmit={handleNovaCobranca} className="p-6 space-y-5 bg-gray-50/50">
               
-              <div className="grid grid-cols-2 gap-4">
+              {/* Card 1: Aluno */}
+              <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-4">
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">Valor</label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-3 text-sm font-bold text-gray-400">R$</span>
-                    <input 
-                      type="text" 
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
-                      value={novaCobranca.valor}
-                      onChange={handleValorChange}
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 flex items-center gap-1.5">
+                    <Users size={12} /> Aluno Destinatário
+                  </label>
+                  <div className="relative group">
+                    <select 
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all appearance-none cursor-pointer hover:bg-gray-100/80"
+                      value={novaCobranca.user_id}
+                      onChange={(e) => setNovaCobranca({ ...novaCobranca, user_id: e.target.value })}
                       disabled={gerando}
-                    />
+                    >
+                      <option value="" className="text-gray-400">Selecione um aluno na lista...</option>
+                      {alunos.map(a => (
+                        <option key={a.id} value={a.id}>{a.nome}</option>
+                      ))}
+                    </select>
+                    <div className="absolute right-4 top-3.5 pointer-events-none text-gray-400 group-focus-within:text-black transition-colors">
+                      <ChevronDown size={16} strokeWidth={3} />
+                    </div>
                   </div>
                 </div>
+              </div>
+              
+              {/* Card 2: Dados Financeiros */}
+              <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm space-y-5">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 block">Valor Total</label>
+                    <div className="relative group">
+                      <span className="absolute left-4 top-3 text-sm font-black text-gray-400 group-focus-within:text-black transition-colors">R$</span>
+                      <input 
+                        type="text" 
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-11 pr-4 py-3 text-sm font-black text-gray-900 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all hover:bg-gray-100/80"
+                        value={novaCobranca.valor}
+                        onChange={handleValorChange}
+                        disabled={gerando}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 block">Ref. (Mês)</label>
+                    <div className="relative group">
+                      <span className="absolute left-3.5 top-3.5 text-gray-400 group-focus-within:text-black transition-colors">
+                        <FileText size={16} />
+                      </span>
+                      <input 
+                        type="text" 
+                        placeholder="MM/AAAA"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-10 pr-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all hover:bg-gray-100/80"
+                        value={novaCobranca.referencia}
+                        onChange={(e) => setNovaCobranca({ ...novaCobranca, referencia: e.target.value })}
+                        disabled={gerando}
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">Referência</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2 flex items-center gap-1.5">
+                    <Clock size={12} /> Vencimento
+                  </label>
                   <input 
-                    type="text" 
-                    placeholder="MM/AAAA"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
-                    value={novaCobranca.referencia}
-                    onChange={(e) => setNovaCobranca({ ...novaCobranca, referencia: e.target.value })}
+                    type="date" 
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all hover:bg-gray-100/80 uppercase"
+                    value={novaCobranca.data_vencimento}
+                    onChange={(e) => setNovaCobranca({ ...novaCobranca, data_vencimento: e.target.value })}
                     disabled={gerando}
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">Vencimento</label>
-                <input 
-                  type="date" 
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-black focus:ring-1 focus:ring-black transition-all"
-                  value={novaCobranca.data_vencimento}
-                  onChange={(e) => setNovaCobranca({ ...novaCobranca, data_vencimento: e.target.value })}
-                  disabled={gerando}
-                />
               </div>
 
               <div className="pt-2">
                 <button 
                   type="submit" 
                   disabled={gerando}
-                  className="w-full bg-black text-white rounded-xl py-3.5 text-xs font-black uppercase tracking-widest hover:bg-gray-800 transition-colors active:scale-95 disabled:opacity-50 flex justify-center items-center h-12"
+                  className="w-full bg-black text-white rounded-xl py-4 text-xs font-black uppercase tracking-widest hover:bg-gray-800 transition-all active:scale-[0.98] disabled:opacity-50 flex justify-center items-center gap-2 shadow-lg shadow-black/20"
                 >
                   {gerando ? (
                     <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                   ) : (
-                    'Gerar Fatura'
+                    <>
+                      Gerar Fatura Agora
+                      <ArrowRight size={16} />
+                    </>
                   )}
                 </button>
               </div>
