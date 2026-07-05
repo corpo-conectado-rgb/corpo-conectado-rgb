@@ -419,10 +419,6 @@ export default function AdminFinanceiro() {
                                 <p className="text-sm font-bold text-gray-900">{a.nome}</p>
                                 <p className="text-xs text-gray-500 font-medium">{a.email}</p>
                               </div>
-                              {a.status_mensalidade === 'PENDENTE' && <span className="bg-yellow-100 text-yellow-700 text-[9px] font-black uppercase px-2 py-1 rounded-md">Pendente</span>}
-                              {a.status_mensalidade === 'ATRASADA' && <span className="bg-red-100 text-red-700 text-[9px] font-black uppercase px-2 py-1 rounded-md">Atrasada</span>}
-                              {a.status_mensalidade === 'PAGA' && <span className="bg-emerald-100 text-emerald-700 text-[9px] font-black uppercase px-2 py-1 rounded-md">Em dia</span>}
-                              {a.status_mensalidade === 'SEM_COBRANCA' && <span className="bg-gray-100 text-gray-600 text-[9px] font-black uppercase px-2 py-1 rounded-md">S/ Cobrança</span>}
                             </div>
                           ))
                         )}
