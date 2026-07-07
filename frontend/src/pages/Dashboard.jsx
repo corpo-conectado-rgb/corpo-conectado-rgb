@@ -176,6 +176,7 @@ export default function Dashboard() {
             <div className="absolute inset-0 flex items-center justify-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
               <p className="text-sm font-bold text-gray-400">Sem dados de treino suficientes.</p>
             </div>
+          )}
         </div>
       </div>
       
