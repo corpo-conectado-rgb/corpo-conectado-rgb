@@ -22,7 +22,9 @@ router.get('/', authMiddleware, async (req, res) => {
         hora_inicio: r.get('hora_inicio'),
         volume_total: Number(r.get('volume_total')) || 0,
         duracao_seg: Number(r.get('duracao_seg')) || 0,
-        detalhes: r.get('detalhes')
+        detalhes: r.get('detalhes'),
+        letra: r.get('letra'),
+        nome_dia: r.get('nome_dia')
       }))
       .sort((a, b) => {
         const dtA = new Date(`${a.data}T${a.hora_inicio || '00:00'}`);
@@ -124,12 +126,37 @@ router.get('/', authMiddleware, async (req, res) => {
       diasDesdeUltimoTreino = Math.floor((hoje - d) / (1000 * 60 * 60 * 24));
     }
 
+    // Calcular Distribuição de Treinos do Mês Atual
+    const hojeAg = new Date();
+    // UTC adjustment to match frontend's "current month" reliably if needed, but local is fine for grouping
+    const monthStartAtual = new Date(hojeAg.getFullYear(), hojeAg.getMonth(), 1);
+    const monthEndAtual = new Date(hojeAg.getFullYear(), hojeAg.getMonth() + 1, 0, 23, 59, 59);
+
+    const treinosMesAtual = userHist.filter(t => {
+      const dt = new Date(t.data + 'T12:00:00');
+      return dt >= monthStartAtual && dt <= monthEndAtual;
+    });
+
+    const distribuicaoMap = {};
+    treinosMesAtual.forEach(t => {
+      const fichaNome = t.letra ? `Ficha ${t.letra}` : (t.nome_dia || 'Outro');
+      if (!distribuicaoMap[fichaNome]) distribuicaoMap[fichaNome] = 0;
+      distribuicaoMap[fichaNome]++;
+    });
+
+    const distribuicaoTreinos = Object.keys(distribuicaoMap).map(key => ({
+      name: key,
+      value: distribuicaoMap[key]
+    })).sort((a, b) => a.name.localeCompare(b.name));
+
     res.json({
       streakSemanas,
       tempoMensalSegundos,
       barData,
       diasDesdeUltimoTreino,
-      totalSessoes: userHist.length
+      totalSessoes: userHist.length,
+      distribuicaoTreinos,
+      totalTreinosMesAtual: treinosMesAtual.length
     });
 
   } catch (error) {

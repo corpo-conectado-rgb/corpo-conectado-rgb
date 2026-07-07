@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, FileText, BarChart2, Flame, Activity, Clock, Loader2, Bot, Timer, CheckCircle, XCircle, ChevronRight } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+import { Dumbbell, FileText, BarChart2, Flame, Activity, Clock, Loader2, Bot, Timer, CheckCircle, XCircle, ChevronRight, PieChart as PieChartIcon } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+
+const CHART_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6', '#3b82f6'];
 import { apiFetch } from '../services/api';
 
 export default function Dashboard() {
@@ -12,6 +14,8 @@ export default function Dashboard() {
     volumeMensal: 0,
     diasDesdeUltimoTreino: null,
     barData: [],
+    distribuicaoTreinos: [],
+    totalTreinosMesAtual: 0,
     totalSessoes: 0
   });
   const [notificacoes, setNotificacoes] = useState([]);
@@ -172,10 +176,83 @@ export default function Dashboard() {
             <div className="absolute inset-0 flex items-center justify-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
               <p className="text-sm font-bold text-gray-400">Sem dados de treino suficientes.</p>
             </div>
-          )}
         </div>
       </div>
       
+      {/* Distribuição dos Treinos */}
+      <div className="bg-white border border-gray-200 shadow-sm flex flex-col p-3 md:p-6 rounded-2xl mb-2">
+        <h2 className="shrink-0 text-[10px] md:text-xs font-black text-gray-800 mb-3 md:mb-6 uppercase tracking-widest flex items-center gap-2">
+          <PieChartIcon size={14} className="text-purple-600 md:w-4 md:h-4" />
+          Distribuição dos Treinos (Mês Atual)
+        </h2>
+        
+        {data.totalTreinosMesAtual > 0 && data.distribuicaoTreinos && data.distribuicaoTreinos.length > 0 ? (
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 py-2">
+            
+            {/* Gráfico Rosquinha */}
+            <div className="relative w-48 h-48 md:w-56 md:h-56 shrink-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={data.distribuicaoTreinos}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius="65%"
+                    outerRadius="100%"
+                    paddingAngle={3}
+                    dataKey="value"
+                    stroke="none"
+                    isAnimationActive={true}
+                  >
+                    {data.distribuicaoTreinos.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip 
+                    cursor={{fill: '#f8fafc'}}
+                    contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: 'white', fontWeight: 700, padding: '10px 16px', fontSize: 13, boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                    itemStyle={{color: '#fff'}}
+                    formatter={(value) => [`${value} ${value === 1 ? 'Treino' : 'Treinos'}`, 'Concluídos']}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              {/* Texto Central */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-3xl font-black text-gray-900 leading-none">{data.totalTreinosMesAtual}</span>
+                <span className="text-[9px] font-black uppercase text-gray-400 mt-1 text-center leading-tight tracking-widest">Treinos<br/>no mês</span>
+              </div>
+            </div>
+
+            {/* Legenda Customizada */}
+            <div className="flex flex-col gap-3 w-full max-w-xs">
+              {data.distribuicaoTreinos.map((entry, index) => {
+                const percent = Math.round((entry.value / data.totalTreinosMesAtual) * 100);
+                return (
+                  <div key={`legend-${index}`} className="flex items-center justify-between bg-gray-50/80 p-2.5 rounded-xl border border-gray-100 transition-colors hover:bg-gray-100">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-3.5 h-3.5 rounded-md shadow-sm" style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}></div>
+                      <span className="text-xs font-bold text-gray-700">{entry.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs font-black text-gray-900">{entry.value}</span>
+                      <span className="text-[10px] font-bold text-gray-400 ml-1.5">({percent}%)</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+          </div>
+        ) : (
+          <div className="w-full h-44 md:h-64 flex flex-col items-center justify-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+              <FileText size={20} className="text-gray-400" />
+            </div>
+            <p className="text-sm font-bold text-gray-500">Nenhum treino realizado neste mês.</p>
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }
