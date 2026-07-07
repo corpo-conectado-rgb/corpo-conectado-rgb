@@ -209,10 +209,22 @@ export default function Dashboard() {
                     ))}
                   </Pie>
                   <RechartsTooltip 
-                    cursor={{fill: '#f8fafc'}}
-                    contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: 'white', fontWeight: 700, padding: '10px 16px', fontSize: 13, boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                    itemStyle={{color: '#fff'}}
-                    formatter={(value) => [`${value} ${value === 1 ? 'Treino' : 'Treinos'}`, 'Concluídos']}
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const ptData = payload[0].payload;
+                        const ptValue = ptData.value;
+                        const percent = Math.round((ptValue / data.totalTreinosMesAtual) * 100);
+                        return (
+                          <div className="bg-[#1e293b] rounded-xl text-white font-bold px-4 py-2.5 text-[13px] shadow-xl border-none">
+                            <p className="mb-1">{ptData.name}</p>
+                            <p className="text-[#c084fc]">
+                              Concluídos : {ptValue} Treino{ptValue !== 1 ? 's' : ''} ({percent}%)
+                            </p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
                   />
                 </PieChart>
               </ResponsiveContainer>
