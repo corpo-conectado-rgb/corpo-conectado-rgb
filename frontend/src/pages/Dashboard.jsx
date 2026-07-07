@@ -191,7 +191,12 @@ export default function Dashboard() {
             
             {/* Gráfico Rosquinha */}
             <div className="relative w-52 h-52 md:w-60 md:h-60 shrink-0 mx-auto md:ml-4">
-              <ResponsiveContainer width="100%" height="100%">
+              {/* Texto Central (renderizado antes do SVG para o tooltip ficar por cima) */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-4xl font-black text-gray-900 leading-none">{data.totalTreinosMesAtual}</span>
+                <span className="text-[10px] font-black uppercase text-gray-400 mt-1 text-center leading-tight tracking-widest">Treinos<br/>no mês</span>
+              </div>
+              <ResponsiveContainer width="100%" height="100%" className="relative z-10">
                 <PieChart>
                   <Pie
                     data={data.distribuicaoTreinos}
@@ -213,11 +218,13 @@ export default function Dashboard() {
                       if (active && payload && payload.length) {
                         const ptData = payload[0].payload;
                         const ptValue = ptData.value;
+                        const dataIndex = data.distribuicaoTreinos.findIndex(d => d.name === ptData.name);
+                        const sliceColor = CHART_COLORS[dataIndex % CHART_COLORS.length] || '#c084fc';
                         const percent = Math.round((ptValue / data.totalTreinosMesAtual) * 100);
                         return (
                           <div className="bg-[#1e293b] rounded-xl text-white font-bold px-4 py-2.5 text-[13px] shadow-xl border-none">
                             <p className="mb-1">{ptData.name}</p>
-                            <p className="text-[#c084fc]">
+                            <p style={{ color: sliceColor }}>
                               Concluídos : {ptValue} Treino{ptValue !== 1 ? 's' : ''} ({percent}%)
                             </p>
                           </div>
@@ -228,11 +235,6 @@ export default function Dashboard() {
                   />
                 </PieChart>
               </ResponsiveContainer>
-              {/* Texto Central */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-4xl font-black text-gray-900 leading-none">{data.totalTreinosMesAtual}</span>
-                <span className="text-[10px] font-black uppercase text-gray-400 mt-1 text-center leading-tight tracking-widest">Treinos<br/>no mês</span>
-              </div>
             </div>
 
             {/* Legenda Customizada */}
