@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dumbbell, FileText, BarChart2, Flame, Activity, Clock, Loader2, Bot, Timer, CheckCircle, XCircle, ChevronRight, PieChart as PieChartIcon } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-
-const CHART_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6', '#3b82f6'];
+const CHART_COLORS = ['#7e22ce', '#9333ea', '#a855f7', '#c084fc', '#d8b4fe', '#f3e8ff'];
 import { apiFetch } from '../services/api';
 
 export default function Dashboard() {
@@ -188,10 +187,10 @@ export default function Dashboard() {
         </h2>
         
         {data.totalTreinosMesAtual > 0 && data.distribuicaoTreinos && data.distribuicaoTreinos.length > 0 ? (
-          <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 py-2">
+          <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6 md:gap-10 w-full pt-2 pb-1">
             
             {/* Gráfico Rosquinha */}
-            <div className="relative w-48 h-48 md:w-56 md:h-56 shrink-0">
+            <div className="relative w-52 h-52 md:w-60 md:h-60 shrink-0 mx-auto md:ml-4">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -219,24 +218,24 @@ export default function Dashboard() {
               </ResponsiveContainer>
               {/* Texto Central */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-3xl font-black text-gray-900 leading-none">{data.totalTreinosMesAtual}</span>
-                <span className="text-[9px] font-black uppercase text-gray-400 mt-1 text-center leading-tight tracking-widest">Treinos<br/>no mês</span>
+                <span className="text-4xl font-black text-gray-900 leading-none">{data.totalTreinosMesAtual}</span>
+                <span className="text-[10px] font-black uppercase text-gray-400 mt-1 text-center leading-tight tracking-widest">Treinos<br/>no mês</span>
               </div>
             </div>
 
             {/* Legenda Customizada */}
-            <div className="flex flex-col gap-3 w-full max-w-xs">
+            <div className="flex flex-col gap-2.5 w-full md:w-auto md:min-w-[240px] shrink-0 md:mr-2">
               {data.distribuicaoTreinos.map((entry, index) => {
                 const percent = Math.round((entry.value / data.totalTreinosMesAtual) * 100);
                 return (
-                  <div key={`legend-${index}`} className="flex items-center justify-between bg-gray-50/80 p-2.5 rounded-xl border border-gray-100 transition-colors hover:bg-gray-100">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-3.5 h-3.5 rounded-md shadow-sm" style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}></div>
-                      <span className="text-xs font-bold text-gray-700">{entry.name}</span>
+                  <div key={`legend-${index}`} className="flex items-center justify-between bg-white border border-gray-100 p-3 rounded-xl shadow-sm transition-all hover:border-purple-200 hover:shadow-md hover:-translate-y-0.5 group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-4 h-4 rounded-full shadow-inner border border-black/5" style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}></div>
+                      <span className="text-xs font-bold text-gray-700 group-hover:text-purple-900 transition-colors">{entry.name}</span>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex items-center gap-2.5">
                       <span className="text-xs font-black text-gray-900">{entry.value}</span>
-                      <span className="text-[10px] font-bold text-gray-400 ml-1.5">({percent}%)</span>
+                      <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md group-hover:bg-purple-50 group-hover:text-purple-600 transition-colors">{percent}%</span>
                     </div>
                   </div>
                 );
