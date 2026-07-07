@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dumbbell, FileText, BarChart2, Flame, Activity, Clock, Loader2, Bot, Timer, CheckCircle, XCircle, ChevronRight, PieChart as PieChartIcon } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-const CHART_COLORS = ['#7e22ce', '#9333ea', '#a855f7', '#c084fc', '#d8b4fe', '#f3e8ff'];
+const CHART_COLORS = ['#7e22ce', '#0EA5E9', '#18518F', '#c084fc', '#d8b4fe', '#f3e8ff'];
 import { apiFetch } from '../services/api';
 
 export default function Dashboard() {
