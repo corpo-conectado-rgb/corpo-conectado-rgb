@@ -190,7 +190,7 @@ export default function Dashboard() {
           <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6 md:gap-10 w-full pt-2 pb-1">
             
             {/* Gráfico Rosquinha */}
-            <div className="relative w-52 h-52 md:w-60 md:h-60 shrink-0 mx-auto md:ml-4">
+            <div className="relative w-52 h-52 md:w-60 md:h-60 shrink-0 mx-auto md:ml-4 [&_:focus]:outline-none [&_path:focus]:outline-none [&_g:focus]:outline-none">
               {/* Texto Central (renderizado antes do SVG para o tooltip ficar por cima) */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <span className="text-4xl font-black text-gray-900 leading-none">{data.totalTreinosMesAtual}</span>
