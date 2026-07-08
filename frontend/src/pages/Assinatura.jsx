@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Crown, Check, ChevronDown, ArrowRight, Shield,
+  Check, ChevronDown, ArrowRight, Shield,
   Dumbbell, BarChart2, ClipboardList, Flame, Timer,
   UserCircle, Bot, Rocket, ChevronRight as ChevronRightIcon,
   Sparkles, Lock
@@ -151,13 +151,7 @@ export default function Assinatura() {
           {/* ═══════════════════════════════════════════════════ */}
           <section ref={planRef} className="flex justify-center">
             <div className="w-full max-w-md bg-white border-2 border-purple-600 rounded-3xl shadow-xl shadow-purple-600/10 overflow-hidden hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-600/15 transition-all duration-300">
-              {/* Badge */}
-              <div className="bg-purple-600 text-white text-center py-2.5 px-4">
-                <span className="text-[11px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5">
-                  <Crown size={14} />
-                  Recomendado
-                </span>
-              </div>
+              {/* Sem Badge Recomendado */}
 
               <div className="p-6 md:p-8 space-y-6">
                 {/* Plan Name */}
