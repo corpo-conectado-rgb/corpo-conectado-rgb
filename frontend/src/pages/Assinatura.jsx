@@ -124,8 +124,7 @@ export default function Assinatura() {
           {/* ═══════════════════════════════════════════════════ */}
           <section className="text-center space-y-5 pt-2">
             <div className="inline-flex items-center gap-2 bg-purple-50 text-purple-700 text-[11px] font-black uppercase tracking-widest px-4 py-2 rounded-full">
-              <Sparkles size={14} />
-              Corpo Conectado Pro
+              Corpo Conectado
             </div>
             <h1 className="text-3xl md:text-5xl font-black text-gray-900 tracking-tight leading-tight">
               Seu treino. Sua evolução.
