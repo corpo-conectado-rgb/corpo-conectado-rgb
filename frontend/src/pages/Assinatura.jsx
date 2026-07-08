@@ -151,7 +151,8 @@ export default function Assinatura() {
           {/* ═══════════════════════════════════════════════════ */}
           <section ref={planRef} className="flex justify-center">
             <div className="w-full max-w-md bg-white border-2 border-purple-600 rounded-3xl shadow-xl shadow-purple-600/10 overflow-hidden hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-600/15 transition-all duration-300">
-              {/* Sem Badge Recomendado */}
+              {/* Topo Roxo Decorativo */}
+              <div className="bg-purple-600 h-4 w-full"></div>
 
               <div className="p-6 md:p-8 space-y-6">
                 {/* Plan Name */}
