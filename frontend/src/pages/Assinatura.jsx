@@ -50,7 +50,7 @@ const BENEFITS = [
   {
     icon: Bot,
     title: 'Assistente IA (Alfred)',
-    description: 'Um copiloto inteligente do Corpo Conectado que analisa seus dados, acompanha sua evolução e mantém você sempre conectado ao seu progresso e ao seu Educador Físico.',
+    description: 'Um copiloto inteligente do Corpo Conectado que analisa seus dados, acompanha sua evolução e mantém você sempre conectado ao seu progresso e ao seu educador físico.',
   },
   {
     icon: Rocket,
