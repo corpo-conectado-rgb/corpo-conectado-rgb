@@ -14,6 +14,7 @@ import AdminPrescricao from './pages/AdminPrescricao';
 import AdminSolicitacoes from './pages/AdminSolicitacoes';
 import AdminConfiguracoes from './pages/AdminConfiguracoes';
 import Financeiro from './pages/Financeiro';
+import Assinatura from './pages/Assinatura';
 import AdminFinanceiro from './pages/AdminFinanceiro';
 import Welcome from './pages/Welcome';
 
@@ -65,6 +66,7 @@ function AppRoutes() {
         <Route path="treinos" element={<Treinos />} />
         <Route path="perfil" element={<Perfil />} />
         <Route path="financeiro" element={<Financeiro />} />
+        <Route path="assinatura" element={<Assinatura />} />
         
         {/* Rotas Administrativas Envolvidas no Layout */}
         <Route path="admin/alunos" element={<AdminRoute><AdminAlunos /></AdminRoute>} />

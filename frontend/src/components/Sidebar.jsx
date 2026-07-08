@@ -18,7 +18,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { name: 'Dashboard Central', icon: LayoutDashboard, path: '/dashboard' },
     { name: 'Meu Treino', icon: Dumbbell, path: '/treinos' },
     { name: 'Meus Dados', icon: User, path: '/perfil' },
-    { name: 'Assinatura', icon: CreditCard, path: '/financeiro' },
+    { name: 'Assinatura', icon: CreditCard, path: '/assinatura' },
   ];
 
   const adminMenu = user?.role === 'admin' ? [
