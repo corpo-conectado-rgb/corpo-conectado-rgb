@@ -115,13 +115,6 @@ export default function Assinatura() {
 
   // Verifica se já tem assinatura ativa
   useEffect(() => {
-    // Se o aluno veio intencionalmente pelo botão "Ver Planos" na tela do Financeiro,
-    // não fazemos o redirect para deixar ele ver os planos.
-    if (location.state?.fromFinanceiro) {
-      setInitialLoading(false);
-      return;
-    }
-
     apiFetch('/financeiro/minha-assinatura')
       .then(res => {
         if (res && res.status === 'ATIVA') {
@@ -139,7 +132,7 @@ export default function Assinatura() {
       .catch(() => {
         setInitialLoading(false);
       });
-  }, [navigate]);
+  }, [navigate, location.state]);
 
   const scrollToPlan = () => {
     planRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
