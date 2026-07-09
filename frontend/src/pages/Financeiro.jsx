@@ -275,17 +275,25 @@ export default function Financeiro() {
                 </div>
               </div>
 
-              {/* Cancel button */}
-              {assinatura.status === 'ATIVA' && (
-                <div className="pt-1">
+              {/* Actions */}
+              <div className="pt-2 flex items-center justify-between">
+                <button
+                  onClick={() => navigate('/assinatura')}
+                  className="flex items-center gap-1 text-xs font-bold text-purple-600 hover:text-purple-700 transition-colors"
+                >
+                  <CreditCard size={14} />
+                  Ver planos
+                </button>
+                
+                {assinatura.status === 'ATIVA' && (
                   <button
                     onClick={() => setShowCancelModal(true)}
-                    className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors mt-2"
+                    className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors"
                   >
                     Cancelar Assinatura
                   </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
 

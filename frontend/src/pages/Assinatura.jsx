@@ -107,6 +107,7 @@ export default function Assinatura() {
   const navigate = useNavigate();
   const [openFaq, setOpenFaq] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
   const planRef = useRef(null);
 
@@ -116,9 +117,13 @@ export default function Assinatura() {
       .then(res => {
         if (res && res.status === 'ATIVA') {
           navigate('/financeiro', { replace: true });
+        } else {
+          setInitialLoading(false);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setInitialLoading(false);
+      });
   }, [navigate]);
 
   const scrollToPlan = () => {
@@ -144,6 +149,17 @@ export default function Assinatura() {
       setLoading(false);
     }
   };
+
+  if (initialLoading) {
+    return (
+      <div className="absolute inset-0 z-10 bg-white rounded-2xl flex items-center justify-center animate-fade-in">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-4 border-gray-200 border-t-black rounded-full animate-spin" />
+          <p className="text-sm font-bold text-gray-500">Verificando...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="absolute inset-0 z-10 bg-white rounded-2xl flex flex-col overflow-hidden animate-fade-in">
