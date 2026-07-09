@@ -238,7 +238,7 @@ export default function Financeiro() {
                 {assinatura.status === 'ATIVA' ? (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-xs font-black">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    ATIVA
+                    ATIVO
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-red-50 text-red-700 text-xs font-black">
