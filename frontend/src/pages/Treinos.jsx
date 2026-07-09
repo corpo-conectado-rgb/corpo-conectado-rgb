@@ -543,7 +543,7 @@ export default function Treinos() {
             className={`flex-1 flex items-center justify-center gap-2 h-[52px] md:h-12 rounded-xl font-black text-white 
                        transition-all text-sm shadow-md active:scale-[0.98] ${
                          confirmarFinalizar 
-                          ? 'bg-red-600 hover:bg-red-700 animate-pulse' 
+                          ? 'bg-emerald-600 hover:bg-emerald-700 animate-pulse' 
                           : 'bg-black hover:bg-gray-800'
                        }`}>
             {exIndex === fichaAtiva.exercicios.length - 1 ? (
