@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Check, ChevronDown, ArrowRight, Shield,
   Dumbbell, BarChart2, ClipboardList, Flame, Timer,
@@ -105,6 +105,7 @@ const FAQ_ITEMS = [
 
 export default function Assinatura() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [openFaq, setOpenFaq] = useState(null);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -113,6 +114,13 @@ export default function Assinatura() {
 
   // Verifica se já tem assinatura ativa
   useEffect(() => {
+    // Se o aluno veio intencionalmente pelo botão "Ver Planos" na tela do Financeiro,
+    // não fazemos o redirect para deixar ele ver os planos.
+    if (location.state?.fromFinanceiro) {
+      setInitialLoading(false);
+      return;
+    }
+
     apiFetch('/financeiro/minha-assinatura')
       .then(res => {
         if (res && res.status === 'ATIVA') {

@@ -278,7 +278,7 @@ export default function Financeiro() {
               {/* Actions */}
               <div className="pt-2 flex items-center justify-between">
                 <button
-                  onClick={() => navigate('/assinatura')}
+                  onClick={() => navigate('/assinatura', { state: { fromFinanceiro: true } })}
                   className="flex items-center gap-1 text-xs font-bold text-purple-600 hover:text-purple-700 transition-colors"
                 >
                   <CreditCard size={14} />
