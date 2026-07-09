@@ -257,21 +257,21 @@ export default function Financeiro() {
               </div>
 
               {/* Row 3: Mini info cards */}
-              <div className="grid grid-cols-3 gap-3 mt-4">
-                <div className="bg-gray-50 rounded-xl p-3 text-center">
-                  <CalendarCheck size={14} className="text-gray-400 mx-auto mb-1" />
-                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Contratado</div>
-                  <div className="text-sm font-black text-gray-900 mt-1">{formatDate(assinatura.data_inicio)}</div>
+              <div className="grid grid-cols-3 gap-2 mt-4">
+                <div className="bg-gray-50 rounded-xl p-2 md:p-3 text-center flex flex-col items-center justify-center">
+                  <CalendarCheck size={14} className="text-gray-400 mb-1" />
+                  <div className="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-wide leading-tight">Início</div>
+                  <div className="text-xs md:text-sm font-black text-gray-900 mt-0.5">{formatDate(assinatura.data_inicio)}</div>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-3 text-center">
-                  <Calendar size={14} className="text-gray-400 mx-auto mb-1" />
-                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Próx. Vencimento</div>
-                  <div className="text-sm font-black text-gray-900 mt-1">{formatDate(stats?.proximo_vencimento)}</div>
+                <div className="bg-gray-50 rounded-xl p-2 md:p-3 text-center flex flex-col items-center justify-center">
+                  <Calendar size={14} className="text-gray-400 mb-1" />
+                  <div className="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-wide leading-tight">Vencimento</div>
+                  <div className="text-xs md:text-sm font-black text-gray-900 mt-0.5">{formatDate(stats?.proximo_vencimento)}</div>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-3 text-center">
-                  <TrendingUp size={14} className="text-gray-400 mx-auto mb-1" />
-                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Meses</div>
-                  <div className="text-sm font-black text-gray-900 mt-1">{stats?.meses_assinante ?? 0}</div>
+                <div className="bg-gray-50 rounded-xl p-2 md:p-3 text-center flex flex-col items-center justify-center">
+                  <TrendingUp size={14} className="text-gray-400 mb-1" />
+                  <div className="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-wide leading-tight">Meses</div>
+                  <div className="text-xs md:text-sm font-black text-gray-900 mt-0.5">{stats?.meses_assinante ?? 0}</div>
                 </div>
               </div>
 
