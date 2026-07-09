@@ -109,6 +109,7 @@ export default function Assinatura() {
   const [openFaq, setOpenFaq] = useState(null);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [hasActivePlan, setHasActivePlan] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
   const planRef = useRef(null);
 
@@ -124,7 +125,13 @@ export default function Assinatura() {
     apiFetch('/financeiro/minha-assinatura')
       .then(res => {
         if (res && res.status === 'ATIVA') {
-          navigate('/financeiro', { replace: true });
+          setHasActivePlan(true);
+          // Redireciona apenas se não veio pelo botão "Ver Planos"
+          if (!location.state?.fromFinanceiro) {
+            navigate('/financeiro', { replace: true });
+          } else {
+            setInitialLoading(false);
+          }
         } else {
           setInitialLoading(false);
         }
@@ -139,6 +146,10 @@ export default function Assinatura() {
   };
 
   const handleAssinar = async () => {
+    if (hasActivePlan) {
+      navigate('/financeiro');
+      return;
+    }
     try {
       setLoading(true);
       const result = await apiFetch('/financeiro/assinar', { method: 'POST' });
@@ -210,7 +221,15 @@ export default function Assinatura() {
 
               <div className="p-6 md:p-8 space-y-6">
                 {/* Plan Name */}
-                <h2 className="text-lg font-black text-gray-900 tracking-tight">Plano Básico</h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-black text-gray-900 tracking-tight">Plano Básico</h2>
+                  {hasActivePlan && (
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-widest">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      Ativo
+                    </span>
+                  )}
+                </div>
 
                 {/* Price */}
                 <div className="space-y-1">
@@ -248,6 +267,8 @@ export default function Assinatura() {
                   {loading ? (
                     <><Loader2 size={16} className="animate-spin" /> Ativando...
                     </>
+                  ) : hasActivePlan ? (
+                    <>Acessar Financeiro <ArrowRight size={16} /></>
                   ) : (
                     <>Assinar Agora <ArrowRight size={16} /></>
                   )}
@@ -391,6 +412,8 @@ export default function Assinatura() {
               >
                 {loading ? (
                   <><Loader2 size={16} className="animate-spin" /> Ativando...</>
+                ) : hasActivePlan ? (
+                  <>Acessar Financeiro <ArrowRight size={16} /></>
                 ) : (
                   <>Começar Agora <ArrowRight size={16} /></>
                 )}
