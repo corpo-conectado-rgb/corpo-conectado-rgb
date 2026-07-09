@@ -1,11 +1,13 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Check, ChevronDown, ArrowRight, Shield,
   Dumbbell, BarChart2, ClipboardList, Flame, Timer,
   UserCircle, Bot, Rocket, ChevronRight as ChevronRightIcon,
-  Sparkles, Lock
+  Sparkles, Lock, Loader2
 } from 'lucide-react';
+import { apiFetch } from '../services/api';
+import Toast from '../components/Toast';
 
 const PLAN_FEATURES = [
   'Treinos personalizados',
@@ -104,14 +106,43 @@ const FAQ_ITEMS = [
 export default function Assinatura() {
   const navigate = useNavigate();
   const [openFaq, setOpenFaq] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '', type: '' });
   const planRef = useRef(null);
+
+  // Verifica se já tem assinatura ativa
+  useEffect(() => {
+    apiFetch('/financeiro/minha-assinatura')
+      .then(res => {
+        if (res && res.status === 'ATIVA') {
+          navigate('/financeiro', { replace: true });
+        }
+      })
+      .catch(() => {});
+  }, [navigate]);
 
   const scrollToPlan = () => {
     planRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
-  const handleAssinar = () => {
-    navigate('/financeiro');
+  const handleAssinar = async () => {
+    try {
+      setLoading(true);
+      const result = await apiFetch('/financeiro/assinar', { method: 'POST' });
+      if (result.success) {
+        setToast({ show: true, message: 'Assinatura ativada com sucesso! 🎉', type: 'success' });
+        setTimeout(() => navigate('/financeiro'), 1500);
+      }
+    } catch (err) {
+      const msg = err.message || 'Erro ao ativar assinatura.';
+      if (msg.includes('já possui')) {
+        navigate('/financeiro');
+      } else {
+        setToast({ show: true, message: msg, type: 'error' });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -187,10 +218,15 @@ export default function Assinatura() {
                 {/* CTA */}
                 <button
                   onClick={handleAssinar}
-                  className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white font-bold text-sm py-4 rounded-xl hover:bg-gray-800 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 shadow-lg shadow-gray-900/20"
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white font-bold text-sm py-4 rounded-xl hover:bg-gray-800 hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 shadow-lg shadow-gray-900/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
-                  Assinar Agora
-                  <ArrowRight size={16} />
+                  {loading ? (
+                    <><Loader2 size={16} className="animate-spin" /> Ativando...
+                    </>
+                  ) : (
+                    <>Assinar Agora <ArrowRight size={16} /></>
+                  )}
                 </button>
 
                 {/* Trust */}
@@ -326,16 +362,28 @@ export default function Assinatura() {
               </p>
               <button
                 onClick={handleAssinar}
-                className="inline-flex items-center gap-2 bg-white text-gray-900 font-black text-sm px-8 py-4 rounded-xl hover:bg-gray-100 hover:scale-105 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-white/10"
+                disabled={loading}
+                className="inline-flex items-center gap-2 bg-white text-gray-900 font-black text-sm px-8 py-4 rounded-xl hover:bg-gray-100 hover:scale-105 active:scale-[0.98] transition-all duration-200 shadow-lg shadow-white/10 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
-                Começar Agora
-                <ArrowRight size={16} />
+                {loading ? (
+                  <><Loader2 size={16} className="animate-spin" /> Ativando...</>
+                ) : (
+                  <>Começar Agora <ArrowRight size={16} /></>
+                )}
               </button>
             </div>
           </section>
 
         </div>
       </div>
+
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ show: false, message: '', type: '' })}
+        />
+      )}
     </div>
   );
 }

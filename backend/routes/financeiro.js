@@ -124,8 +124,362 @@ router.post('/webhook', express.json({ type: 'application/json' }), async (req, 
 });
 
 // ============================================
+// HELPER — Gera referência no formato "Mês/Ano"
+// ============================================
+function gerarReferencia(date) {
+  const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+  return `${meses[date.getMonth()]}/${date.getFullYear()}`;
+}
+
+// ============================================
+// HELPER — Auto-gera próxima mensalidade se a atual foi PAGA
+// ============================================
+async function autoGerarProximaMensalidade(userId) {
+  try {
+    const assinaturasRows = await getCachedRows('assinaturas', ASSINATURAS_HEADERS);
+    const assinatura = assinaturasRows.find(r => r.get('user_id') === userId && r.get('status') === 'ATIVA');
+    if (!assinatura) return;
+
+    const mensalidadesRows = await getCachedRows('mensalidades', MENSALIDADES_HEADERS);
+    const userMensalidades = mensalidadesRows
+      .filter(r => r.get('user_id') === userId)
+      .sort((a, b) => new Date(b.get('data_vencimento')) - new Date(a.get('data_vencimento')));
+
+    if (userMensalidades.length === 0) return;
+
+    const maisRecente = userMensalidades[0];
+    
+    // Se a mais recente não é PAGA, não gera nova
+    if (maisRecente.get('status') !== 'PAGA') return;
+
+    // Verifica se já existe uma mensalidade futura (evita duplicata)
+    const hoje = new Date();
+    const existeFutura = userMensalidades.some(r => {
+      const venc = new Date(r.get('data_vencimento'));
+      return venc > hoje && r.get('status') !== 'PAGA';
+    });
+    if (existeFutura) return;
+
+    // Calcula próximo vencimento
+    const diaVenc = Number(assinatura.get('dia_vencimento')) || hoje.getDate();
+    const valorPlano = Number(String(assinatura.get('valor_personalizado') || '19.90').replace(',', '.'));
+    
+    let proxVenc = new Date(hoje.getFullYear(), hoje.getMonth() + 1, diaVenc);
+    // Se o dia de vencimento já passou neste mês e não existe cobrança pro mês atual
+    if (diaVenc > hoje.getDate()) {
+      proxVenc = new Date(hoje.getFullYear(), hoje.getMonth(), diaVenc);
+    }
+
+    const sheet = await getSheet('mensalidades', MENSALIDADES_HEADERS);
+    await sheet.addRow({
+      id: uuidv4(),
+      user_id: userId,
+      asaas_payment_id: '',
+      valor: valorPlano,
+      data_vencimento: proxVenc.toISOString().split('T')[0],
+      data_pagamento: '',
+      status: 'PENDENTE',
+      forma_pagamento: 'PIX_MANUAL',
+      referencia: gerarReferencia(proxVenc),
+      pix_qrcode: '',
+      pix_copia_cola: '',
+      observacao: 'Gerada automaticamente',
+      data_criacao: new Date().toISOString()
+    });
+    invalidateCache('mensalidades');
+    console.log(`[AUTO] Nova mensalidade gerada para user ${userId} - venc: ${proxVenc.toISOString().split('T')[0]}`);
+  } catch (err) {
+    console.error('[AUTO] Erro ao gerar próxima mensalidade:', err);
+  }
+}
+
+// ============================================
+// POST /assinar — Ativa assinatura do aluno
+// ============================================
+router.post('/assinar', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Verifica se já tem assinatura ATIVA
+    const assinaturasRows = await getCachedRows('assinaturas', ASSINATURAS_HEADERS);
+    const jaTemAtiva = assinaturasRows.find(r => r.get('user_id') === userId && r.get('status') === 'ATIVA');
+    if (jaTemAtiva) {
+      return res.status(400).json({ error: 'Você já possui uma assinatura ativa.' });
+    }
+
+    // Busca ou cria o plano "Plano Básico"
+    let planosRows = await getCachedRows('planos', PLANOS_HEADERS);
+    let planoBasico = planosRows.find(r => r.get('nome') === 'Plano Básico' && r.get('ativo') === 'true');
+    
+    if (!planoBasico) {
+      const planosSheet = await getSheet('planos', PLANOS_HEADERS);
+      const planoId = uuidv4();
+      await planosSheet.addRow({
+        id: planoId,
+        nome: 'Plano Básico',
+        valor: '19.90',
+        ativo: 'true',
+        data_criacao: new Date().toISOString()
+      });
+      invalidateCache('planos');
+      planosRows = await getCachedRows('planos', PLANOS_HEADERS);
+      planoBasico = planosRows.find(r => r.get('id') === planoId);
+    }
+
+    const planoId = planoBasico.get('id');
+    const valorPlano = Number(String(planoBasico.get('valor') || '19.90').replace(',', '.'));
+    const hoje = new Date();
+    const diaVencimento = hoje.getDate();
+
+    // Cria assinatura
+    const assinaturaId = uuidv4();
+    const assinaturasSheet = await getSheet('assinaturas', ASSINATURAS_HEADERS);
+    await assinaturasSheet.addRow({
+      id: assinaturaId,
+      user_id: userId,
+      plano_id: planoId,
+      asaas_customer_id: '',
+      valor_personalizado: valorPlano.toString(),
+      dia_vencimento: diaVencimento.toString(),
+      status: 'ATIVA',
+      data_inicio: hoje.toISOString().split('T')[0],
+      data_criacao: hoje.toISOString()
+    });
+    invalidateCache('assinaturas');
+
+    // Gera primeira mensalidade (vencimento = 30 dias a partir de hoje)
+    const vencimento = new Date(hoje);
+    vencimento.setDate(vencimento.getDate() + 30);
+
+    const mensalidadesSheet = await getSheet('mensalidades', MENSALIDADES_HEADERS);
+    await mensalidadesSheet.addRow({
+      id: uuidv4(),
+      user_id: userId,
+      asaas_payment_id: '',
+      valor: valorPlano,
+      data_vencimento: vencimento.toISOString().split('T')[0],
+      data_pagamento: '',
+      status: 'PENDENTE',
+      forma_pagamento: 'PIX_MANUAL',
+      referencia: gerarReferencia(vencimento),
+      pix_qrcode: '',
+      pix_copia_cola: '',
+      observacao: 'Primeira mensalidade - assinatura ativada',
+      data_criacao: hoje.toISOString()
+    });
+    invalidateCache('mensalidades');
+
+    res.json({
+      success: true,
+      message: 'Assinatura ativada com sucesso!',
+      assinatura: {
+        id: assinaturaId,
+        plano_nome: 'Plano Básico',
+        valor: valorPlano,
+        status: 'ATIVA',
+        data_inicio: hoje.toISOString().split('T')[0],
+        dia_vencimento: diaVencimento
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao assinar:', error);
+    res.status(500).json({ error: 'Erro ao ativar assinatura' });
+  }
+});
+
+// ============================================
+// GET /minha-assinatura — Retorna assinatura do aluno
+// ============================================
+router.get('/minha-assinatura', authMiddleware, async (req, res) => {
+  try {
+    const assinaturasRows = await getCachedRows('assinaturas', ASSINATURAS_HEADERS);
+    const assinatura = assinaturasRows
+      .filter(r => r.get('user_id') === req.user.id)
+      .sort((a, b) => new Date(b.get('data_criacao')) - new Date(a.get('data_criacao')))[0];
+
+    if (!assinatura) return res.json(null);
+
+    // Busca nome do plano
+    const planosRows = await getCachedRows('planos', PLANOS_HEADERS);
+    const plano = planosRows.find(r => r.get('id') === assinatura.get('plano_id'));
+
+    res.json({
+      id: assinatura.get('id'),
+      plano_nome: plano ? plano.get('nome') : 'Plano Básico',
+      valor: Number(String(assinatura.get('valor_personalizado') || '19.90').replace(',', '.')),
+      status: assinatura.get('status'),
+      data_inicio: assinatura.get('data_inicio'),
+      dia_vencimento: Number(assinatura.get('dia_vencimento'))
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao buscar assinatura' });
+  }
+});
+
+// ============================================
+// GET /minha-assinatura/resumo — Dados consolidados para a tela Financeiro
+// ============================================
+router.get('/minha-assinatura/resumo', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Auto-gerar próxima mensalidade se necessário
+    await autoGerarProximaMensalidade(userId);
+
+    // Buscar assinatura
+    const assinaturasRows = await getCachedRows('assinaturas', ASSINATURAS_HEADERS);
+    const assinaturaRow = assinaturasRows
+      .filter(r => r.get('user_id') === userId)
+      .sort((a, b) => new Date(b.get('data_criacao')) - new Date(a.get('data_criacao')))[0];
+
+    let assinatura = null;
+    if (assinaturaRow) {
+      const planosRows = await getCachedRows('planos', PLANOS_HEADERS);
+      const plano = planosRows.find(r => r.get('id') === assinaturaRow.get('plano_id'));
+      assinatura = {
+        id: assinaturaRow.get('id'),
+        plano_nome: plano ? plano.get('nome') : 'Plano Básico',
+        valor: Number(String(assinaturaRow.get('valor_personalizado') || '19.90').replace(',', '.')),
+        status: assinaturaRow.get('status'),
+        data_inicio: assinaturaRow.get('data_inicio'),
+        dia_vencimento: Number(assinaturaRow.get('dia_vencimento'))
+      };
+    }
+
+    // Buscar mensalidades
+    const mensalidadesRows = await getCachedRows('mensalidades', MENSALIDADES_HEADERS);
+    const userMensalidades = mensalidadesRows
+      .filter(r => r.get('user_id') === userId)
+      .sort((a, b) => new Date(b.get('data_vencimento')) - new Date(a.get('data_vencimento')));
+
+    // Mensalidade atual (mais recente)
+    let mensalidadeAtual = null;
+    if (userMensalidades.length > 0) {
+      const atual = userMensalidades[0];
+      let diasAtraso = 0;
+      if (atual.get('status') === 'ATRASADA') {
+        const hoje = new Date();
+        const vencimento = new Date(atual.get('data_vencimento'));
+        diasAtraso = Math.ceil(Math.abs(hoje - vencimento) / (1000 * 60 * 60 * 24));
+      }
+      mensalidadeAtual = {
+        id: atual.get('id'),
+        valor: Number(String(atual.get('valor') || '0').replace(',', '.')),
+        status: atual.get('status'),
+        data_vencimento: atual.get('data_vencimento'),
+        data_pagamento: atual.get('data_pagamento'),
+        referencia: atual.get('referencia'),
+        dias_atraso: diasAtraso
+      };
+    }
+
+    // Histórico (todas exceto a atual)
+    const historico = userMensalidades.slice(1).map(r => ({
+      id: r.get('id'),
+      valor: Number(String(r.get('valor') || '0').replace(',', '.')),
+      status: r.get('status'),
+      data_vencimento: r.get('data_vencimento'),
+      data_pagamento: r.get('data_pagamento'),
+      referencia: r.get('referencia')
+    }));
+
+    // Stats
+    const totalPago = userMensalidades
+      .filter(r => r.get('status') === 'PAGA')
+      .reduce((sum, r) => sum + (Number(String(r.get('valor') || '0').replace(',', '.')) || 0), 0);
+    
+    const mesesAssinante = userMensalidades.filter(r => r.get('status') === 'PAGA').length;
+
+    let proximoVencimento = null;
+    const pendentes = userMensalidades.filter(r => r.get('status') === 'PENDENTE' || r.get('status') === 'ATRASADA');
+    if (pendentes.length > 0) {
+      proximoVencimento = pendentes[pendentes.length - 1].get('data_vencimento');
+    } else if (assinatura && assinatura.status === 'ATIVA') {
+      // Calcular próximo vencimento baseado no dia_vencimento
+      const hoje = new Date();
+      const diaVenc = assinatura.dia_vencimento || hoje.getDate();
+      let prox = new Date(hoje.getFullYear(), hoje.getMonth(), diaVenc);
+      if (prox <= hoje) prox = new Date(hoje.getFullYear(), hoje.getMonth() + 1, diaVenc);
+      proximoVencimento = prox.toISOString().split('T')[0];
+    }
+
+    res.json({
+      assinatura,
+      mensalidade_atual: mensalidadeAtual,
+      historico,
+      stats: {
+        total_pago: totalPago,
+        meses_assinante: mesesAssinante,
+        proximo_vencimento: proximoVencimento
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao gerar resumo:', error);
+    res.status(500).json({ error: 'Erro ao carregar resumo da assinatura' });
+  }
+});
+
+// ============================================
+// POST /cancelar-assinatura — Cancela a assinatura do aluno
+// ============================================
+router.post('/cancelar-assinatura', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const sheet = await getSheet('assinaturas', ASSINATURAS_HEADERS);
+    const rows = await sheet.getRows();
+    const row = rows.find(r => r.get('user_id') === userId && r.get('status') === 'ATIVA');
+
+    if (!row) {
+      return res.status(404).json({ error: 'Nenhuma assinatura ativa encontrada.' });
+    }
+
+    row.set('status', 'CANCELADA');
+    await row.save();
+    invalidateCache('assinaturas');
+
+    res.json({ success: true, message: 'Assinatura cancelada com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao cancelar assinatura:', error);
+    res.status(500).json({ error: 'Erro ao cancelar assinatura' });
+  }
+});
+
+// ============================================
 // ADMIN ROTAS ABAIXO
 // ============================================
+
+// ============================================
+// PUT /admin/assinatura/:userId/vencimento — Admin altera dia de vencimento
+// ============================================
+router.put('/admin/assinatura/:userId/vencimento', adminMiddleware, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { dia_vencimento } = req.body;
+
+    if (!dia_vencimento || dia_vencimento < 1 || dia_vencimento > 28) {
+      return res.status(400).json({ error: 'Dia de vencimento deve ser entre 1 e 28.' });
+    }
+
+    const sheet = await getSheet('assinaturas', ASSINATURAS_HEADERS);
+    const rows = await sheet.getRows();
+    const row = rows.find(r => r.get('user_id') === userId && r.get('status') === 'ATIVA');
+
+    if (!row) {
+      return res.status(404).json({ error: 'Assinatura ativa não encontrada para este aluno.' });
+    }
+
+    row.set('dia_vencimento', dia_vencimento.toString());
+    await row.save();
+    invalidateCache('assinaturas');
+
+    res.json({ success: true, message: `Dia de vencimento alterado para ${dia_vencimento}.` });
+  } catch (error) {
+    console.error('Erro ao alterar vencimento:', error);
+    res.status(500).json({ error: 'Erro ao alterar dia de vencimento' });
+  }
+});
 
 // ============================================
 // GET /admin/dashboard — KPIs financeiros
@@ -288,3 +642,4 @@ router.put('/admin/cobranca/:id/pagar', adminMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+
