@@ -37,6 +37,7 @@ export default function Perfil() {
   
   // Estado da Assinatura
   const [assinatura, setAssinatura] = useState(null);
+  const [assinaturaLoading, setAssinaturaLoading] = useState(true);
 
   useEffect(() => {
     const checkPendente = async () => {
@@ -52,7 +53,11 @@ export default function Perfil() {
         if (res && res.status) {
           setAssinatura(res);
         }
-      } catch {}
+      } catch (err) {
+        console.error("Erro ao buscar assinatura:", err);
+      } finally {
+        setAssinaturaLoading(false);
+      }
     };
 
     checkPendente();
@@ -250,7 +255,18 @@ export default function Perfil() {
 
       {/* ===== CARD ASSINATURA (TOPO) ===== */}
       <div className="mb-6">
-        {assinatura && assinatura.status === 'ATIVA' ? (
+        {assinaturaLoading ? (
+          <div className="bg-white border-2 border-gray-100 rounded-3xl p-5 md:p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 animate-pulse">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-gray-100 shrink-0"></div>
+              <div className="space-y-2">
+                <div className="h-4 w-32 bg-gray-200 rounded-md"></div>
+                <div className="h-3 w-48 bg-gray-100 rounded-md"></div>
+              </div>
+            </div>
+            <div className="h-10 w-full md:w-40 bg-gray-100 rounded-xl"></div>
+          </div>
+        ) : assinatura && assinatura.status === 'ATIVA' ? (
           <div className="bg-white border-2 border-purple-600 rounded-3xl p-5 md:p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center shrink-0">
