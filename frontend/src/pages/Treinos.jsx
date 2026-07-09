@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Dumbbell, Play, CheckCircle2, Circle, ChevronRight, ChevronUp, ChevronLeft,
-  Flame, Target, Zap, Clock, BarChart3, Trophy, X,
+  Flame, Target, Zap, Clock, BarChart3, Trophy, X, AlertCircle,
   ArrowLeft, ArrowRight, Timer, History, Minus, Plus, MessageSquarePlus, FileText
 } from 'lucide-react';
 import { apiFetch } from '../services/api';
@@ -45,6 +45,7 @@ export default function Treinos() {
   const [descansoFimTimestamp, setDescansoFimTimestamp] = useState(null);
   const [treinoFinalizado, setTreinoFinalizado] = useState(false);
   const [confirmarFinalizar, setConfirmarFinalizar] = useState(false);
+  const [showEncerrarModal, setShowEncerrarModal] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [proximaLetra, setProximaLetra] = useState(null);
   const [showSolicitacao, setShowSolicitacao] = useState(false);
@@ -429,7 +430,7 @@ export default function Treinos() {
         {/* HUD Header */}
         <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm pb-3 mb-3 border-b border-gray-100">
           <div className="flex items-center justify-between mb-2.5">
-            <button onClick={voltarHub} className="flex items-center gap-1.5 text-gray-400 hover:text-black transition text-sm font-bold active:scale-95">
+            <button onClick={() => setShowEncerrarModal(true)} className="flex items-center gap-1.5 text-gray-400 hover:text-black transition text-sm font-bold active:scale-95">
               <X size={18} /> Encerrar
             </button>
             <div className="flex items-center gap-1.5 text-sm font-black text-black bg-gray-50 px-3 py-1 rounded-full border border-gray-200">
@@ -557,6 +558,40 @@ export default function Treinos() {
             )}
           </button>
         </div>
+
+        {/* Modal de Encerrar Treino */}
+        {showEncerrarModal && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowEncerrarModal(false)} />
+            <div className="bg-white w-full max-w-sm rounded-3xl p-6 relative z-10 animate-fade-in text-center space-y-4">
+              <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-2">
+                <AlertCircle size={24} className="text-red-600" />
+              </div>
+              <h3 className="text-xl font-black text-gray-900 tracking-tight">Encerrar Treino?</h3>
+              <p className="text-sm text-gray-500 font-medium">
+                Se você encerrar agora, todos os dados deste treino serão perdidos e ele não será salvo no seu histórico.
+              </p>
+              <div className="pt-2 flex flex-col gap-3">
+                <button
+                  onClick={() => setShowEncerrarModal(false)}
+                  className="w-full py-3.5 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 active:scale-95 transition-all text-sm"
+                >
+                  Continuar Treinando
+                </button>
+                <button
+                  onClick={() => {
+                    setShowEncerrarModal(false);
+                    voltarHub();
+                  }}
+                  className="w-full py-3.5 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 active:scale-95 transition-all text-sm"
+                >
+                  Sim, Encerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     );
   }
