@@ -44,6 +44,7 @@ export default function Treinos() {
   const [descansoMax, setDescansoMax] = useState(0);
   const [descansoFimTimestamp, setDescansoFimTimestamp] = useState(null);
   const [treinoFinalizado, setTreinoFinalizado] = useState(false);
+  const [confirmarFinalizar, setConfirmarFinalizar] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [proximaLetra, setProximaLetra] = useState(null);
   const [showSolicitacao, setShowSolicitacao] = useState(false);
@@ -53,6 +54,12 @@ export default function Treinos() {
   const [showPDF, setShowPDF] = useState(false);
   const timerRef = useRef(null);
   const descansoRef = useRef(null);
+  const confirmTimerRef = useRef(null);
+
+  // Limpa o timer de confirmação se desmontar
+  useEffect(() => {
+    return () => clearTimeout(confirmTimerRef.current);
+  }, []);
 
   // ─── Data Fetching ──────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
@@ -517,11 +524,34 @@ export default function Treinos() {
             className="flex items-center justify-center w-[52px] h-[52px] md:w-12 md:h-12 rounded-xl text-gray-500 hover:bg-gray-100 border border-gray-200 transition disabled:opacity-30 shrink-0 active:scale-95">
             <ArrowLeft size={18} />
           </button>
-          <button onClick={proximoExercicio}
-            className="flex-1 flex items-center justify-center gap-2 h-[52px] md:h-12 rounded-xl font-black text-white bg-black
-                       hover:bg-gray-800 active:scale-[0.98] transition-all text-sm shadow-md">
+          <button 
+            onClick={() => {
+              if (exIndex === fichaAtiva.exercicios.length - 1) {
+                if (!confirmarFinalizar) {
+                  setConfirmarFinalizar(true);
+                  if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
+                  confirmTimerRef.current = setTimeout(() => setConfirmarFinalizar(false), 3000);
+                } else {
+                  setConfirmarFinalizar(false);
+                  if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
+                  proximoExercicio();
+                }
+              } else {
+                proximoExercicio();
+              }
+            }}
+            className={`flex-1 flex items-center justify-center gap-2 h-[52px] md:h-12 rounded-xl font-black text-white 
+                       transition-all text-sm shadow-md active:scale-[0.98] ${
+                         confirmarFinalizar 
+                          ? 'bg-red-600 hover:bg-red-700 animate-pulse' 
+                          : 'bg-black hover:bg-gray-800'
+                       }`}>
             {exIndex === fichaAtiva.exercicios.length - 1 ? (
-              <><Trophy size={16} /> Finalizar Treino</>
+              confirmarFinalizar ? (
+                <>Toque novamente para Finalizar</>
+              ) : (
+                <><Trophy size={16} /> Finalizar Treino</>
+              )
             ) : (
               <>Próximo <ArrowRight size={16} /></>
             )}
