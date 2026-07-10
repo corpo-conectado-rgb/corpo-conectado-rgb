@@ -351,7 +351,7 @@ export default function Treinos() {
       series: Array.from({ length: ex.series }).map((_, i) => {
         const s = seriesState[`${ex.id}_${i}`];
         return {
-          carga: Number(s?.carga) || 0,
+          carga: Number(String(s?.carga).replace(',', '.')) || 0,
           reps: parseInt(s?.reps) || 0,
           concluida: s?.concluida || false
         };
@@ -362,6 +362,7 @@ export default function Treinos() {
     try {
       apiFetch('/workouts/complete', {
         method: 'POST',
+        keepalive: true,
         body: JSON.stringify({
           dia_treino_id: fichaAtiva.id,
           treino_id: fichaAtiva.treino_id,
@@ -416,7 +417,7 @@ export default function Treinos() {
   const volumeTotal = fichaAtiva ? fichaAtiva.exercicios.reduce((total, ex) => {
     return total + Array.from({ length: ex.series }).reduce((sum, _, i) => {
       const s = seriesState[`${ex.id}_${i}`];
-      if (s?.concluida) return sum + ((Number(s.carga) || 0) * (parseInt(s.reps) || 0));
+      if (s?.concluida) return sum + ((Number(String(s.carga).replace(',', '.')) || 0) * (parseInt(s.reps) || 0));
       return sum;
     }, 0);
   }, 0) : 0;
@@ -618,7 +619,7 @@ export default function Treinos() {
 
                   {/* Input de carga com +/- */}
                   <div className="flex items-center gap-1 flex-1 min-w-0">
-                    <button onClick={() => updateCarga(exAtual.id, serieIdx, Math.max(0, (Number(serie.carga) || 0) - 2.5))}
+                    <button onClick={() => updateCarga(exAtual.id, serieIdx, Math.max(0, (Number(String(serie.carga || '').replace(',', '.')) || 0) - 2.5))}
                       className="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200 shrink-0">
                       <Minus size={16} />
                     </button>
@@ -631,7 +632,7 @@ export default function Treinos() {
                       className={`flex-1 min-w-[40px] bg-gray-50 border border-gray-200 rounded-lg px-1 py-1.5 md:py-2 text-center text-sm font-black outline-none h-9 md:h-10
                         ${feita ? 'text-gray-400' : 'text-gray-900 focus:border-black focus:ring-1 focus:ring-black'}`}
                     />
-                    <button onClick={() => updateCarga(exAtual.id, serieIdx, (Number(serie.carga) || 0) + 2.5)}
+                    <button onClick={() => updateCarga(exAtual.id, serieIdx, (Number(String(serie.carga || '').replace(',', '.')) || 0) + 2.5)}
                       className="w-9 h-9 md:w-10 md:h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 active:bg-gray-200 shrink-0">
                       <Plus size={16} />
                     </button>
