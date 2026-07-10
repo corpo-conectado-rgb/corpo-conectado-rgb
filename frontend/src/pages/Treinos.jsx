@@ -325,7 +325,13 @@ export default function Treinos() {
     clearInterval(timerRef.current);
     clearInterval(descansoRef.current);
     setDescansoAtivo(false);
-    setSalvando(true);
+
+    // Cálculo otimista da próxima ficha para evitar flicker na interface
+    if (fichas && fichas.length > 0 && fichaAtiva) {
+      const currentIndex = fichas.findIndex(f => f.letra === fichaAtiva.letra);
+      const nextIndex = (currentIndex + 1) % fichas.length;
+      setProximaLetra(fichas[nextIndex].letra);
+    }
 
     const horaFim = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
@@ -343,8 +349,9 @@ export default function Treinos() {
       })
     }));
 
+    // Enviar em background sem bloquear a UI
     try {
-      const result = await apiFetch('/workouts/complete', {
+      apiFetch('/workouts/complete', {
         method: 'POST',
         body: JSON.stringify({
           dia_treino_id: fichaAtiva.id,
@@ -357,11 +364,8 @@ export default function Treinos() {
           exercicios: exerciciosPayload
         })
       });
-      setProximaLetra(result.proxima_letra);
     } catch (err) {
       console.error('Erro ao salvar treino:', err);
-    } finally {
-      setSalvando(false);
     }
   };
 
@@ -477,14 +481,10 @@ export default function Treinos() {
             </div>
           )}
 
-          {salvando ? (
-            <p className="text-sm text-gray-400 animate-pulse">Salvando sessão...</p>
-          ) : (
-            <button onClick={voltarHub}
-              className="mt-2 bg-black text-white font-black px-8 py-4 rounded-xl hover:bg-gray-800 active:scale-95 transition-all text-sm w-full max-w-xs">
-              Voltar ao Hub
-            </button>
-          )}
+          <button onClick={voltarHub}
+            className="mt-2 bg-black text-white font-black px-8 py-4 rounded-xl hover:bg-gray-800 active:scale-95 transition-all text-sm w-full max-w-xs">
+            Voltar ao Hub
+          </button>
         </div>
       );
     }
