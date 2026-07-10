@@ -461,6 +461,7 @@ export default function Treinos() {
       const eficiencia = fichaAtiva.exercicios.reduce((acc, ex) => acc + ex.series, 0) > 0 
         ? Math.round((seriesConcluidas / fichaAtiva.exercicios.reduce((acc, ex) => acc + ex.series, 0)) * 100) 
         : 0;
+      const proximaFicha = fichas.find(f => f.letra === proximaLetra);
 
       return (
         <div className="flex flex-col items-center min-h-[85vh] text-center gap-6 animate-fade-in pb-8">
