@@ -466,17 +466,16 @@ export default function Treinos() {
       const isFinishing = descansoSeg <= 5;
       return (
         <div className="flex flex-col items-center justify-center h-full gap-6 animate-fade-in bg-black text-white -m-4 md:-m-5 lg:-m-6 p-6 rounded-2xl">
-          <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Descanso</p>
           
-          <div className={`flex items-center justify-center w-52 h-52 rounded-full border-4 transition-all duration-500 ${isFinishing ? 'border-red-500 animate-pulse' : 'border-white/10'}`}>
-            <span className={`text-6xl font-black tabular-nums transition-colors duration-500 ${isFinishing ? 'text-red-500' : 'text-white'}`}>
+          <div className={`flex items-center justify-center w-52 h-52 rounded-full border-4 transition-all duration-500 ${isFinishing ? 'border-emerald-500 animate-pulse' : 'border-white/10'}`}>
+            <span className={`text-6xl font-black tabular-nums transition-colors duration-500 ${isFinishing ? 'text-emerald-500' : 'text-white'}`}>
               {formatTime(descansoSeg)}
             </span>
           </div>
 
           {/* Barra de progresso */}
           <div className="w-48 h-1.5 bg-white/10 rounded-full overflow-hidden -mt-2">
-            <div className={`h-full transition-all duration-1000 ease-linear rounded-full ${isFinishing ? 'bg-red-500' : 'bg-white'}`} style={{ width: `${pct}%` }} />
+            <div className={`h-full transition-all duration-1000 ease-linear rounded-full ${isFinishing ? 'bg-emerald-500' : 'bg-white'}`} style={{ width: `${pct}%` }} />
           </div>
 
           <button onClick={() => { setDescansoAtivo(false); setDescansoSeg(0); }}
