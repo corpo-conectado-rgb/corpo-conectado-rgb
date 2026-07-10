@@ -79,7 +79,7 @@ export default function Treinos() {
   const [treinoFinalizado, setTreinoFinalizado] = useState(false);
   const [confirmarFinalizar, setConfirmarFinalizar] = useState(false);
   const [showEncerrarModal, setShowEncerrarModal] = useState(false);
-  const [salvando, setSalvando] = useState(false);
+  const [syncStatus, setSyncStatus] = useState('idle'); // 'idle' | 'syncing' | 'synced' | 'error'
   const [proximaLetra, setProximaLetra] = useState(null);
   const [showSolicitacao, setShowSolicitacao] = useState(false);
   const [solicitacaoSuccess, setSolicitacaoSuccess] = useState(false);
@@ -136,6 +136,22 @@ export default function Treinos() {
 
   // ─── Data Fetching ──────────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
+    // 0. Reenviar treinos pendentes que falharam na sessão anterior
+    try {
+      const pending = localStorage.getItem('corpoConectado_pendingWorkout');
+      if (pending) {
+        const payload = JSON.parse(pending);
+        await apiFetch('/workouts/complete', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        localStorage.removeItem('corpoConectado_pendingWorkout');
+        console.log('Treino pendente reenviado com sucesso!');
+      }
+    } catch (e) {
+      console.warn('Não foi possível reenviar treino pendente:', e);
+    }
+
     // 1. Stale-While-Revalidate: Tentar carregar do cache local imediatamente
     const cached = localStorage.getItem('corpoConectado_treinos_cache');
     if (cached) {
@@ -255,7 +271,7 @@ export default function Treinos() {
         const lastSerie = lastEx?.series?.[i];
         initialState[`${ex.id}_${i}`] = {
           concluida: false,
-          carga: lastSerie?.carga || '',
+          carga: lastSerie?.carga ?? '',
           reps: ex.reps
         };
       });
@@ -330,12 +346,14 @@ export default function Treinos() {
   };
 
   const finalizarTreino = async () => {
+    // 1. Mostrar a tela de conclusão instantaneamente (UI Otimista)
     setTreinoFinalizado(true);
+    setSyncStatus('syncing');
     clearInterval(timerRef.current);
     clearInterval(descansoRef.current);
     setDescansoAtivo(false);
 
-    // Cálculo otimista da próxima ficha para evitar flicker na interface
+    // 2. Cálculo otimista da próxima ficha
     if (fichas && fichas.length > 0 && fichaAtiva) {
       const currentIndex = fichas.findIndex(f => f.letra === fichaAtiva.letra);
       const nextIndex = (currentIndex + 1) % fichas.length;
@@ -344,7 +362,7 @@ export default function Treinos() {
 
     const horaFim = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-    // Montar payload
+    // 3. Montar payload
     const exerciciosPayload = fichaAtiva.exercicios.map(ex => ({
       exercicio_id: ex.id,
       nome: ex.nome,
@@ -358,25 +376,42 @@ export default function Treinos() {
       })
     }));
 
-    // Enviar em background sem bloquear a UI
-    try {
-      apiFetch('/workouts/complete', {
-        method: 'POST',
-        keepalive: true,
-        body: JSON.stringify({
-          dia_treino_id: fichaAtiva.id,
-          treino_id: fichaAtiva.treino_id,
-          letra: fichaAtiva.letra,
-          nome_dia: fichaAtiva.nome,
-          duracao_seg: tempoTotal,
-          hora_inicio: horaInicio,
-          hora_fim: horaFim,
-          exercicios: exerciciosPayload
-        })
-      });
-    } catch (err) {
-      console.error('Erro ao salvar treino:', err);
+    const requestPayload = {
+      dia_treino_id: fichaAtiva.id,
+      treino_id: fichaAtiva.treino_id,
+      letra: fichaAtiva.letra,
+      nome_dia: fichaAtiva.nome,
+      duracao_seg: tempoTotal,
+      hora_inicio: horaInicio,
+      hora_fim: horaFim,
+      exercicios: exerciciosPayload
+    };
+
+    // 4. Backup local ANTES de enviar (rede de segurança)
+    localStorage.setItem('corpoConectado_pendingWorkout', JSON.stringify(requestPayload));
+
+    // 5. Enviar ao servidor com retry
+    const MAX_RETRIES = 3;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        await apiFetch('/workouts/complete', {
+          method: 'POST',
+          body: JSON.stringify(requestPayload)
+        });
+        // Sucesso: limpar backup e marcar como salvo
+        localStorage.removeItem('corpoConectado_pendingWorkout');
+        setSyncStatus('synced');
+        return;
+      } catch (err) {
+        console.warn(`Tentativa ${attempt}/${MAX_RETRIES} falhou:`, err.message);
+        if (attempt < MAX_RETRIES) {
+          await new Promise(r => setTimeout(r, 2000 * attempt)); // Espera 2s, 4s
+        }
+      }
     }
+
+    // Todas as tentativas falharam — o backup local permanece para reenvio futuro
+    setSyncStatus('error');
   };
 
   const handleEnviarSolicitacao = async (e) => {
@@ -407,6 +442,7 @@ export default function Treinos() {
     setActiveView('hub');
     setFichaAtiva(null);
     setTreinoFinalizado(false);
+    setSyncStatus('idle');
     // Recarregar dados atualizados
     setLoading(true);
     await fetchData();
@@ -505,6 +541,28 @@ export default function Treinos() {
                 <span className="text-gray-600 text-xs">•</span>
                 <span className="text-[10px] font-bold text-gray-500 tracking-widest uppercase">treino inteligente</span>
               </div>
+            </div>
+
+            {/* Indicador de Sincronização */}
+            <div className="absolute bottom-3 right-4 z-20">
+              {syncStatus === 'syncing' && (
+                <div className="flex items-center gap-1.5 text-gray-500 animate-pulse">
+                  <div className="w-3 h-3 border border-gray-500 border-t-gray-300 rounded-full animate-spin" />
+                  <span className="text-[9px] font-bold uppercase tracking-wider">Sincronizando...</span>
+                </div>
+              )}
+              {syncStatus === 'synced' && (
+                <div className="flex items-center gap-1.5 text-emerald-500 animate-fade-in">
+                  <CheckCircle2 size={12} />
+                  <span className="text-[9px] font-bold uppercase tracking-wider">Salvo na nuvem</span>
+                </div>
+              )}
+              {syncStatus === 'error' && (
+                <div className="flex items-center gap-1.5 text-amber-400 animate-fade-in">
+                  <AlertCircle size={12} />
+                  <span className="text-[9px] font-bold uppercase tracking-wider">Salvo localmente</span>
+                </div>
+              )}
             </div>
           </div>
 
