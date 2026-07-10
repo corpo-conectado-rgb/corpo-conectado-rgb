@@ -17,6 +17,7 @@ import Financeiro from './pages/Financeiro';
 import Assinatura from './pages/Assinatura';
 import AdminFinanceiro from './pages/AdminFinanceiro';
 import Welcome from './pages/Welcome';
+import InstallPrompt from './components/InstallPrompt';
 
 // Componente para proteger rotas privadas
 const ProtectedRoute = ({ children }) => {
@@ -103,6 +104,7 @@ function App() {
       <CopilotProvider>
         <BrowserRouter>
           <AppRoutes />
+          <InstallPrompt />
         </BrowserRouter>
       </CopilotProvider>
     </AuthProvider>
