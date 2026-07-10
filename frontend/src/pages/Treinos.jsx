@@ -449,42 +449,70 @@ export default function Treinos() {
 
     // ── Tela de Conclusão ──
     if (treinoFinalizado) {
-      const proximaFicha = fichas.find(f => f.letra === proximaLetra);
+      const eficiencia = fichaAtiva.exercicios.reduce((acc, ex) => acc + ex.series, 0) > 0 
+        ? Math.round((seriesConcluidas / fichaAtiva.exercicios.reduce((acc, ex) => acc + ex.series, 0)) * 100) 
+        : 0;
+
       return (
-        <div className="flex flex-col items-center justify-center min-h-[70vh] text-center gap-5 animate-fade-in px-4">
-          <div className="w-24 h-24 flex items-center justify-center drop-shadow-2xl">
-            <img src="/Icone_Corpo_Conectado_Premium.png" alt="Corpo Conectado" className="w-full h-full object-contain pointer-events-none" />
-          </div>
-          <h2 className="text-2xl font-black text-gray-900">Treino Concluído!</h2>
-
-          <div className="grid grid-cols-2 gap-3 w-full max-w-xs">
-            {[
-              { label: 'Tempo', valor: formatTime(tempoTotal) },
-              { 
-                label: 'Eficiência', 
-                valor: `${fichaAtiva.exercicios.reduce((acc, ex) => acc + ex.series, 0) > 0 ? Math.round((seriesConcluidas / fichaAtiva.exercicios.reduce((acc, ex) => acc + ex.series, 0)) * 100) : 0}%` 
-              },
-              { label: 'Exercícios', valor: fichaAtiva.exercicios.length },
-              { label: 'Séries', valor: seriesConcluidas },
-            ].map(({ label, valor }) => (
-              <div key={label} className="bg-gray-50 border border-gray-100 rounded-xl p-3 text-center">
-                <span className="text-lg font-black text-gray-900 block">{valor}</span>
-                <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-0.5">{label}</p>
+        <div className="flex flex-col items-center min-h-[85vh] text-center gap-6 animate-fade-in pb-8">
+          
+          {/* Card de Conquista (A Área do Print) */}
+          <div className="w-full max-w-sm bg-gray-900 rounded-3xl p-8 shadow-2xl relative overflow-hidden mt-4 border border-gray-800">
+            {/* Brilho de fundo sutil */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1/2 bg-purple-600/20 blur-3xl rounded-full pointer-events-none" />
+            
+            <div className="relative z-10 flex flex-col items-center">
+              {/* Ícone */}
+              <div className="w-20 h-20 mb-5 drop-shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+                <img src="/Icone_Corpo_Conectado_Premium.png" alt="Corpo Conectado" className="w-full h-full object-contain pointer-events-none" />
               </div>
-            ))}
+              
+              <h2 className="text-2xl font-black text-white uppercase tracking-tight">Treino Concluído</h2>
+              <p className="text-sm font-medium text-purple-400 mt-1 mb-8">Treino {fichaAtiva.letra} · {fichaAtiva.nome}</p>
+
+              {/* Métricas */}
+              <div className="grid grid-cols-3 gap-3 w-full mb-8">
+                <div className="flex flex-col items-center justify-center bg-gray-800/50 rounded-2xl p-3 border border-gray-700/50">
+                  <span className="text-lg font-black text-white">{formatTime(tempoTotal)}</span>
+                  <span className="text-[9px] uppercase tracking-wider text-gray-400 mt-1">Tempo</span>
+                </div>
+                
+                <div className="flex flex-col items-center justify-center bg-purple-600/10 rounded-2xl p-3 border border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.1)]">
+                  <span className="text-lg font-black text-purple-400">{formatVolume(volumeTotal)}<span className="text-xs ml-0.5">kg</span></span>
+                  <span className="text-[9px] uppercase tracking-wider text-purple-400/80 mt-1">Volume</span>
+                </div>
+
+                <div className="flex flex-col items-center justify-center bg-gray-800/50 rounded-2xl p-3 border border-gray-700/50">
+                  <span className="text-lg font-black text-white">{eficiencia}%</span>
+                  <span className="text-[9px] uppercase tracking-wider text-gray-400 mt-1">Foco</span>
+                </div>
+              </div>
+
+              {/* Assinatura / Marca d'água */}
+              <div className="w-full flex items-center justify-center gap-2 pt-5 border-t border-gray-800">
+                <span className="text-[10px] font-black text-white tracking-widest uppercase">corpo conectado</span>
+                <span className="text-gray-600 text-xs">•</span>
+                <span className="text-[10px] font-bold text-gray-500 tracking-widest uppercase">treino inteligente</span>
+              </div>
+            </div>
           </div>
 
-          {proximaFicha && (
-            <div className="bg-gray-50 border border-gray-200 rounded-xl px-5 py-3 mt-1">
-              <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black mb-1">Próximo Treino</p>
-              <p className="font-black text-gray-900">Treino {proximaLetra} · {proximaFicha.nome}</p>
-            </div>
-          )}
+          {/* Elementos Fora do Print */}
+          <div className="w-full max-w-sm px-4 flex flex-col gap-3">
+            {proximaFicha && (
+              <div className="bg-white border border-gray-200 rounded-2xl p-4 text-left shadow-sm flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black mb-1">Próximo Treino</p>
+                  <p className="font-black text-gray-900">Treino {proximaLetra} · {proximaFicha.nome}</p>
+                </div>
+              </div>
+            )}
 
-          <button onClick={voltarHub}
-            className="mt-2 bg-black text-white font-black px-8 py-4 rounded-xl hover:bg-gray-800 active:scale-95 transition-all text-sm w-full max-w-xs">
-            Voltar ao Hub
-          </button>
+            <button onClick={voltarHub}
+              className="bg-black text-white font-black px-8 py-4 rounded-2xl hover:bg-gray-800 active:scale-95 transition-all w-full text-sm shadow-xl shadow-black/10">
+              Voltar ao Hub
+            </button>
+          </div>
         </div>
       );
     }
