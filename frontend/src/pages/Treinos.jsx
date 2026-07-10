@@ -10,7 +10,7 @@ import PDFPreviewModal from '../components/pdf/PDFPreviewModal';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 const formatTime = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-const formatVolume = (v) => v >= 1000 ? `${(v / 1000).toFixed(1).replace('.0', '')}k` : String(v);
+const formatVolume = (v) => Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 1 });
 const formatDate = (dateStr) => {
   if (!dateStr) return '';
   const [y, m, d] = dateStr.split('-');
