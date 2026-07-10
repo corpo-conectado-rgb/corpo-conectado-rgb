@@ -19,6 +19,38 @@ const formatDate = (dateStr) => {
 
 const DIAS_SEMANA_CURTO = { 'Domingo': 'Dom', 'Segunda-feira': 'Seg', 'Terça-feira': 'Ter', 'Quarta-feira': 'Qua', 'Quinta-feira': 'Qui', 'Sexta-feira': 'Sex', 'Sábado': 'Sáb' };
 
+const playElegantBeep = (ctx, isFinal = false) => {
+  if (!ctx) return;
+  try {
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    osc.type = 'sine';
+    
+    if (isFinal) {
+      // Final long elegant beep
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      gainNode.gain.setValueAtTime(0, ctx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.05);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.6);
+    } else {
+      // Short tick for countdown
+      osc.frequency.setValueAtTime(600, ctx.currentTime);
+      gainNode.gain.setValueAtTime(0, ctx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.15);
+    }
+  } catch (e) {
+    console.error("Audio error", e);
+  }
+};
+
 // ─── Componente Principal ────────────────────────────────────────────────────
 export default function Treinos() {
   const { user } = useAuth();
@@ -184,26 +216,12 @@ export default function Treinos() {
           setDescansoAtivo(false);
           
           if ('vibrate' in navigator) navigator.vibrate([400]);
-          try {
-            const ctx = audioCtxRef.current;
-            if (ctx) {
-              const osc = ctx.createOscillator();
-              const gainNode = ctx.createGain();
-              osc.connect(gainNode);
-              gainNode.connect(ctx.destination);
-              osc.type = 'sine';
-              osc.frequency.setValueAtTime(800, ctx.currentTime);
-              osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.5);
-              gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
-              gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-              osc.start(ctx.currentTime);
-              osc.stop(ctx.currentTime + 0.5);
-            }
-          } catch (e) {
-            console.error("Audio error", e);
-          }
+          playElegantBeep(audioCtxRef.current, true);
         } else {
           setDescansoSeg(restante);
+          if (restante <= 5) {
+            playElegantBeep(audioCtxRef.current, false);
+          }
           if (restante === 3 || restante === 2 || restante === 1) {
             if ('vibrate' in navigator) navigator.vibrate([100]);
           }
