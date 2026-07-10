@@ -57,6 +57,7 @@ export default function Treinos() {
   const descansoRef = useRef(null);
   const confirmTimerRef = useRef(null);
   const wakeLockRef = useRef(null);
+  const audioCtxRef = useRef(null);
 
   // Wake Lock
   useEffect(() => {
@@ -184,9 +185,8 @@ export default function Treinos() {
           
           if ('vibrate' in navigator) navigator.vibrate([400]);
           try {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (AudioContext) {
-              const ctx = new AudioContext();
+            const ctx = audioCtxRef.current;
+            if (ctx) {
               const osc = ctx.createOscillator();
               const gainNode = ctx.createGain();
               osc.connect(gainNode);
@@ -261,6 +261,17 @@ export default function Treinos() {
 
     // Iniciar descanso ao concluir
     if (newConcluida && fichaAtiva) {
+      // Destravar AudioContext no Safari (requer interação do usuário)
+      if (!audioCtxRef.current) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+          audioCtxRef.current = new AudioContext();
+        }
+      }
+      if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume();
+      }
+
       const ex = fichaAtiva.exercicios[exIndex];
       setDescansoMax(ex.descanso);
       setDescansoSeg(ex.descanso);
