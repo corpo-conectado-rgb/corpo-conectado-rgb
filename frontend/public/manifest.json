@@ -1,8 +1,11 @@
 {
   "name": "Corpo Conectado",
   "short_name": "Corpo Conectado",
+  "description": "Seu treino inteligente e gerenciamento fitness de alta performance.",
+  "id": "/",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "icons": [
