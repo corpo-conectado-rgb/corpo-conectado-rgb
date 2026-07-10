@@ -71,7 +71,7 @@ export default function FloatingAlfred() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <div ref={popoverRef} className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       
       {/* Se for Admin e estiver no contexto de Prescrição, renderizar o AssistenteIA como Drawer */}
       {user?.role === 'admin' && activeContext === 'PRESCRICAO' && (
@@ -87,7 +87,6 @@ export default function FloatingAlfred() {
       {/* Popover do Mini Chat (Para alunos ou outros contextos) */}
       {isOpen && (!activeContext || user?.role !== 'admin') && (
         <div 
-          ref={popoverRef}
           className="mb-4 w-80 sm:w-96 bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden animate-scale-in transform origin-bottom-right flex flex-col max-h-[80vh]"
         >
           {/* Header do Chat */}
