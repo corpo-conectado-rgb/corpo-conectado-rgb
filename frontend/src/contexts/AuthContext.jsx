@@ -39,8 +39,9 @@ export const AuthProvider = ({ children }) => {
 
       if (storageUser && storageToken) {
         setUser(JSON.parse(storageUser));
+        setLoading(false); // Render instantly with cached data
         
-        // Fetch fresh data in the background to sync any admin approvals
+        // Sync fresh data silently in the background (cold start safe)
         try {
           const data = await apiFetch('/auth/me');
           setUser(data);
@@ -48,8 +49,9 @@ export const AuthProvider = ({ children }) => {
         } catch (err) {
           console.error('Background profile sync failed:', err.message);
         }
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     loadStorageData();

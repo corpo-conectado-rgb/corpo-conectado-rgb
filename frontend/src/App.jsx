@@ -23,7 +23,15 @@ const ProtectedRoute = ({ children }) => {
   const { signed, loading } = useAuth();
 
   if (loading) {
-    return <div className="h-screen w-screen flex items-center justify-center bg-gray-50"><span className="text-gray-500 font-bold">Carregando...</span></div>;
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-gray-900 gap-6">
+        <div className="flex flex-col items-center gap-2">
+          <h1 className="text-2xl font-black text-white tracking-tight">corpo conectado</h1>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-gray-500 font-bold">Seu treino inteligente</p>
+        </div>
+        <div className="w-5 h-5 border-2 border-gray-700 border-t-purple-500 rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   if (!signed) {
@@ -38,7 +46,15 @@ const AdminRoute = ({ children }) => {
   const { user, signed, loading } = useAuth();
   
   if (loading) {
-    return <div className="h-screen w-screen flex items-center justify-center bg-gray-50 sm:hidden"><span className="text-gray-500 font-bold">Autenticando...</span></div>;
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-gray-900 gap-6">
+        <div className="flex flex-col items-center gap-2">
+          <h1 className="text-2xl font-black text-white tracking-tight">corpo conectado</h1>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-gray-500 font-bold">Seu treino inteligente</p>
+        </div>
+        <div className="w-5 h-5 border-2 border-gray-700 border-t-purple-500 rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   if (!signed) {
