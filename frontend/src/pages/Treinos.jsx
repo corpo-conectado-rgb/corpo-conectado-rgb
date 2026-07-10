@@ -271,7 +271,7 @@ export default function Treinos() {
         const lastSerie = lastEx?.series?.[i];
         initialState[`${ex.id}_${i}`] = {
           concluida: false,
-          carga: lastSerie?.carga ?? '',
+          carga: lastSerie?.carga || '',
           reps: ex.reps
         };
       });

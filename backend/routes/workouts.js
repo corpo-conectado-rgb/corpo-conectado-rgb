@@ -424,8 +424,12 @@ router.get('/last-loads/:dia_treino_id', authMiddleware, async (req, res) => {
       r => r.get('user_id') === req.user.id && r.get('dia_treino_id') === dia_treino_id
     );
 
-    // Ordenar por data DESC e pegar a mais recente
-    userRows.sort((a, b) => new Date(b.get('data')) - new Date(a.get('data')));
+    // Ordenar por data+hora DESC para pegar a mais recente
+    userRows.sort((a, b) => {
+      const dtA = new Date(`${a.get('data')}T${a.get('hora_inicio') || '00:00'}`);
+      const dtB = new Date(`${b.get('data')}T${b.get('hora_inicio') || '00:00'}`);
+      return dtB - dtA;
+    });
 
     if (userRows.length === 0) {
       return res.json([]);
