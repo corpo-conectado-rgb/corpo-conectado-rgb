@@ -12,7 +12,8 @@ export default defineConfig({
       workbox: {
         cleanupOutdatedCaches: true,
         clientsClaim: true,
-        skipWaiting: true
+        skipWaiting: true,
+        maximumFileSizeToCacheInBytes: 5000000 // 5MB limit
       },
       manifest: false // Use the existing public/manifest.json
     })
