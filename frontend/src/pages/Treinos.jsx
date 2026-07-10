@@ -235,6 +235,10 @@ export default function Treinos() {
   // ─── Ações ──────────────────────────────────────────────────────────────
   const iniciarTreino = async (ficha) => {
     if (iniciandoTreinoId) return; // Evita múltiplos cliques
+    if (!ficha.exercicios || ficha.exercicios.length === 0) {
+      alert('Esta ficha ainda não possui exercícios cadastrados pelo treinador.');
+      return;
+    }
     setIniciandoTreinoId(ficha.id);
 
     // Buscar cargas da última sessão
