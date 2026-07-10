@@ -543,31 +543,31 @@ export default function Treinos() {
               </div>
             </div>
 
-            {/* Indicador de Sincronização */}
-            <div className="absolute bottom-3 right-4 z-20">
-              {syncStatus === 'syncing' && (
-                <div className="flex items-center gap-1.5 text-gray-500 animate-pulse">
-                  <div className="w-3 h-3 border border-gray-500 border-t-gray-300 rounded-full animate-spin" />
-                  <span className="text-[9px] font-bold uppercase tracking-wider">Sincronizando...</span>
-                </div>
-              )}
-              {syncStatus === 'synced' && (
-                <div className="flex items-center gap-1.5 text-emerald-500 animate-fade-in">
-                  <CheckCircle2 size={12} />
-                  <span className="text-[9px] font-bold uppercase tracking-wider">Salvo na nuvem</span>
-                </div>
-              )}
-              {syncStatus === 'error' && (
-                <div className="flex items-center gap-1.5 text-amber-400 animate-fade-in">
-                  <AlertCircle size={12} />
-                  <span className="text-[9px] font-bold uppercase tracking-wider">Salvo localmente</span>
-                </div>
-              )}
-            </div>
           </div>
 
           {/* Elementos Fora do Print */}
           <div className="w-full max-w-sm px-4 flex flex-col gap-3">
+            {/* Indicador de Sincronização Externo */}
+            <div className="flex justify-center mt-1 mb-1">
+              {syncStatus === 'syncing' && (
+                <div className="flex items-center gap-1.5 text-gray-400 animate-pulse">
+                  <div className="w-3.5 h-3.5 border-2 border-gray-300 border-t-gray-500 rounded-full animate-spin" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Sincronizando...</span>
+                </div>
+              )}
+              {syncStatus === 'synced' && (
+                <div className="flex items-center gap-1.5 text-emerald-600/90 animate-fade-in">
+                  <CheckCircle2 size={13} strokeWidth={2.5} />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Salvo na nuvem</span>
+                </div>
+              )}
+              {syncStatus === 'error' && (
+                <div className="flex items-center gap-1.5 text-amber-500/90 animate-fade-in">
+                  <AlertCircle size={13} strokeWidth={2.5} />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Salvo localmente</span>
+                </div>
+              )}
+            </div>
             {proximaFicha && (
               <div className="bg-white border border-gray-200 rounded-2xl p-4 text-left shadow-sm flex items-center justify-between">
                 <div>
