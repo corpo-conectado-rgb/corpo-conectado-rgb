@@ -56,6 +56,44 @@ export default function Treinos() {
   const timerRef = useRef(null);
   const descansoRef = useRef(null);
   const confirmTimerRef = useRef(null);
+  const wakeLockRef = useRef(null);
+
+  // Wake Lock
+  useEffect(() => {
+    const requestWakeLock = async () => {
+      if (activeView === 'foco') {
+        try {
+          if ('wakeLock' in navigator) {
+            wakeLockRef.current = await navigator.wakeLock.request('screen');
+          }
+        } catch (err) {
+          console.warn('Wake Lock error:', err);
+        }
+      } else {
+        if (wakeLockRef.current) {
+          wakeLockRef.current.release().catch(console.warn);
+          wakeLockRef.current = null;
+        }
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        requestWakeLock();
+      }
+    };
+
+    requestWakeLock();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release().catch(console.warn);
+        wakeLockRef.current = null;
+      }
+    };
+  }, [activeView]);
 
   // Limpa o timer de confirmação se desmontar
   useEffect(() => {
@@ -143,8 +181,32 @@ export default function Treinos() {
           clearInterval(descansoRef.current);
           setDescansoSeg(0);
           setDescansoAtivo(false);
+          
+          if ('vibrate' in navigator) navigator.vibrate([400]);
+          try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+              const ctx = new AudioContext();
+              const osc = ctx.createOscillator();
+              const gainNode = ctx.createGain();
+              osc.connect(gainNode);
+              gainNode.connect(ctx.destination);
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(800, ctx.currentTime);
+              osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.5);
+              gainNode.gain.setValueAtTime(0.5, ctx.currentTime);
+              gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+              osc.start(ctx.currentTime);
+              osc.stop(ctx.currentTime + 0.5);
+            }
+          } catch (e) {
+            console.error("Audio error", e);
+          }
         } else {
           setDescansoSeg(restante);
+          if (restante === 3 || restante === 2 || restante === 1) {
+            if ('vibrate' in navigator) navigator.vibrate([100]);
+          }
         }
       }, 1000);
     }
@@ -401,14 +463,20 @@ export default function Treinos() {
     // ── Overlay de Descanso ──
     if (descansoAtivo) {
       const pct = descansoMax > 0 ? ((descansoMax - descansoSeg) / descansoMax) * 100 : 0;
+      const isFinishing = descansoSeg <= 5;
       return (
         <div className="flex flex-col items-center justify-center h-full gap-6 animate-fade-in bg-black text-white -m-4 md:-m-5 lg:-m-6 p-6 rounded-2xl">
           <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Descanso</p>
-          <span className="text-6xl font-black tabular-nums">{formatTime(descansoSeg)}</span>
+          
+          <div className={`flex items-center justify-center w-52 h-52 rounded-full border-4 transition-all duration-500 ${isFinishing ? 'border-red-500 animate-pulse' : 'border-white/10'}`}>
+            <span className={`text-6xl font-black tabular-nums transition-colors duration-500 ${isFinishing ? 'text-red-500' : 'text-white'}`}>
+              {formatTime(descansoSeg)}
+            </span>
+          </div>
 
           {/* Barra de progresso */}
-          <div className="w-48 h-1.5 bg-white/10 rounded-full overflow-hidden">
-            <div className="h-full bg-white transition-all duration-1000 ease-linear rounded-full" style={{ width: `${pct}%` }} />
+          <div className="w-48 h-1.5 bg-white/10 rounded-full overflow-hidden -mt-2">
+            <div className={`h-full transition-all duration-1000 ease-linear rounded-full ${isFinishing ? 'bg-red-500' : 'bg-white'}`} style={{ width: `${pct}%` }} />
           </div>
 
           <button onClick={() => { setDescansoAtivo(false); setDescansoSeg(0); }}
