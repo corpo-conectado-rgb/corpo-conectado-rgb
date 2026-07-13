@@ -152,7 +152,8 @@ router.get('/my-sheet', authMiddleware, async (req, res) => {
           series: Number(ex.get('series')) || 3,
           reps: ex.get('repeticoes') || '10-12',
           descanso: Number(ex.get('descanso')) || 60,
-          grupomuscular: dia.get('foco_muscular') || 'Geral'
+          grupomuscular: dia.get('foco_muscular') || 'Geral',
+          observacao: ex.get('observacoes') || ''
         }))
       };
     });
