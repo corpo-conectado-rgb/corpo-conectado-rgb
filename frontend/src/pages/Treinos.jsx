@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  Dumbbell, Play, CheckCircle2, Circle, ChevronRight, ChevronUp, ChevronLeft,
+  Dumbbell, Play, CheckCircle2, Circle, ChevronRight, ChevronUp, ChevronLeft, ChevronDown, Info,
   Flame, Target, Zap, Clock, BarChart3, Trophy, X, AlertCircle,
   ArrowLeft, ArrowRight, Timer, History, Minus, Plus, MessageSquarePlus, FileText
 } from 'lucide-react';
@@ -49,6 +49,73 @@ const playElegantBeep = (ctx, isFinal = false) => {
   } catch (e) {
     console.error("Audio error", e);
   }
+};
+
+// ─── Componente de Observação ────────────────────────────────────────────────
+const ObservacaoCard = ({ observacao, exId }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [isLong, setIsLong] = useState(false);
+  const textRef = useRef(null);
+
+  // Zera o estado quando muda o exercício
+  useEffect(() => {
+    setExpanded(false);
+  }, [exId]);
+
+  useEffect(() => {
+    // Timeout para permitir que o DOM renderize antes de calcular a altura
+    const timer = setTimeout(() => {
+      if (textRef.current) {
+        // Altura de 2 linhas em text-sm leading-relaxed é aproximadamente 44px
+        // Se scrollHeight for maior que clientHeight + 2px de tolerância, tem overflow
+        const isOverflowing = textRef.current.scrollHeight > textRef.current.clientHeight + 2;
+        setIsLong(isOverflowing);
+      }
+    }, 50);
+    return () => clearTimeout(timer);
+  }, [observacao, exId, expanded]);
+
+  if (!observacao) return null;
+
+  return (
+    <div className="mb-5 bg-blue-50/40 border border-blue-100/60 rounded-xl overflow-hidden transition-all duration-300">
+      <div 
+        className={`p-3.5 flex gap-3 ${isLong && !expanded ? 'cursor-pointer active:bg-blue-50/70' : ''}`}
+        onClick={() => isLong && setExpanded(!expanded)}
+      >
+        <div className="pt-0.5 shrink-0 text-blue-500">
+          <Info size={18} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className="text-[10px] font-black uppercase tracking-widest text-blue-600/70 mb-1">
+            Observação do Treinador
+          </h4>
+          <p 
+            ref={textRef}
+            className={`text-sm text-gray-800 font-medium leading-relaxed transition-all duration-300 ${expanded ? '' : 'line-clamp-2'}`}
+          >
+            {observacao}
+          </p>
+          
+          {isLong && (
+            <button 
+              className="flex items-center gap-1 mt-2 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpanded(!expanded);
+              }}
+            >
+              {expanded ? (
+                <>Ver menos <ChevronUp size={14} /></>
+              ) : (
+                <>Ler mais <ChevronDown size={14} /></>
+              )}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 // ─── Componente Principal ────────────────────────────────────────────────────
@@ -646,6 +713,8 @@ export default function Treinos() {
             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 py-0.5 bg-gray-50 rounded border border-gray-100">{exAtual.grupomuscular}</span>
           </div>
           <h2 className="text-xl font-black text-gray-900 mb-4 leading-tight">{exAtual.nome}</h2>
+
+          <ObservacaoCard observacao={exAtual.observacao} exId={exAtual.id} />
 
           {/* Info pills */}
           <div className="flex gap-2 mb-5">
