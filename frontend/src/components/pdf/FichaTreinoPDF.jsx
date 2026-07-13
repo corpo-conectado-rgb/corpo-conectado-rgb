@@ -344,7 +344,7 @@ export default function FichaTreinoPDF({ aluno, profissional, treinos, dataEmiss
 
         {/* ═══ Treinos ═══ */}
         {treinos?.map((treino, tIdx) => (
-          <View key={tIdx} style={styles.treinoSection} wrap={false}>
+          <View key={tIdx} style={styles.treinoSection}>
             {/* Título do Treino */}
             <View style={styles.treinoHeader}>
               <View style={styles.treinoHeaderLeft}>
@@ -357,7 +357,7 @@ export default function FichaTreinoPDF({ aluno, profissional, treinos, dataEmiss
             </View>
 
             {/* Header da Tabela */}
-            <View style={styles.tableHeader}>
+            <View style={styles.tableHeader} wrap={false}>
               <Text style={[styles.thText, styles.colNum]}>#</Text>
               <Text style={[styles.thText, styles.colExercicio]}>Exercício</Text>
               <Text style={[styles.thText, styles.colSeries]}>Séries</Text>
@@ -369,7 +369,7 @@ export default function FichaTreinoPDF({ aluno, profissional, treinos, dataEmiss
 
             {/* Linhas */}
             {treino.exercicios?.map((ex, exIdx) => (
-              <View key={exIdx} style={[styles.tableRow, exIdx % 2 !== 0 && styles.tableRowAlt]}>
+              <View key={exIdx} style={[styles.tableRow, exIdx % 2 !== 0 && styles.tableRowAlt]} wrap={false}>
                 <Text style={[styles.tdLight, styles.colNum]}>{exIdx + 1}</Text>
                 <Text style={[styles.tdBold, styles.colExercicio]}>{ex.nome || '--'}</Text>
                 <Text style={[styles.tdText, styles.colSeries]}>{ex.series || '--'}</Text>
