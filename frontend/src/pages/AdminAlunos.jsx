@@ -763,9 +763,9 @@ export default function AdminAlunos() {
         aluno={drawerAluno}
         profissional={adminUser ? { nome: adminUser.nome, email: adminUser.email } : null}
         treinos={fichaAberta?.map(dia => ({
-          letra: dia.letra_dia,
-          nome: dia.foco_muscular,
-          foco_muscular: dia.foco_muscular,
+          letra: dia.letra,
+          nome: dia.nome,
+          foco_muscular: dia.nome,
           objetivo: drawerAluno?.objetivo,
           exercicios: dia.exercicios
         })) || []}
