@@ -344,7 +344,7 @@ export default function FichaTreinoPDF({ aluno, profissional, treinos, dataEmiss
 
         {/* ═══ Treinos ═══ */}
         {treinos?.map((treino, tIdx) => (
-          <View key={tIdx} style={styles.treinoSection}>
+          <View key={tIdx} style={styles.treinoSection} wrap={false}>
             {/* Título do Treino */}
             <View style={styles.treinoHeader}>
               <View style={styles.treinoHeaderLeft}>
