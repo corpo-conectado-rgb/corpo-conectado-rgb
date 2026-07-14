@@ -376,7 +376,7 @@ export default function FichaTreinoPDF({ aluno, profissional, treinos, dataEmiss
                 <Text style={[styles.tdText, styles.colReps]}>{ex.reps || ex.repeticoes || '--'}</Text>
                 <Text style={[styles.tdText, styles.colCarga]}>{ex.carga || '--'}</Text>
                 <Text style={[styles.tdText, styles.colDescanso]}>{formatDescanso(ex.descanso)}</Text>
-                <Text style={[styles.tdLight, styles.colObs]}>{ex.observacoes || ''}</Text>
+                <Text style={[styles.tdLight, styles.colObs]}>{ex.observacoes || ex.observacao || ''}</Text>
               </View>
             ))}
           </View>
