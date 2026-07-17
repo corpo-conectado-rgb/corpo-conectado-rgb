@@ -12,22 +12,28 @@ const DEVICES_HEADERS = ['id', 'user_id', 'user_nome', 'user_email', 'device_id'
 
 // Seed padrão para a primeira execução
 const DEFAULT_CONFIG = [
-  { chave: 'REQUIRE_DEVICE_ACTIVATION', valor: 'false' }
+  { chave: 'REQUIRE_DEVICE_ACTIVATION', valor: 'false' },
+  { chave: 'TRIAL_INICIO', valor: new Date().toISOString().split('T')[0] },
+  { chave: 'TRIAL_DIAS', valor: '30' }
 ];
 
 /**
  * Garante que a aba de configurações exista e tenha os valores padrão.
+ * Adiciona apenas chaves que ainda não existem (idempotente).
  */
 async function ensureConfigSeeded() {
   const sheet = await getSheet(CONFIG_SHEET, CONFIG_HEADERS);
   const rows = await getCachedRows(CONFIG_SHEET, CONFIG_HEADERS);
+  const existingKeys = rows.map(r => r.get('chave'));
 
-  if (rows.length === 0) {
-    for (const cfg of DEFAULT_CONFIG) {
+  let added = false;
+  for (const cfg of DEFAULT_CONFIG) {
+    if (!existingKeys.includes(cfg.chave)) {
       await sheet.addRow(cfg);
+      added = true;
     }
-    invalidateCache(CONFIG_SHEET);
   }
+  if (added) invalidateCache(CONFIG_SHEET);
 }
 
 // ============================================

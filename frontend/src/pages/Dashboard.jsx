@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell, FileText, BarChart2, Flame, Activity, Clock, Loader2, Bot, Timer, CheckCircle, XCircle, ChevronRight, PieChart as PieChartIcon } from 'lucide-react';
+import { Dumbbell, FileText, BarChart2, Flame, Activity, Clock, Loader2, Bot, Timer, CheckCircle, XCircle, ChevronRight, PieChart as PieChartIcon, Gift, AlertTriangle, ArrowRight } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 const CHART_COLORS = ['#7e22ce', '#0EA5E9', '#18518F', '#c084fc', '#d8b4fe', '#f3e8ff'];
 import { apiFetch } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -18,6 +19,8 @@ export default function Dashboard() {
     totalSessoes: 0
   });
   const [notificacoes, setNotificacoes] = useState([]);
+  const [trialStatus, setTrialStatus] = useState(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     async function loadData() {
@@ -40,6 +43,18 @@ export default function Dashboard() {
     }
     loadData();
   }, []);
+
+  // Buscar status do trial (apenas para alunos)
+  useEffect(() => {
+    if (user?.role === 'admin') return;
+    apiFetch('/financeiro/trial-status')
+      .then(res => {
+        if (res && !res.temAssinatura && res.trialAtivo) {
+          setTrialStatus(res);
+        }
+      })
+      .catch(() => {});
+  }, [user?.role]);
 
   if (loading) {
     return (
@@ -67,6 +82,47 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col h-full overflow-y-auto animate-fade-in pb-2">
+      
+      {/* Card de Trial Gratuito */}
+      {trialStatus && trialStatus.diasRestantes > 0 && (() => {
+        const d = trialStatus.diasRestantes;
+        const isUrgent = d <= 3;
+        const isWarning = d <= 7 && d > 3;
+        
+        const bgColor = isUrgent ? 'bg-red-50' : isWarning ? 'bg-amber-50' : 'bg-purple-50';
+        const borderColor = isUrgent ? 'border-red-200' : isWarning ? 'border-amber-200' : 'border-purple-200';
+        const iconBg = isUrgent ? 'bg-red-100' : isWarning ? 'bg-amber-100' : 'bg-purple-100';
+        const iconColor = isUrgent ? 'text-red-600' : isWarning ? 'text-amber-600' : 'text-purple-600';
+        const titleColor = isUrgent ? 'text-red-900' : isWarning ? 'text-amber-900' : 'text-purple-900';
+        const textColor = isUrgent ? 'text-red-700' : isWarning ? 'text-amber-700' : 'text-purple-700';
+        const btnColor = isUrgent ? 'text-red-600' : isWarning ? 'text-amber-600' : 'text-purple-600';
+        const IconComp = isUrgent ? AlertTriangle : isWarning ? Clock : Gift;
+        
+        const msg = d === 1
+          ? 'Seu período gratuito termina amanhã!'
+          : d <= 3
+            ? `Seu período gratuito termina em ${d} dias!`
+            : d <= 7
+              ? `Faltam ${d} dias para o término do seu período gratuito`
+              : `Você tem ${d} dias de acesso gratuito ao Corpo Conectado`;
+        
+        return (
+          <div className={`shrink-0 ${bgColor} border ${borderColor} rounded-2xl p-3 md:p-4 mb-3 md:mb-4 flex items-center justify-between shadow-sm animate-fade-in overflow-hidden relative group cursor-pointer`} onClick={() => navigate('/assinatura')}>
+            <div className="flex items-center gap-3 relative z-10">
+              <div className={`w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center shrink-0 ${isUrgent ? 'animate-pulse' : ''}`}>
+                <IconComp size={18} className={iconColor} />
+              </div>
+              <div>
+                <p className={`text-sm font-black ${titleColor} tracking-tight`}>{msg}</p>
+                <p className={`text-[11px] font-medium ${textColor} mt-0.5`}>Conheça nossos planos para manter o acesso</p>
+              </div>
+            </div>
+            <div className={`flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${btnColor} group-hover:translate-x-1 transition-transform shrink-0 relative z-10`}>
+              <span className="hidden md:inline">Ver Planos</span> <ArrowRight size={14} strokeWidth={3} />
+            </div>
+          </div>
+        );
+      })()}
       
       {/* Insight Alfred (Topo) — com notificação integrada */}
       <div className="shrink-0 bg-purple-50 border border-purple-200 rounded-2xl p-3 md:p-4 flex items-start gap-3 md:gap-4 mb-3 md:mb-6 shadow-sm">
@@ -98,6 +154,46 @@ export default function Dashboard() {
               </button>
             </div>
           )}
+
+          {/* Alerta do Alfred sobre o trial */}
+          {trialStatus && [7, 3, 1].includes(trialStatus.diasRestantes) && (() => {
+            const d = trialStatus.diasRestantes;
+            const dismissKey = `trial_alert_${d}`;
+            const dismissed = JSON.parse(localStorage.getItem('@CorpoConectado:dismissedNotifs') || '[]');
+            if (dismissed.includes(dismissKey)) return null;
+            
+            const msgs = {
+              7: 'Olá! Seu período de teste termina em 7 dias. Que tal garantir sua assinatura?',
+              3: 'Faltam apenas 3 dias! Ative sua assinatura para não perder o acesso.',
+              1: 'Último dia do seu acesso gratuito! Assine agora para continuar treinando.'
+            };
+            
+            return (
+              <div className="rounded-xl p-3 mb-2 border bg-purple-50 border-purple-200">
+                <p className="text-xs font-bold text-purple-800">
+                  ⏳ {msgs[d]}
+                </p>
+                <div className="flex items-center gap-3 mt-1.5">
+                  <button
+                    onClick={() => navigate('/assinatura')}
+                    className="text-[9px] font-black uppercase tracking-widest text-purple-600 hover:text-purple-800 transition"
+                  >
+                    Ver Planos →
+                  </button>
+                  <button
+                    onClick={() => {
+                      dismissed.push(dismissKey);
+                      localStorage.setItem('@CorpoConectado:dismissedNotifs', JSON.stringify(dismissed));
+                      setTrialStatus(prev => ({ ...prev })); // Force re-render
+                    }}
+                    className="text-[9px] font-bold uppercase tracking-widest text-purple-400 hover:text-purple-600 transition"
+                  >
+                    Entendi
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
 
           <p className="text-sm font-medium text-purple-900">{insightText}</p>
         </div>

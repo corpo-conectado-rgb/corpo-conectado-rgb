@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, CheckCircle, Search, User, Filter, XCircle, X, Trash2, ArrowRight, AlertTriangle } from 'lucide-react';
+import { Mail, CheckCircle, Search, User, Filter, XCircle, X, Trash2, ArrowRight, AlertTriangle, Banknote } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../services/api';
 
@@ -93,6 +93,7 @@ export default function AdminSolicitacoes() {
       case 'EXECUCAO': return 'Execução';
       case 'APLICATIVO': return 'Aplicativo';
       case 'ALTERACAO_DADOS': return 'Alteração de Dados';
+      case 'PAGAMENTO_REALIZADO': return 'Pagamento Realizado';
       default: return tipo;
     }
   };
@@ -105,6 +106,7 @@ export default function AdminSolicitacoes() {
       case 'EXECUCAO': return 'bg-amber-50 text-amber-600 border-amber-200/50';
       case 'APLICATIVO': return 'bg-indigo-50 text-indigo-600 border-indigo-200/50';
       case 'ALTERACAO_DADOS': return 'bg-orange-50 text-orange-600 border-orange-200/50';
+      case 'PAGAMENTO_REALIZADO': return 'bg-green-50 text-green-600 border-green-200/50';
       default: return 'bg-gray-50 text-gray-600 border-gray-200/50';
     }
   };
@@ -178,8 +180,8 @@ export default function AdminSolicitacoes() {
                 </button>
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gray-100 to-gray-50 border border-gray-200 flex items-center justify-center text-gray-600 font-black shadow-sm shrink-0">
-                      {sol.aluno_nome ? sol.aluno_nome.charAt(0).toUpperCase() : <User size={20} />}
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black shadow-sm shrink-0 ${sol.tipo === 'PAGAMENTO_REALIZADO' ? 'bg-gradient-to-tr from-green-100 to-emerald-50 border border-green-200 text-green-600' : 'bg-gradient-to-tr from-gray-100 to-gray-50 border border-gray-200 text-gray-600'}`}>
+                      {sol.tipo === 'PAGAMENTO_REALIZADO' ? <Banknote size={20} /> : sol.aluno_nome ? sol.aluno_nome.charAt(0).toUpperCase() : <User size={20} />}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between gap-2 mb-1">
@@ -241,6 +243,14 @@ export default function AdminSolicitacoes() {
                     </button>
                     {sol.status === 'PENDENTE' ? (
                       <>
+                        {sol.tipo === 'PAGAMENTO_REALIZADO' && (
+                          <button 
+                            onClick={() => navigate('/admin/financeiro')}
+                            className="px-4 py-2 w-full flex justify-center items-center gap-1.5 text-[10px] font-black uppercase tracking-wider bg-green-50 text-green-600 border border-green-100 rounded-xl hover:bg-green-500 hover:text-white transition active:scale-95"
+                          >
+                            <Banknote size={14} /> Confirmar Recebimento
+                          </button>
+                        )}
                         <button 
                           onClick={() => setActionModal({ show: true, id: sol.id, type: 'aprovar' })}
                           className="px-4 py-2 w-full flex justify-center items-center gap-1.5 text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl hover:bg-emerald-500 hover:text-white transition active:scale-95"

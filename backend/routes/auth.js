@@ -9,7 +9,7 @@ const { calcularIdade } = require('../utils/dateUtils');
 
 const USERS_SHEET = 'usuarios';
 const ANAMNESE_SHEET = 'anamnese';
-const HEADERS = ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role'];
+const HEADERS = ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role', 'trial_expira'];
 const ANAMNESE_HEADERS = ['id_usuario', 'idade', 'altura', 'peso', 'sexo', 'objetivo', 'nivel_fisico', 'lesoes_criticas', 'habitos_freq', 'habitos_tempo', 'habitos_local', 'data_nascimento', 'telefone'];
 const DISPOSITIVOS_SHEET = 'dispositivos';
 const DISPOSITIVOS_HEADERS = ['id', 'user_id', 'user_nome', 'user_email', 'device_id', 'device_name', 'codigo_ativacao', 'status', 'data_solicitacao', 'data_autorizacao'];
@@ -242,6 +242,8 @@ router.post('/login', async (req, res) => {
         nome: userRow.get('nome'), 
         email: userRow.get('email'),
         role,
+        data_criacao: userRow.get('data_criacao'),
+        trial_expira: userRow.get('trial_expira') || '',
         ...profileData 
       } 
     });
@@ -321,6 +323,8 @@ router.get('/me', authMiddleware, async (req, res) => {
       nome: userRow.get('nome'),
       email: userRow.get('email'),
       role: userRow.get('role') || 'user',
+      data_criacao: userRow.get('data_criacao'),
+      trial_expira: userRow.get('trial_expira') || '',
       ...profileData
     });
   } catch (error) {

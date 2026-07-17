@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, AlertCircle, ArrowRight, Lock } from 'lucide-react';
+import { Menu, AlertCircle, ArrowRight, Lock, Shield, Sparkles } from 'lucide-react';
 import FloatingAlfred from '../components/FloatingAlfred';
 import { apiFetch } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mensalidadeAtrasada, setMensalidadeAtrasada] = useState(false);
   const [bloqueado, setBloqueado] = useState(false);
+  const [trialExpirado, setTrialExpirado] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
 
   React.useEffect(() => {
+    // Verificar mensalidade atrasada (fluxo existente)
     apiFetch('/financeiro/minha-mensalidade')
       .then(res => {
         if (res && res.status === 'ATRASADA') {
@@ -27,7 +31,27 @@ export default function DashboardLayout() {
         }
       })
       .catch(() => {});
-  }, [location.pathname, navigate]);
+
+    // Verificar trial expirado (apenas para alunos)
+    if (user?.role !== 'admin') {
+      apiFetch('/financeiro/trial-status')
+        .then(res => {
+          if (res && !res.temAssinatura && !res.trialAtivo) {
+            setTrialExpirado(true);
+            // Redirecionar para assinatura se não estiver em páginas permitidas
+            const allowed = ['/assinatura', '/financeiro'];
+            if (!allowed.includes(location.pathname)) {
+              navigate('/assinatura', { replace: true });
+            }
+          }
+        })
+        .catch(() => {});
+    }
+  }, [location.pathname, navigate, user?.role]);
+
+  // Páginas permitidas mesmo com trial expirado
+  const paginasPermitidas = ['/assinatura', '/financeiro'];
+  const bloqueadoPorTrial = trialExpirado && !paginasPermitidas.includes(location.pathname);
 
   return (
     <div className="flex h-screen bg-[var(--color-bg-base)] font-sans text-gray-800 overflow-hidden">
@@ -45,7 +69,7 @@ export default function DashboardLayout() {
         </button>
 
         {/* Banner de alerta (quando <= 5 dias de atraso) */}
-        {mensalidadeAtrasada && !bloqueado && location.pathname !== '/financeiro' && (
+        {mensalidadeAtrasada && !bloqueado && !trialExpirado && location.pathname !== '/financeiro' && (
           <div className="w-full bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex items-center justify-between shadow-sm animate-fade-in relative z-20 overflow-hidden group cursor-pointer" onClick={() => navigate('/financeiro')}>
              <div className="flex items-center gap-3 relative z-10">
                <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
@@ -78,8 +102,41 @@ export default function DashboardLayout() {
           </div>
         )}
 
+        {/* Tela de Trial Expirado (quando trial acabou e sem assinatura) */}
+        {bloqueadoPorTrial && (
+          <div className="h-full flex items-center justify-center animate-fade-in">
+            <div className="max-w-sm w-full text-center px-6">
+              {/* Ícone Premium */}
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center shadow-lg shadow-purple-200/50">
+                <Shield size={36} className="text-purple-600" />
+              </div>
+              
+              <h2 className="text-xl font-black text-gray-900 tracking-tight mb-2">
+                Seu período gratuito terminou
+              </h2>
+              <p className="text-sm font-medium text-gray-500 leading-relaxed mb-8">
+                Ative sua assinatura para continuar utilizando o Corpo Conectado e manter sua evolução.
+              </p>
+              
+              <button
+                onClick={() => navigate('/assinatura')}
+                className="w-full bg-black text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-gray-800 transition active:scale-95 shadow-xl shadow-black/20"
+              >
+                <Sparkles size={18} /> Ativar Assinatura
+              </button>
+              
+              <button
+                onClick={() => navigate('/financeiro')}
+                className="mt-3 text-xs font-bold text-gray-400 hover:text-gray-600 transition"
+              >
+                Ver meu financeiro →
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Se bloqueado e não estiver na tela financeiro, nem mostra o Outlet. */}
-        {(!bloqueado || location.pathname === '/financeiro') && (
+        {(!bloqueado || location.pathname === '/financeiro') && !bloqueadoPorTrial && (
           <div className="bi-canvas relative max-w-7xl mx-auto h-full bg-white flex flex-col p-3 md:p-5 lg:p-6 rounded-2xl shadow-sm border border-gray-100 overflow-y-auto overflow-x-hidden">
             <Outlet />
           </div>

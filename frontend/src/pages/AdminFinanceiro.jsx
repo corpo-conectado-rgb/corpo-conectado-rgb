@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Wallet, Search, TrendingUp, Users, AlertCircle, FileText, CheckCircle2, ChevronDown, Clock, Filter, Check, X, RotateCcw, ArrowRight, Plus } from 'lucide-react';
+import { Wallet, Search, TrendingUp, Users, AlertCircle, FileText, CheckCircle2, ChevronDown, Clock, Filter, Check, X, RotateCcw, ArrowRight, Plus, Gift, Calendar, Loader2 } from 'lucide-react';
 import { apiFetch } from '../services/api';
 import Toast from '../components/Toast';
 
@@ -30,6 +30,9 @@ export default function AdminFinanceiro() {
   const [dropdownAlunoOpen, setDropdownAlunoOpen] = useState(false);
   const dropdownAlunoRef = useRef(null);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
+  const [trialExtend, setTrialExtend] = useState(null); // { userId, nome }
+  const [diasExtras, setDiasExtras] = useState('15');
+  const [estendendoTrial, setEstendendoTrial] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -72,6 +75,25 @@ export default function AdminFinanceiro() {
       setToast({ show: true, message: 'Falha ao carregar dashboard financeiro.', type: 'error' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handler para estender trial
+  const handleEstenderTrial = async () => {
+    if (!trialExtend || !diasExtras || Number(diasExtras) <= 0) return;
+    try {
+      setEstendendoTrial(true);
+      const result = await apiFetch('/financeiro/admin/trial/estender', {
+        method: 'PUT',
+        body: JSON.stringify({ userId: trialExtend.userId, diasExtras: Number(diasExtras) })
+      });
+      setToast({ show: true, message: `Trial de ${trialExtend.nome} estendido até ${formatDate(result.novaDataExpiracao)}`, type: 'success' });
+      setTrialExtend(null);
+      setDiasExtras('15');
+    } catch (err) {
+      setToast({ show: true, message: err.message || 'Erro ao estender trial', type: 'error' });
+    } finally {
+      setEstendendoTrial(false);
     }
   };
 
@@ -308,7 +330,18 @@ export default function AdminFinanceiro() {
                     <tr key={aluno.id} className="hover:bg-gray-50/80 transition-all duration-300">
                       <td className="px-6 py-4 w-[30%]">
                         <div className="font-bold text-gray-900 text-sm">{aluno.nome}</div>
-                        <div className="text-xs text-gray-500">{aluno.email}</div>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-gray-500">{aluno.email}</span>
+                          {aluno.status_assinatura !== 'ATIVA' && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setTrialExtend({ userId: aluno.id, nome: aluno.nome }); }}
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-purple-50 text-purple-600 border border-purple-200/50 hover:bg-purple-100 transition cursor-pointer"
+                              title="Estender período gratuito"
+                            >
+                              <Gift size={9} /> Trial
+                            </button>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 w-[20%]">
                         {aluno.status_mensalidade === 'PAGA' && (
@@ -529,6 +562,71 @@ export default function AdminFinanceiro() {
               >
                 {gerando ? <span className="animate-spin border-2 border-white/20 border-t-white rounded-full w-4 h-4" /> : <Check size={16} strokeWidth={3} />}
                 Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL ESTENDER TRIAL */}
+      {trialExtend && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !estendendoTrial && setTrialExtend(null)} />
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm relative overflow-hidden animate-scale-in">
+            <div className="relative h-20 bg-gradient-to-r from-purple-600 to-purple-800 p-5 flex items-center gap-3 overflow-hidden">
+              <div className="absolute top-0 right-0 -mt-8 -mr-8 w-24 h-24 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+              <div className="w-9 h-9 bg-white/15 rounded-xl flex items-center justify-center backdrop-blur-md border border-white/20">
+                <Gift className="text-white" size={18} />
+              </div>
+              <div className="relative z-10">
+                <h3 className="text-base font-black text-white tracking-tight leading-none">Estender Trial</h3>
+                <p className="text-purple-200 text-xs font-medium mt-1">{trialExtend.nome}</p>
+              </div>
+              <button
+                onClick={() => setTrialExtend(null)}
+                disabled={estendendoTrial}
+                className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition active:scale-95"
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1.5 block">
+                  Dias extras para adicionar
+                </label>
+                <div className="flex gap-2">
+                  {['7', '15', '30'].map(d => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setDiasExtras(d)}
+                      className={`flex-1 py-2.5 rounded-xl text-sm font-black transition active:scale-95 ${
+                        diasExtras === d
+                          ? 'bg-purple-600 text-white shadow-md'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      +{d} dias
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="number"
+                  min="1"
+                  value={diasExtras}
+                  onChange={e => setDiasExtras(e.target.value)}
+                  placeholder="Ou digite um valor"
+                  className="w-full mt-2 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-900 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                />
+              </div>
+              <button
+                onClick={handleEstenderTrial}
+                disabled={estendendoTrial || !diasExtras || Number(diasExtras) <= 0}
+                className="w-full bg-purple-600 text-white py-3.5 rounded-xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-purple-700 transition active:scale-95 disabled:opacity-50 shadow-lg shadow-purple-200"
+              >
+                {estendendoTrial ? <Loader2 size={16} className="animate-spin" /> : <Calendar size={16} />}
+                {estendendoTrial ? 'Estendendo...' : 'Confirmar Extensão'}
               </button>
             </div>
           </div>

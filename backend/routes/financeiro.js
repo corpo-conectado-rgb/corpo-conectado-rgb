@@ -641,5 +641,195 @@ router.put('/admin/cobranca/:id/pagar', adminMiddleware, async (req, res) => {
   }
 });
 
-module.exports = router;
+// ============================================
+// Constantes auxiliares para Trial
+// ============================================
+const USERS_HEADERS = ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role', 'trial_expira'];
+const CONFIG_HEADERS = ['chave', 'valor'];
+const SOLICITACOES_HEADERS = ['id', 'aluno_id', 'aluno_nome', 'tipo', 'mensagem', 'status', 'data_criacao', 'data_resolucao', 'observacao_admin'];
 
+// ============================================
+// GET /trial-status — Verifica status do período gratuito
+// ============================================
+router.get('/trial-status', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const role = req.user.role;
+
+    // Admins nunca são bloqueados
+    if (role === 'admin') {
+      return res.json({ temAssinatura: true, trialAtivo: false, diasRestantes: 0, dataExpiracao: '' });
+    }
+
+    // 1. Verificar se já tem assinatura ativa
+    const assinaturasRows = await getCachedRows('assinaturas', ASSINATURAS_HEADERS);
+    const assinaturaAtiva = assinaturasRows.find(
+      r => r.get('user_id') === userId && r.get('status') === 'ATIVA'
+    );
+
+    if (assinaturaAtiva) {
+      return res.json({ temAssinatura: true, trialAtivo: false, diasRestantes: 0, dataExpiracao: '' });
+    }
+
+    // 2. Buscar dados do usuário
+    const usersRows = await getCachedRows('usuarios', USERS_HEADERS);
+    const userRow = usersRows.find(r => r.get('id') === userId);
+    if (!userRow) return res.status(404).json({ error: 'Usuário não encontrado' });
+
+    // 3. Verificar se tem trial_expira personalizado (admin estendeu)
+    const trialExpiraCustom = userRow.get('trial_expira');
+    
+    let dataExpiracao;
+    
+    if (trialExpiraCustom) {
+      // Usar data de expiração personalizada
+      dataExpiracao = new Date(trialExpiraCustom);
+    } else {
+      // Calcular baseado na data de criação
+      const dataCriacao = new Date(userRow.get('data_criacao'));
+      
+      // Buscar configurações de trial
+      const configRows = await getCachedRows('configuracoes', CONFIG_HEADERS);
+      const trialInicioRow = configRows.find(r => r.get('chave') === 'TRIAL_INICIO');
+      const trialDiasRow = configRows.find(r => r.get('chave') === 'TRIAL_DIAS');
+      
+      const trialDias = trialDiasRow ? Number(trialDiasRow.get('valor')) : 30;
+      const trialInicio = trialInicioRow ? new Date(trialInicioRow.get('valor')) : null;
+      
+      // Para alunos existentes (criados antes do deploy), usar a data de deploy
+      const dataBase = (trialInicio && dataCriacao < trialInicio) ? trialInicio : dataCriacao;
+      
+      dataExpiracao = new Date(dataBase);
+      dataExpiracao.setDate(dataExpiracao.getDate() + trialDias);
+    }
+
+    const hoje = new Date();
+    const diffMs = dataExpiracao - hoje;
+    const diasRestantes = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+    const trialAtivo = diasRestantes > 0;
+
+    res.json({
+      temAssinatura: false,
+      trialAtivo,
+      diasRestantes,
+      dataExpiracao: dataExpiracao.toISOString().split('T')[0]
+    });
+  } catch (error) {
+    console.error('Erro ao verificar trial:', error);
+    res.status(500).json({ error: 'Erro ao verificar status do trial' });
+  }
+});
+
+// ============================================
+// POST /notificar-pagamento — Aluno informa que realizou pagamento
+// ============================================
+router.post('/notificar-pagamento', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Buscar nome do aluno
+    const usersRows = await getCachedRows('usuarios', USERS_HEADERS);
+    const userRow = usersRows.find(r => r.get('id') === userId);
+    if (!userRow) return res.status(404).json({ error: 'Usuário não encontrado' });
+
+    const alunoNome = userRow.get('nome');
+
+    // Verificar se já tem uma notificação pendente recente (evitar spam)
+    const solicitacoesRows = await getCachedRows('solicitacoes', SOLICITACOES_HEADERS);
+    const pendente = solicitacoesRows.find(
+      r => r.get('aluno_id') === userId && r.get('tipo') === 'PAGAMENTO_REALIZADO' && r.get('status') === 'PENDENTE'
+    );
+
+    if (pendente) {
+      return res.json({ success: true, message: 'Notificação já enviada. Aguarde a confirmação do administrador.' });
+    }
+
+    // Criar solicitação
+    const solicitacoesSheet = await getSheet('solicitacoes', SOLICITACOES_HEADERS);
+    await solicitacoesSheet.addRow({
+      id: uuidv4(),
+      aluno_id: userId,
+      aluno_nome: alunoNome,
+      tipo: 'PAGAMENTO_REALIZADO',
+      mensagem: `${alunoNome} informou que realizou o pagamento via PIX.`,
+      status: 'PENDENTE',
+      data_criacao: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+      data_resolucao: '',
+      observacao_admin: ''
+    });
+
+    invalidateCache('solicitacoes');
+
+    res.json({ success: true, message: 'Notificação enviada com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao notificar pagamento:', error);
+    res.status(500).json({ error: 'Erro ao enviar notificação de pagamento' });
+  }
+});
+
+// ============================================
+// PUT /admin/trial/estender — Admin estende período gratuito de um aluno
+// ============================================
+router.put('/admin/trial/estender', adminMiddleware, async (req, res) => {
+  try {
+    const { userId, diasExtras } = req.body;
+
+    if (!userId || !diasExtras || diasExtras <= 0) {
+      return res.status(400).json({ error: 'userId e diasExtras (positivo) são obrigatórios.' });
+    }
+
+    // Buscar o usuário
+    const usersSheet = await getSheet('usuarios', USERS_HEADERS);
+    const usersRows = await usersSheet.getRows();
+    const userRow = usersRows.find(r => r.get('id') === userId);
+    
+    if (!userRow) return res.status(404).json({ error: 'Usuário não encontrado' });
+
+    // Calcular nova data de expiração
+    const trialExpiraAtual = userRow.get('trial_expira');
+    let baseDate;
+
+    if (trialExpiraAtual) {
+      // Se já tem uma data personalizada, estender a partir dela
+      baseDate = new Date(trialExpiraAtual);
+    } else {
+      // Calcular a data de expiração padrão (data_criacao + 30 dias)
+      const dataCriacao = new Date(userRow.get('data_criacao'));
+      const configRows = await getCachedRows('configuracoes', CONFIG_HEADERS);
+      const trialInicioRow = configRows.find(r => r.get('chave') === 'TRIAL_INICIO');
+      const trialDiasRow = configRows.find(r => r.get('chave') === 'TRIAL_DIAS');
+      
+      const trialDias = trialDiasRow ? Number(trialDiasRow.get('valor')) : 30;
+      const trialInicio = trialInicioRow ? new Date(trialInicioRow.get('valor')) : null;
+      
+      const dataBase = (trialInicio && dataCriacao < trialInicio) ? trialInicio : dataCriacao;
+      baseDate = new Date(dataBase);
+      baseDate.setDate(baseDate.getDate() + trialDias);
+    }
+
+    // Se a data base já passou, estender a partir de hoje
+    const hoje = new Date();
+    if (baseDate < hoje) {
+      baseDate = hoje;
+    }
+
+    baseDate.setDate(baseDate.getDate() + Number(diasExtras));
+    const novaExpiracao = baseDate.toISOString().split('T')[0];
+
+    // Salvar no Google Sheets
+    userRow.set('trial_expira', novaExpiracao);
+    await userRow.save();
+    invalidateCache('usuarios');
+
+    res.json({ 
+      success: true, 
+      novaDataExpiracao: novaExpiracao,
+      message: `Trial estendido com sucesso até ${novaExpiracao}`
+    });
+  } catch (error) {
+    console.error('Erro ao estender trial:', error);
+    res.status(500).json({ error: 'Erro ao estender período gratuito' });
+  }
+});
+
+module.exports = router;

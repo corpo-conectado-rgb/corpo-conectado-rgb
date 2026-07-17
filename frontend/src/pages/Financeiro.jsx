@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, CheckCircle2, Clock, AlertCircle, Copy, FileText, Calendar, CalendarCheck, TrendingUp, ArrowRight, XCircle } from 'lucide-react';
+import { CreditCard, CheckCircle2, Clock, AlertCircle, Copy, FileText, Calendar, CalendarCheck, TrendingUp, ArrowRight, XCircle, Send, Loader2 } from 'lucide-react';
 import { apiFetch } from '../services/api';
 import Toast from '../components/Toast';
 
@@ -23,6 +23,8 @@ export default function Financeiro() {
   const [toast, setToast] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [notificandoPgto, setNotificandoPgto] = useState(false);
+  const [pgtoNotificado, setPgtoNotificado] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -60,6 +62,19 @@ export default function Financeiro() {
       setToast({ type: 'success', message: 'Chave PIX copiada!' });
     } catch {
       setToast({ type: 'error', message: 'Erro ao copiar chave PIX.' });
+    }
+  };
+
+  const handleNotificarPagamento = async () => {
+    setNotificandoPgto(true);
+    try {
+      await apiFetch('/financeiro/notificar-pagamento', { method: 'POST' });
+      setPgtoNotificado(true);
+      setToast({ type: 'success', message: 'Notificação enviada! O administrador será avisado.' });
+    } catch (err) {
+      setToast({ type: 'error', message: 'Erro ao notificar pagamento.' });
+    } finally {
+      setNotificandoPgto(false);
     }
   };
 
@@ -371,6 +386,32 @@ export default function Financeiro() {
                   </div>
                 </div>
               </div>
+            )}
+
+            {mensalidade_atual && mensalidade_atual.status !== 'PAGA' && (
+              <button
+                onClick={handleNotificarPagamento}
+                disabled={notificandoPgto || pgtoNotificado}
+                className={`w-full mt-4 rounded-2xl border flex items-center gap-3 p-4 transition-colors text-left ${
+                  pgtoNotificado
+                    ? 'bg-gray-50 border-gray-200 cursor-not-allowed opacity-70'
+                    : 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 cursor-pointer'
+                }`}
+              >
+                {notificandoPgto ? (
+                  <Loader2 size={20} className="text-emerald-600 animate-spin flex-shrink-0" />
+                ) : (
+                  <CheckCircle2 size={20} className="text-emerald-600 flex-shrink-0" />
+                )}
+                <div>
+                  <p className="text-sm font-bold text-gray-900">
+                    {pgtoNotificado ? 'Aguardando confirmação do administrador...' : 'Já realizei o pagamento'}
+                  </p>
+                  {!pgtoNotificado && (
+                    <p className="text-xs text-gray-500 font-medium mt-0.5">Notificar o administrador</p>
+                  )}
+                </div>
+              </button>
             )}
           </div>
 
