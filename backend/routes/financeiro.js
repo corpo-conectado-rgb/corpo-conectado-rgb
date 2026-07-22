@@ -487,6 +487,7 @@ router.put('/admin/assinatura/:userId/vencimento', adminMiddleware, async (req, 
 router.get('/admin/dashboard', adminMiddleware, async (req, res) => {
   try {
     const mensalidadesRows = await getCachedRows('mensalidades', MENSALIDADES_HEADERS);
+    const usersRows = await getCachedRows('usuarios', ['id', 'nome', 'email', 'role']);
     
     let receitaMes = 0;
     let receitaAno = 0;
@@ -497,11 +498,19 @@ router.get('/admin/dashboard', adminMiddleware, async (req, res) => {
     const currentMonth = hoje.getMonth();
     const currentYear = hoje.getFullYear();
 
+    const userRoleMap = new Map();
+    usersRows.forEach(r => userRoleMap.set(r.get('id'), r.get('role')));
+
     mensalidadesRows.forEach(r => {
+      const userId = r.get('user_id');
+      const role = userRoleMap.get(userId);
+      
+      // Ignorar administradores e usuários excluídos do cálculo do dashboard
+      if (!role || role === 'admin') return;
+
       const status = r.get('status');
       const valor = Number(String(r.get('valor') || '0').replace(',', '.')) || 0;
       const dataPagamentoStr = r.get('data_pagamento');
-      const userId = r.get('user_id');
       
       if (status === 'PAGA' && dataPagamentoStr) {
         const d = new Date(dataPagamentoStr);
