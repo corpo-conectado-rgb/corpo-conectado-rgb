@@ -649,6 +649,19 @@ const CONFIG_HEADERS = ['chave', 'valor'];
 const SOLICITACOES_HEADERS = ['id', 'aluno_id', 'aluno_nome', 'tipo', 'mensagem', 'status', 'data_criacao', 'data_resolucao', 'observacao_admin'];
 
 // ============================================
+// Função auxiliar para interpretar data no formato brasileiro (DD/MM/YYYY, HH:MM:SS) ou ISO
+// ============================================
+function parseData(dataStr) {
+  if (!dataStr) return new Date();
+  if (dataStr.includes('/')) {
+    const [dataParte] = dataStr.split(',');
+    const [dia, mes, ano] = dataParte.trim().split('/');
+    return new Date(`${ano}-${mes}-${dia}T00:00:00`);
+  }
+  return new Date(dataStr);
+}
+
+// ============================================
 // GET /trial-status — Verifica status do período gratuito
 // ============================================
 router.get('/trial-status', authMiddleware, async (req, res) => {
@@ -686,7 +699,7 @@ router.get('/trial-status', authMiddleware, async (req, res) => {
       dataExpiracao = new Date(trialExpiraCustom);
     } else {
       // Calcular baseado na data de criação
-      const dataCriacao = new Date(userRow.get('data_criacao'));
+      const dataCriacao = parseData(userRow.get('data_criacao'));
       
       // Buscar configurações de trial
       const configRows = await getCachedRows('configuracoes', CONFIG_HEADERS);
@@ -794,7 +807,7 @@ router.put('/admin/trial/estender', adminMiddleware, async (req, res) => {
       baseDate = new Date(trialExpiraAtual);
     } else {
       // Calcular a data de expiração padrão (data_criacao + 30 dias)
-      const dataCriacao = new Date(userRow.get('data_criacao'));
+      const dataCriacao = parseData(userRow.get('data_criacao'));
       const configRows = await getCachedRows('configuracoes', CONFIG_HEADERS);
       const trialInicioRow = configRows.find(r => r.get('chave') === 'TRIAL_INICIO');
       const trialDiasRow = configRows.find(r => r.get('chave') === 'TRIAL_DIAS');
