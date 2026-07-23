@@ -275,17 +275,17 @@ export default function AdminPrescricao() {
           <button 
             onClick={carregarModelos}
             disabled={salvando}
-            className="flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-200 px-4 md:px-5 py-3.5 rounded-xl font-bold hover:bg-gray-50 hover:border-gray-300 transition shadow-sm min-w-[120px]"
+            className="flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-200 px-4 md:px-5 py-3 rounded-xl text-sm font-bold hover:bg-gray-50 hover:text-black hover:border-gray-300 transition shadow-sm whitespace-nowrap"
           >
-            <Copy size={18} /> <span className="hidden md:inline">Copiar Modelo</span>
+            <Copy size={16} /> <span className="hidden md:inline">Copiar Modelo</span>
           </button>
           
           <button 
             onClick={salvarPrescricao}
             disabled={salvando}
-            className="flex items-center justify-center gap-2 bg-black text-white px-5 md:px-8 py-3.5 rounded-xl font-black hover:bg-gray-800 transition shadow-lg disabled:opacity-50 min-w-[120px]"
+            className="flex items-center justify-center gap-2 bg-black text-white px-5 md:px-8 py-3 rounded-xl text-sm font-black hover:bg-gray-800 transition shadow-lg disabled:opacity-50 whitespace-nowrap"
           >
-            {salvando ? 'Compilando...' : <><Save size={18} /> <span className="hidden md:inline">Salvar Prescrição</span><span className="md:hidden">Salvar</span></>}
+            {salvando ? 'Compilando...' : <><Save size={16} /> <span className="hidden md:inline">Salvar Prescrição</span><span className="md:hidden">Salvar</span></>}
           </button>
         </div>
       </div>
