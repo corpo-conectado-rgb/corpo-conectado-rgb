@@ -180,6 +180,84 @@ router.get('/fichas/usuario/:id/builder', adminMiddleware, async (req, res) => {
   }
 });
 
+// ============================================
+// GET /admin/fichas/templates — Lista todas as fichas ativas para usar como modelo
+// ============================================
+router.get('/fichas/templates', adminMiddleware, async (req, res) => {
+  try {
+    const treinosRows = await getCachedRows('treinos', []);
+    const usuariosRows = await getCachedRows('usuarios', []);
+
+    // Criar um mapa de id de usuário para nome
+    const userMap = {};
+    usuariosRows.forEach(u => {
+      userMap[u.get('id')] = u.get('nome');
+    });
+
+    // Filtrar apenas treinos ativos
+    const templates = treinosRows
+      .filter(r => r.get('status') === 'ativo' || r.get('status') === 'ativa')
+      .map(r => ({
+        id_treino: r.get('id'),
+        nome_ficha: r.get('nome_ficha') || 'Sem Nome',
+        nome_aluno: userMap[r.get('user_id')] || 'Aluno Desconhecido',
+        objetivo: r.get('objetivo') || ''
+      }));
+
+    res.json(templates);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================
+// GET /admin/fichas/clone/:treinoId — Retorna estrutura RAW de uma ficha específica pelo seu ID
+// ============================================
+router.get('/fichas/clone/:treinoId', adminMiddleware, async (req, res) => {
+  try {
+    const { treinoId } = req.params;
+    const treinosRows = await getCachedRows('treinos', []);
+    const activeTreino = treinosRows.find(r => r.get('id') === treinoId);
+
+    if (!activeTreino) {
+      return res.status(404).json({ error: 'Ficha não encontrada' });
+    }
+
+    const diasRows = await getCachedRows('dias_treino', []);
+    const diasParaTreino = diasRows.filter(r => r.get('treino_id') === treinoId);
+
+    const exerciciosRows = await getCachedRows('exercicios', []);
+
+    const diasMapeados = diasParaTreino.map(dia => {
+      const diaId = dia.get('id');
+      const exsOfDia = exerciciosRows.filter(r => r.get('dia_treino_id') === diaId);
+
+      return {
+        letra_dia: dia.get('letra_dia'),
+        foco_muscular: dia.get('foco_muscular') || '',
+        exercicios: exsOfDia.map(ex => ({
+          nome: ex.get('nome') || '',
+          series: ex.get('series') || 3,
+          repeticoes: ex.get('repeticoes') || '10-12',
+          descanso: ex.get('descanso') || 60,
+          carga: ex.get('carga') || '',
+          observacoes: ex.get('observacoes') || ''
+        }))
+      };
+    });
+
+    res.json({
+      nome_ficha: activeTreino.get('nome_ficha') || '',
+      tipo_divisao: activeTreino.get('tipo_divisao') || 'A/B/C',
+      objetivo: activeTreino.get('objetivo') || '',
+      duracao_dias: activeTreino.get('duracao_dias') || '',
+      data_termino: activeTreino.get('data_termino') || '',
+      dias: diasMapeados
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 // 2. Criar Estrutura de Treino (Master -> Dias -> Exercicios)
 router.post('/fichas', adminMiddleware, async (req, res) => {
   try {

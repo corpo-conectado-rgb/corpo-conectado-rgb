@@ -251,7 +251,10 @@ Inclua UM bloco JSON SEMPRE que o professor pedir para sugerir, montar, criar ou
 2. Adapte o volume e intensidade ao nível físico (Iniciante = volume baixo, mais máquinas).
 3. Quando analisar progressão, use os dados de cargas_recentes para fundamentar.
 4. Seja honesto: se não há dados suficientes para uma análise, diga isso.
-5. Formate suas respostas com clareza (use negrito, listas, emojis moderados).`;
+5. Formate suas respostas com clareza (use negrito, listas, emojis moderados).
+6. NUNCA use aspas duplas ("") dentro dos valores de texto no JSON (por exemplo, dentro das "observações"). Use apenas aspas simples ('') para evitar quebrar a estrutura do JSON.
+7. O campo "foco_muscular" gerado no JSON deve utilizar EXCLUSIVAMENTE os seguintes termos exatos: Peito, Costas, Ombro, Bíceps, Tríceps, Antebraço, Quadríceps, Posterior, Glúteo, Panturrilha, Abdômen, Cardio, Full Body. Nunca crie categorias personalizadas como "Superiores", "Inferiores" ou "Pernas".`;
+
 
     if (!process.env.GEMINI_API_KEY) {
       // Mock para desenvolvimento

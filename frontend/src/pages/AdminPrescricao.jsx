@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, BrainCircuit, Dumbbell, AlertTriangle, Activity, User, PlusCircle, Trash, Trash2, X, CalendarDays, MinusCircle, Bot, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, BrainCircuit, Dumbbell, AlertTriangle, Activity, User, PlusCircle, Trash, Trash2, X, CalendarDays, MinusCircle, Bot, Loader2, Copy, Search } from 'lucide-react';
 import { apiFetch } from '../services/api';
 import Toast from '../components/Toast';
 import { useCopilot } from '../contexts/CopilotContext';
@@ -22,6 +22,11 @@ export default function AdminPrescricao() {
   const [menuAbertoDiaIdx, setMenuAbertoDiaIdx] = useState(null);
   const [toast, setToast] = useState(null);
   const { registerContext, clearCopilotContext } = useCopilot();
+
+  const [showModalModelos, setShowModalModelos] = useState(false);
+  const [listaModelos, setListaModelos] = useState([]);
+  const [buscaModelo, setBuscaModelo] = useState('');
+  const [loadingModelos, setLoadingModelos] = useState(false);
 
   // Estados do Formulário Master
   const [nomeFicha, setNomeFicha] = useState('Projeto Hipertrofia 1.0');
@@ -149,6 +154,46 @@ export default function AdminPrescricao() {
     }
   };
 
+  const carregarModelos = async () => {
+    try {
+      setShowModalModelos(true);
+      setLoadingModelos(true);
+      const data = await apiFetch('/admin/fichas/templates');
+      setListaModelos(data || []);
+    } catch (err) {
+      setToast({ message: 'Erro ao carregar modelos.', type: 'error' });
+    } finally {
+      setLoadingModelos(false);
+    }
+  };
+
+  const aplicarModelo = async (treinoId) => {
+    try {
+      setLoadingModelos(true);
+      const template = await apiFetch(`/admin/fichas/clone/${treinoId}`);
+      if (template) {
+        setNomeFicha(template.nome_ficha + ' (Cópia)');
+        setTipoDivisao(template.tipo_divisao);
+        setFocoMacro(template.objetivo);
+        if (template.duracao_dias) setDuracaoDias(Number(template.duracao_dias));
+        if (template.dias && template.dias.length > 0) {
+          setDiasTreino(template.dias);
+        }
+        setToast({ message: 'Estrutura copiada com sucesso!', type: 'success' });
+        setShowModalModelos(false);
+      }
+    } catch (err) {
+      setToast({ message: 'Falha ao copiar a ficha.', type: 'error' });
+    } finally {
+      setLoadingModelos(false);
+    }
+  };
+
+  const modelosFiltrados = listaModelos.filter(m => 
+    (m.nome_ficha || '').toLowerCase().includes(buscaModelo.toLowerCase()) || 
+    (m.nome_aluno || '').toLowerCase().includes(buscaModelo.toLowerCase())
+  );
+
   // Handler para ações vindas do Assistente IA (ex: injetar exercícios na ficha)
   const handleApplyIAAction = React.useCallback((action) => {
     if (action.tipo === 'gerar_exercicios' && action.dias) {
@@ -227,7 +272,14 @@ export default function AdminPrescricao() {
           </div>
         </div>
         <div className="flex items-center gap-3 mt-4 md:mt-0">
-
+          <button 
+            onClick={carregarModelos}
+            disabled={salvando}
+            className="flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-200 px-4 md:px-5 py-3.5 rounded-xl font-bold hover:bg-gray-50 hover:border-gray-300 transition shadow-sm min-w-[120px]"
+          >
+            <Copy size={18} /> <span className="hidden md:inline">Copiar Modelo</span>
+          </button>
+          
           <button 
             onClick={salvarPrescricao}
             disabled={salvando}
@@ -422,6 +474,71 @@ export default function AdminPrescricao() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Copiar Modelos */}
+      {showModalModelos && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setShowModalModelos(false)} />
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col relative z-10 shadow-2xl animate-scale-up">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between shrink-0">
+              <h2 className="text-xl font-black text-gray-900 flex items-center gap-2">
+                <Copy size={20} className="text-blue-600" /> Modelos de Fichas
+              </h2>
+              <button onClick={() => setShowModalModelos(false)} className="text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 p-2 rounded-xl transition">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6 border-b border-gray-100 bg-gray-50/50 shrink-0">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                  <Search size={18} />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Pesquisar por nome do aluno ou título da ficha..."
+                  value={buscaModelo}
+                  onChange={(e) => setBuscaModelo(e.target.value)}
+                  className="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-3 text-sm font-medium text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-100 outline-none transition shadow-sm"
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 bg-[#FAFAFA]">
+              {loadingModelos && listaModelos.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-40 gap-3 text-gray-400">
+                  <Loader2 size={24} className="animate-spin text-blue-500" />
+                  <p className="text-sm font-bold">Buscando modelos no banco de dados...</p>
+                </div>
+              ) : modelosFiltrados.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-40 gap-3 text-gray-400">
+                  <Dumbbell size={32} className="opacity-20" />
+                  <p className="text-sm font-bold">Nenhum modelo de treino encontrado.</p>
+                </div>
+              ) : (
+                <div className="grid gap-3">
+                  {modelosFiltrados.map((modelo) => (
+                    <div key={modelo.id_treino} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between hover:border-blue-300 hover:shadow-md transition cursor-default group">
+                      <div>
+                        <h3 className="font-black text-gray-900 text-sm">{modelo.nome_ficha}</h3>
+                        <p className="text-xs font-medium text-gray-500 mt-0.5">Aluno: <span className="font-bold text-gray-700">{modelo.nome_aluno}</span></p>
+                        {modelo.objetivo && <p className="text-[10px] text-blue-600 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded inline-block font-bold mt-2 uppercase">{modelo.objetivo}</p>}
+                      </div>
+                      <button
+                        onClick={() => aplicarModelo(modelo.id_treino)}
+                        disabled={loadingModelos}
+                        className="opacity-0 group-hover:opacity-100 flex items-center gap-1.5 px-4 py-2 bg-black text-white text-xs font-black uppercase tracking-widest rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
+                      >
+                        {loadingModelos ? <Loader2 size={14} className="animate-spin" /> : <Copy size={14} />} Clonar
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Assistente IA (Drawer) removido, agora usa FloatingAlfred via Context */}
     </div>
