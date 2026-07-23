@@ -423,11 +423,11 @@ export default function AdminAlunos() {
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead>
                 <tr className="bg-[#FAFAFA] border-b border-gray-100 text-[10px] uppercase font-black tracking-widest text-gray-400">
-                  <th className="px-6 py-4 w-[35%]">Aluno & Contato</th>
-                  <th className="px-6 py-4 w-[20%]">Objetivo</th>
-                  <th className="px-6 py-4 w-[15%]">Status</th>
-                  <th className="px-6 py-4 w-[20%] text-center">Início Cadastro</th>
-                  <th className="px-6 py-4 text-center">Prescrever</th>
+                  <th className="px-5 py-3 w-[30%]">Aluno & Contato</th>
+                  <th className="px-5 py-3 w-[25%]">Foco & Perfil</th>
+                  <th className="px-5 py-3 w-[20%]">Status</th>
+                  <th className="px-5 py-3 w-[15%] text-center">Início Cadastro</th>
+                  <th className="px-5 py-3 text-center">Ações</th>
                 </tr>
               </thead>
             </table>
@@ -448,38 +448,38 @@ export default function AdminAlunos() {
                   alunosFiltrados.map((aluno) => (
                     <tr key={aluno.id} className="hover:bg-gray-50/80 transition-all duration-300 group">
                       {/* INFO ATLETA */}
-                      <td className="px-6 py-4 w-[35%]">
-                        <div className="flex items-center gap-4">
-                          <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-blue-100 via-blue-50 to-white border border-blue-200/60 flex items-center justify-center text-blue-700 font-black text-base shadow-sm group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
+                      <td className="px-5 py-3 w-[30%]">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-700 font-bold text-sm shadow-sm group-hover:bg-white group-hover:border-gray-300 transition-all duration-300">
                              {aluno.nome ? aluno.nome.charAt(0).toUpperCase() : '?'}
                           </div>
                           <div>
-                            <div className="text-[14px] font-black text-gray-900 group-hover:text-blue-600 transition-colors">
+                            <div className="text-[13px] font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
                               {aluno.nome || 'Sem Nome'}
                             </div>
-                            <div className="text-[11px] text-gray-500 font-medium">{aluno.email}</div>
+                            <div className="text-[11px] text-gray-400 font-medium">{aluno.email}</div>
                           </div>
                         </div>
                       </td>
 
                       {/* DADOS FÍSICOS/MÉDICOS */}
-                      <td className="px-6 py-4 w-[20%]">
+                      <td className="px-5 py-3 w-[25%]">
                         {aluno.objetivo ? (
-                          <div className="flex flex-col gap-1.5">
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[9px] uppercase tracking-widest font-black bg-gray-900 text-white shadow-sm w-fit">
+                          <div className="flex flex-col gap-1">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-100 text-gray-600 border border-gray-200/60 w-fit">
                               {aluno.objetivo}
                             </span>
-                            <span className="text-[11px] font-medium text-gray-500">{aluno.idade || '--'} anos • {aluno.peso ? `${aluno.peso}kg` : ''} • Nível: {aluno.nivel_fisico}</span>
+                            <span className="text-[11px] font-medium text-gray-400">{aluno.idade || '--'} anos • {aluno.peso ? `${aluno.peso}kg` : '--'} • Nível: {aluno.nivel_fisico}</span>
                           </div>
                         ) : (
-                          <span className="inline-block bg-amber-50 text-amber-600 text-[10px] uppercase font-black tracking-widest px-2.5 py-1 rounded-md border border-amber-200/50">
+                          <span className="inline-block bg-amber-50 text-amber-600 text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded border border-amber-200/50">
                             Pendente Anamnese
                           </span>
                         )}
                       </td>
 
                       {/* STATUS TREINO */}
-                      <td className="px-6 py-4 w-[15%]">
+                      <td className="px-5 py-3 w-[20%]">
                         {aluno.status_treino === 'ATIVO' ? (() => {
                           const diasRest = calcDiasRestantes(aluno.data_termino);
                           const hasDuracao = diasRest !== null;
@@ -491,59 +491,59 @@ export default function AdminAlunos() {
 
                           return (
                             <div className="flex flex-col gap-1">
-                              <span className={`inline-flex items-center whitespace-nowrap gap-1.5 text-[10px] font-black uppercase tracking-widest ${badgeBg} px-3 py-1.5 rounded-full border ${badgeBorder} w-fit`}>
+                              <span className={`inline-flex items-center whitespace-nowrap gap-1.5 text-[10px] font-bold uppercase tracking-wider ${badgeBg} px-2.5 py-1 rounded-full border ${badgeBorder} w-fit`}>
                                 <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`}></span>
                                 <span className="text-gray-700">Ativo</span>
                                 {hasDuracao && (
                                   <>
                                     <span className="text-gray-300">–</span>
-                                    <span className={`${diasText} font-black`}>
+                                    <span className={`${diasText} font-bold`}>
                                       {diasRest <= 0 ? 'Expirada' : `${diasRest} dias`}
                                     </span>
                                   </>
                                 )}
                               </span>
-                              <span className="text-[10px] font-bold text-gray-500 truncate max-w-[140px]">{aluno.ficha_nome}</span>
+                              <span className="text-[11px] font-medium text-gray-400 truncate max-w-[140px] mt-0.5">{aluno.ficha_nome}</span>
                             </div>
                           );
                         })() : (
-                          <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest bg-gray-100 text-gray-500 px-3 py-1.5 rounded-full">
+                          <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full border border-gray-200/60">
                             <span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span> Sem Treino
                           </span>
                         )}
                       </td>
 
                       {/* DATA INSCRIÇÃO */}
-                      <td className="px-6 py-4 text-center w-[20%]">
-                         <span className="text-xs font-bold text-gray-400">{aluno.data_criacao ? aluno.data_criacao.split(',')[0].split(' ')[0] : '--'}</span>
+                      <td className="px-5 py-3 text-center w-[15%]">
+                         <span className="text-[11px] font-medium text-gray-400">{aluno.data_criacao ? aluno.data_criacao.split(',')[0].split(' ')[0] : '--'}</span>
                       </td>
 
                       {/* AÇÕES */}
-                      <td className="px-6 py-4 text-center">
+                      <td className="px-5 py-3 text-center">
                         <div className="flex items-center justify-center gap-2">
                           {aluno.status_treino === 'ATIVO' ? (
                             <button 
                               onClick={() => openDrawer(aluno)}
-                              className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-50 border border-gray-200 text-gray-500 hover:text-black hover:bg-gray-100 transition active:scale-95 shrink-0"
+                              className="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-500 hover:text-black hover:bg-gray-50 transition active:scale-95 shrink-0 shadow-sm"
                               title="Ver Ficha Ativa"
                             >
-                              <Eye size={16} />
+                              <Eye size={14} />
                             </button>
                           ) : (
-                            <div className="w-9 h-9 shrink-0"></div>
+                            <div className="w-8 h-8 shrink-0"></div>
                           )}
                           <button 
                             onClick={() => navigate(`/admin/prescricao/${aluno.id}`)}
-                            className="flex justify-center items-center gap-1.5 bg-black text-white w-[90px] py-2 rounded-xl text-[10px] uppercase tracking-widest font-black hover:bg-gray-800 transition active:scale-95 shadow-md"
+                            className={`flex justify-center items-center gap-1.5 w-[85px] py-1.5 rounded-lg text-[10px] uppercase tracking-wider font-bold transition shadow-sm ${aluno.status_treino === 'ATIVO' ? 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' : 'bg-black text-white hover:bg-gray-800 border border-black'}`}
                           >
-                            <FileText size={11} fill="white" /> {aluno.status_treino === 'ATIVO' ? 'Editar' : 'Ficha'}
+                            <FileText size={12} className={aluno.status_treino === 'ATIVO' ? 'text-gray-500' : 'text-white'} /> {aluno.status_treino === 'ATIVO' ? 'Editar' : 'Ficha'}
                           </button>
                           <button
                             onClick={() => setAlunoParaExcluir(aluno)}
-                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-red-50 border border-red-100 text-red-500 hover:text-white hover:bg-red-500 transition-all opacity-0 group-hover:opacity-100 active:scale-95 shrink-0"
+                            className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 border border-red-100 text-red-500 hover:text-white hover:bg-red-500 transition-all opacity-0 group-hover:opacity-100 active:scale-95 shrink-0"
                             title="Excluir Aluno"
                           >
-                            <Trash2 size={15} />
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </td>
