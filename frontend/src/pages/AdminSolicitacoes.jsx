@@ -169,7 +169,7 @@ export default function AdminSolicitacoes() {
             </div>
           ) : (
             filteredSolicitacoes.map(sol => (
-              <div key={sol.id} className={`group relative bg-white rounded-2xl border ${sol.status === 'PENDENTE' ? 'border-gray-200 shadow-sm' : 'border-gray-100 opacity-75'} p-4 md:p-5 transition-all`}>
+              <div key={sol.id} className={`group relative bg-white rounded-2xl border ${sol.status === 'PENDENTE' ? 'border-gray-200 shadow-sm' : 'border-gray-100 opacity-75'} p-3 md:p-5 transition-all`}>
                 {/* Ícone de Excluir absoluto no canto superior direito */}
                 <button 
                   onClick={() => setDeleteModal({ show: true, id: sol.id, nome: sol.aluno_nome || 'Aluno' })} 
@@ -192,10 +192,10 @@ export default function AdminSolicitacoes() {
                           </span>
                         </div>
                       </div>
-                      <div className="text-xs font-medium text-gray-400 mb-3">
+                      <div className="text-xs font-medium text-gray-400 mb-2 md:mb-3">
                         Enviado em {formatDate(sol.data_criacao)}
                       </div>
-                      <div className="text-sm text-gray-700 bg-gray-50 rounded-xl p-4 border border-gray-100 mb-2">
+                      <div className="text-sm text-gray-700 bg-gray-50 rounded-xl p-3 md:p-4 border border-gray-100 mb-2">
                         {sol.tipo === 'ALTERACAO_DADOS' ? (() => {
                           const alteracoes = parseAlteracaoDados(sol.mensagem);
                           if (!alteracoes) return sol.mensagem;
@@ -234,7 +234,7 @@ export default function AdminSolicitacoes() {
                     </div>
                   </div>
                   
-                  <div className="flex flex-row md:flex-col items-center justify-start md:justify-end gap-2 shrink-0 md:pl-4 md:border-l border-gray-100 md:w-36 lg:w-44 pt-6 md:pt-8">
+                  <div className="flex flex-row md:flex-col items-center justify-start md:justify-end gap-2 shrink-0 md:pl-4 md:border-l border-gray-100 md:w-36 lg:w-44 pt-4 md:pt-8">
                     <button 
                       onClick={() => navigate(`/admin/prescricao/${sol.aluno_id}`)}
                       className="px-4 py-2 w-full text-[10px] font-black uppercase tracking-wider bg-black text-white rounded-xl hover:bg-gray-800 transition active:scale-95 text-center"
