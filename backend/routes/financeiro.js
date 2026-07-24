@@ -229,7 +229,51 @@ router.post('/assinar', authMiddleware, async (req, res) => {
     const planoId = planoBasico.get('id');
     const valorPlano = Number(String(planoBasico.get('valor') || '19.90').replace(',', '.'));
     const hoje = new Date();
-    const diaVencimento = hoje.getDate();
+
+    // ── Calcular primeiro vencimento baseado na data de término do trial ──
+    // O aluno deve aproveitar todo o período gratuito antes da primeira cobrança.
+    let primeiroVencimento;
+
+    // Busca dados do usuário para obter trial_expira
+    const usersRows = await getCachedRows('usuarios', USERS_HEADERS);
+    const userRow = usersRows.find(r => r.get('id') === userId);
+
+    if (userRow) {
+      const trialExpiraCustom = userRow.get('trial_expira');
+
+      if (trialExpiraCustom) {
+        // Trial personalizado (admin estendeu)
+        primeiroVencimento = new Date(trialExpiraCustom);
+      } else {
+        // Calcular baseado na data de criação + TRIAL_DIAS
+        const dataCriacaoRaw = userRow.get('data_criacao');
+        const dataCriacao = parseData(dataCriacaoRaw);
+
+        const configRows = await getCachedRows('configuracoes', CONFIG_HEADERS);
+        const trialInicioRow = configRows.find(r => r.get('chave') === 'TRIAL_INICIO');
+        const trialDiasRow = configRows.find(r => r.get('chave') === 'TRIAL_DIAS');
+
+        const trialDias = trialDiasRow ? Number(trialDiasRow.get('valor')) : 30;
+        const trialInicio = trialInicioRow ? new Date(trialInicioRow.get('valor')) : null;
+
+        const dataBase = (trialInicio && dataCriacao < trialInicio) ? trialInicio : dataCriacao;
+
+        primeiroVencimento = new Date(dataBase);
+        primeiroVencimento.setDate(primeiroVencimento.getDate() + trialDias);
+      }
+
+      // Se o trial já expirou (data de vencimento no passado), usa hoje + 30 dias como fallback
+      if (primeiroVencimento <= hoje) {
+        primeiroVencimento = new Date(hoje);
+        primeiroVencimento.setDate(primeiroVencimento.getDate() + 30);
+      }
+    } else {
+      // Fallback: se não encontrar o usuário, usa hoje + 30 dias
+      primeiroVencimento = new Date(hoje);
+      primeiroVencimento.setDate(primeiroVencimento.getDate() + 30);
+    }
+
+    const diaVencimento = primeiroVencimento.getDate();
 
     // Cria assinatura
     const assinaturaId = uuidv4();
@@ -247,24 +291,21 @@ router.post('/assinar', authMiddleware, async (req, res) => {
     });
     invalidateCache('assinaturas');
 
-    // Gera primeira mensalidade (vencimento = 30 dias a partir de hoje)
-    const vencimento = new Date(hoje);
-    vencimento.setDate(vencimento.getDate() + 30);
-
+    // Gera primeira mensalidade (vencimento = data de término do trial)
     const mensalidadesSheet = await getSheet('mensalidades', MENSALIDADES_HEADERS);
     await mensalidadesSheet.addRow({
       id: uuidv4(),
       user_id: userId,
       asaas_payment_id: '',
       valor: valorPlano,
-      data_vencimento: vencimento.toISOString().split('T')[0],
+      data_vencimento: primeiroVencimento.toISOString().split('T')[0],
       data_pagamento: '',
       status: 'PENDENTE',
       forma_pagamento: 'PIX_MANUAL',
-      referencia: gerarReferencia(vencimento),
+      referencia: gerarReferencia(primeiroVencimento),
       pix_qrcode: '',
       pix_copia_cola: '',
-      observacao: 'Primeira mensalidade - assinatura ativada',
+      observacao: 'Primeira mensalidade - vencimento alinhado ao fim do trial',
       data_criacao: hoje.toISOString()
     });
     invalidateCache('mensalidades');
