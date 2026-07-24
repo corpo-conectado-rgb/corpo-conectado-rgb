@@ -81,6 +81,7 @@ export default function Onboarding() {
     senha: '',
     confirmarSenha: '',
     data_nascimento: '',
+    data_nascimento_display: '',
     altura: '',
     peso: '',
     sexo: '',
@@ -110,6 +111,19 @@ export default function Onboarding() {
       setFormData({ ...formData, [field]: newVal.toFixed(2) });
     } else {
       setFormData({ ...formData, [field]: Number(newVal.toFixed(2)).toString() });
+    }
+  };
+
+  const handleDateInput = (e) => {
+    let val = e.target.value.replace(/\D/g, '');
+    if (val.length > 2) val = val.substring(0, 2) + '/' + val.substring(2);
+    if (val.length > 5) val = val.substring(0, 5) + '/' + val.substring(5, 9);
+    
+    if (val.length === 10) {
+      const [d, m, y] = val.split('/');
+      setFormData(prev => ({ ...prev, data_nascimento: `${y}-${m}-${d}`, data_nascimento_display: val }));
+    } else {
+      setFormData(prev => ({ ...prev, data_nascimento: '', data_nascimento_display: val }));
     }
   };
 
@@ -351,11 +365,13 @@ export default function Onboarding() {
           <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Data Nasc.</label>
           <div className="relative flex flex-col justify-center border border-white/5 rounded-xl overflow-hidden focus-within:border-white/30 transition-colors bg-black/20 px-3 h-[46px]">
             <input 
-              name="data_nascimento" 
-              value={formData.data_nascimento} 
-              onChange={handleChange} 
-              type="date" 
-              className="w-full bg-transparent border-0 text-center font-bold text-[13px] text-white focus:ring-0 p-0 outline-none [color-scheme:dark]" 
+              name="data_nascimento_display" 
+              value={formData.data_nascimento_display} 
+              onChange={handleDateInput} 
+              type="tel" 
+              placeholder="DD/MM/AAAA"
+              maxLength={10}
+              className="w-full bg-transparent border-0 text-center font-bold text-[13px] text-white focus:ring-0 p-0 outline-none [color-scheme:dark] placeholder:text-gray-500" 
             />
           </div>
           {formData.data_nascimento && (
