@@ -30,6 +30,14 @@ export default function AssistenteIA({ isOpen, onClose, alunoId, alunoNome, onAp
     }
   }, [isOpen]);
 
+  // Auto-resize do textarea
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+      inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 250)}px`;
+    }
+  }, [input]);
+
   // Mensagem de boas-vindas quando abre pela primeira vez
   useEffect(() => {
     if (isOpen && messages.length === 0) {
@@ -361,7 +369,7 @@ export default function AssistenteIA({ isOpen, onClose, alunoId, alunoNome, onAp
               onKeyDown={handleKeyDown}
               placeholder="Pergunte algo sobre este aluno..."
               rows={1}
-              className="flex-1 resize-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-400 focus:border-purple-400 focus:ring-1 focus:ring-purple-100 outline-none transition max-h-[100px] overflow-y-auto"
+              className="flex-1 resize-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-400 focus:border-purple-400 focus:ring-1 focus:ring-purple-100 outline-none transition-shadow max-h-[250px] overflow-y-auto custom-scrollbar"
               style={{ minHeight: '44px' }}
               disabled={loading}
             />
