@@ -18,6 +18,9 @@ export default function AdminConfiguracoes() {
   // Modal de exclusão
   const [deleteModal, setDeleteModal] = useState({ show: false, id: null, nome: '' });
 
+  // Modal de reset do demo
+  const [resetModal, setResetModal] = useState(false);
+
   useEffect(() => {
     fetchConfig();
     fetchDispositivos();
@@ -52,19 +55,22 @@ export default function AdminConfiguracoes() {
     }
   };
 
-  const handleResetDemo = async () => {
-    if (!window.confirm('Tem certeza que deseja resetar o ambiente de demonstração? Isso apagará todas as edições feitas na conta demo e recriará os dados padrão.')) {
-      return;
-    }
+  const confirmResetDemo = async () => {
     try {
       setResetandoDemo(true);
       const res = await apiFetch('/demo/reset', { method: 'POST' });
-      alert(res.message || 'Ambiente restaurado com sucesso!');
+      setResetModal(false);
+      // Timeout simples para que o modal de confirmar suma antes do aviso
+      setTimeout(() => alert(res.message || 'Ambiente restaurado com sucesso!'), 300);
     } catch (err) {
       alert('Erro ao restaurar ambiente: ' + err.message);
     } finally {
       setResetandoDemo(false);
     }
+  };
+
+  const handleResetDemo = () => {
+    setResetModal(true);
   };
 
   const fetchDispositivos = async () => {
@@ -435,6 +441,38 @@ export default function AdminConfiguracoes() {
               <button
                 onClick={fecharDeleteModal}
                 disabled={submitting}
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-black uppercase tracking-widest text-xs py-4 rounded-xl disabled:opacity-50 active:scale-95 transition-all"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Reset Demo */}
+      {resetModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => !resetandoDemo && setResetModal(false)} />
+          <div className="relative bg-white w-full max-w-md rounded-3xl shadow-2xl animate-scale-in flex flex-col overflow-hidden text-center p-6 border-t-8 border-indigo-500">
+            <div className="mx-auto w-16 h-16 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mb-4">
+              <RefreshCw size={28} className={resetandoDemo ? "animate-spin" : ""} />
+            </div>
+            <h3 className="text-xl font-black text-gray-900 mb-2">Restaurar Ambiente?</h3>
+            <p className="text-sm text-gray-500 font-medium mb-6 px-2">
+              Você está prestes a apagar todas as edições feitas na conta demo. O sistema irá <span className="font-bold text-indigo-600">recriar o perfil perfeito</span>, incluindo biometria, histórico e treinos. 
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={confirmResetDemo}
+                disabled={resetandoDemo}
+                className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-black uppercase tracking-widest text-xs py-4 rounded-xl disabled:opacity-50 active:scale-95 transition-all shadow-lg shadow-indigo-500/25"
+              >
+                {resetandoDemo ? 'Restaurando...' : 'Sim, Restaurar Conta'}
+              </button>
+              <button
+                onClick={() => setResetModal(false)}
+                disabled={resetandoDemo}
                 className="w-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-black uppercase tracking-widest text-xs py-4 rounded-xl disabled:opacity-50 active:scale-95 transition-all"
               >
                 Cancelar
