@@ -204,7 +204,7 @@ export default function AdminConfiguracoes() {
                     <Shield size={20} className="text-indigo-400" />
                     Ambiente Isolado
                   </h3>
-                  <p className="text-indigo-100/70 text-sm font-medium mb-4 max-w-xl">
+                  <p className="text-indigo-100/70 text-sm font-medium mb-4 max-w-xl hidden md:block">
                     Utilize este ambiente para apresentar o sistema a investidores ou futuros alunos. A conta contém treinos avançados, biometria preenchida, pagamentos simulados e gráficos prontos.
                   </p>
                   
@@ -243,7 +243,7 @@ export default function AdminConfiguracoes() {
                       </>
                     )}
                   </button>
-                  <p className="text-[10px] text-center text-indigo-200/50 font-bold mt-3 max-w-[200px]">
+                  <p className="text-[10px] text-center text-indigo-200/50 font-bold mt-3 max-w-[200px] hidden md:block">
                     Limpa as edições feitas na demonstração e restaura o perfil perfeito.
                   </p>
                 </div>
@@ -264,7 +264,7 @@ export default function AdminConfiguracoes() {
                   </div>
                   <div>
                     <h3 className="text-base font-black text-gray-900 mb-1">Solicitar Ativação de Dispositivo</h3>
-                    <p className="text-sm text-gray-500 font-medium leading-relaxed">
+                    <p className="text-sm text-gray-500 font-medium leading-relaxed hidden md:block">
                       Quando ativado, novos acessos exigirão aprovação do administrador antes de liberar o dispositivo.
                     </p>
                   </div>
