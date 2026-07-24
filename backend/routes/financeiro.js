@@ -548,33 +548,93 @@ router.get('/admin/dashboard', adminMiddleware, async (req, res) => {
 // ============================================
 router.get('/admin/alunos', adminMiddleware, async (req, res) => {
   try {
-    const usuariosRows = await getCachedRows('usuarios', ['id', 'nome', 'email', 'role']);
+    const usuariosRows = await getCachedRows('usuarios', USERS_HEADERS);
     const mensalidadesRows = await getCachedRows('mensalidades', MENSALIDADES_HEADERS);
-    
+    const assinaturasRows = await getCachedRows('assinaturas', ASSINATURAS_HEADERS);
+    const planosRows = await getCachedRows('planos', PLANOS_HEADERS);
+    const configRows = await getCachedRows('configuracoes', CONFIG_HEADERS);
+
+    // Config de trial
+    const trialInicioRow = configRows.find(r => r.get('chave') === 'TRIAL_INICIO');
+    const trialDiasRow = configRows.find(r => r.get('chave') === 'TRIAL_DIAS');
+    const trialDias = trialDiasRow ? Number(trialDiasRow.get('valor')) : 30;
+    const trialInicio = trialInicioRow ? new Date(trialInicioRow.get('valor')) : null;
+    const hoje = new Date();
+
+    // Map de planos por ID
+    const planosMap = new Map();
+    planosRows.forEach(r => planosMap.set(r.get('id'), { nome: r.get('nome'), valor: r.get('valor') }));
+
     // Pegar apenas usuários com role 'user'
     const alunos = usuariosRows.filter(r => r.get('role') !== 'admin').map(r => ({
       id: r.get('id'),
       nome: r.get('nome'),
-      email: r.get('email')
+      email: r.get('email'),
+      data_criacao: r.get('data_criacao'),
+      trial_expira: r.get('trial_expira')
     }));
 
-    // Anexar status financeiro atual de cada aluno
+    // Anexar status financeiro + trial + assinatura
     const result = alunos.map(aluno => {
+      // --- Mensalidade ---
       const alunoMensalidades = mensalidadesRows
         .filter(r => r.get('user_id') === aluno.id)
         .sort((a, b) => new Date(b.get('data_vencimento')) - new Date(a.get('data_vencimento')));
-
       const atual = alunoMensalidades.length > 0 ? alunoMensalidades[0] : null;
-      
+
+      // --- Assinatura ---
+      const assinatura = assinaturasRows.find(r => r.get('user_id') === aluno.id && r.get('status') === 'ATIVA');
+      let statusAssinatura = 'SEM';
+      let planoNome = '';
+      let planoValor = '';
+      let diaVencimento = '';
+      if (assinatura) {
+        statusAssinatura = 'ATIVA';
+        const plano = planosMap.get(assinatura.get('plano_id'));
+        planoNome = plano ? plano.nome : 'Plano Básico';
+        planoValor = assinatura.get('valor_personalizado') || (plano ? plano.valor : '19.90');
+        diaVencimento = assinatura.get('dia_vencimento') || '';
+      }
+
+      // --- Trial ---
+      let trialAtivo = false;
+      let diasRestantesTrial = 0;
+      let dataExpiracaoTrial = '';
+      if (statusAssinatura !== 'ATIVA') {
+        let dataExpiracao;
+        if (aluno.trial_expira) {
+          dataExpiracao = new Date(aluno.trial_expira);
+        } else {
+          const dataCriacao = parseData(aluno.data_criacao);
+          const dataBase = (trialInicio && dataCriacao < trialInicio) ? trialInicio : dataCriacao;
+          dataExpiracao = new Date(dataBase);
+          dataExpiracao.setDate(dataExpiracao.getDate() + trialDias);
+        }
+        const diffMs = dataExpiracao - hoje;
+        diasRestantesTrial = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+        trialAtivo = diasRestantesTrial > 0;
+        dataExpiracaoTrial = dataExpiracao.toISOString().split('T')[0];
+      }
+
       return {
-        ...aluno,
+        id: aluno.id,
+        nome: aluno.nome,
+        email: aluno.email,
+        data_criacao: aluno.data_criacao,
         status_mensalidade: atual ? atual.get('status') : 'SEM_COBRANCA',
         ultima_mensalidade: atual ? {
           id: atual.get('id'),
           valor: Number(String(atual.get('valor') || '0').replace(',', '.')),
           vencimento: atual.get('data_vencimento'),
           referencia: atual.get('referencia')
-        } : null
+        } : null,
+        status_assinatura: statusAssinatura,
+        plano_nome: planoNome,
+        plano_valor: planoValor,
+        dia_vencimento: diaVencimento,
+        trial_ativo: trialAtivo,
+        dias_restantes_trial: diasRestantesTrial,
+        data_expiracao_trial: dataExpiracaoTrial
       };
     });
 
