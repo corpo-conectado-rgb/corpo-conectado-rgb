@@ -568,7 +568,7 @@ export default function AdminAlunos() {
                 const style = hasDuracao ? getDiasRestantesStyle(diasRest) : null;
                 
                 return (
-                  <div key={aluno.id} className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm flex flex-col gap-4">
+                  <div key={aluno.id} className="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm flex flex-col gap-3">
                     {/* Header do Card (Avatar + Info) */}
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-100 via-blue-50 to-white border border-blue-200/60 flex items-center justify-center text-blue-700 font-black text-sm shadow-sm shrink-0">
@@ -612,12 +612,8 @@ export default function AdminAlunos() {
                       )}
                     </div>
 
-                    <div className="text-[10px] text-gray-500 font-medium">
-                      {aluno.idade || '--'} anos • {aluno.peso ? `${aluno.peso}kg` : ''} • Nível: {aluno.nivel_fisico}
-                    </div>
-
                     {/* Ações */}
-                    <div className="flex items-center gap-2 mt-2 pt-4 border-t border-gray-50">
+                    <div className="flex items-center gap-2 pt-1 border-t border-gray-50 mt-1">
                       {isAtivo && (
                         <button 
                           onClick={() => openDrawer(aluno)}
