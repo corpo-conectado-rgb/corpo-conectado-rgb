@@ -12,6 +12,8 @@ const DISMISS_DAYS = 7;
 export default function InstallPrompt() {
   const [show, setShow] = useState(false);
   const [platform, setPlatform] = useState('unknown'); // 'android' | 'ios' | 'unknown'
+  const [isInstalling, setIsInstalling] = useState(false);
+  const [installSuccess, setInstallSuccess] = useState(false);
   const deferredPromptRef = useRef(null);
 
   useEffect(() => {
@@ -44,8 +46,19 @@ export default function InstallPrompt() {
       setTimeout(() => setShow(true), 3000);
     };
 
+    const handleAppInstalled = () => {
+      setInstallSuccess(true);
+      setIsInstalling(false);
+      setTimeout(() => setShow(false), 8000); // Auto close after 8s
+    };
+
     window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    window.addEventListener('appinstalled', handleAppInstalled);
+    
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
   }, []);
 
   const handleInstall = async () => {
@@ -53,7 +66,7 @@ export default function InstallPrompt() {
       deferredPromptRef.current.prompt();
       const result = await deferredPromptRef.current.userChoice;
       if (result.outcome === 'accepted') {
-        setShow(false);
+        setIsInstalling(true);
       }
       deferredPromptRef.current = null;
     }
@@ -127,13 +140,29 @@ export default function InstallPrompt() {
         ) : (
           /* ─── Android / Desktop CTA ─── */
           <div className="mb-4">
-            <button
-              onClick={handleInstall}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-white bg-purple-600 hover:bg-purple-700 active:scale-[0.98] transition-all text-sm shadow-lg shadow-purple-600/20"
-            >
-              <Download size={18} />
-              Instalar Agora
-            </button>
+            {installSuccess ? (
+              <div className="flex flex-col items-center p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center mb-2">
+                  <span className="text-xl">✅</span>
+                </div>
+                <p className="text-sm font-bold text-emerald-800 text-center">Instalado com sucesso!</p>
+                <p className="text-xs text-emerald-600 text-center mt-1">Caso não veja na tela inicial, verifique sua <b>Gaveta de Aplicativos</b>.</p>
+              </div>
+            ) : isInstalling ? (
+              <div className="flex flex-col items-center p-4 bg-gray-50 rounded-xl">
+                <div className="w-8 h-8 border-4 border-gray-200 border-t-purple-600 rounded-full animate-spin mb-3"></div>
+                <p className="text-sm font-bold text-gray-900">Instalando...</p>
+                <p className="text-xs text-gray-500 text-center mt-1">Aguarde. Isso pode levar alguns segundos dependendo da conexão.</p>
+              </div>
+            ) : (
+              <button
+                onClick={handleInstall}
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-white bg-purple-600 hover:bg-purple-700 active:scale-[0.98] transition-all text-sm shadow-lg shadow-purple-600/20"
+              >
+                <Download size={18} />
+                Instalar Agora
+              </button>
+            )}
           </div>
         )}
 
