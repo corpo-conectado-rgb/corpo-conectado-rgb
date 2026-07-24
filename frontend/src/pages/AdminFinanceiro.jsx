@@ -327,14 +327,19 @@ export default function AdminFinanceiro() {
         {/* ===================== KPIs ===================== */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
           {/* Receita Mensal */}
-          <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm group hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Receita Mensal</p>
-              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+          <div className="bg-white rounded-xl p-5 border border-emerald-100 shadow-sm shadow-emerald-50 group hover:shadow-md transition-shadow col-span-2 md:col-span-1 flex flex-col justify-center relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+              <TrendingUp size={64} className="text-emerald-500" />
+            </div>
+            <div className="flex items-center justify-between mb-3 w-full relative z-10">
+              <p className="text-[10px] md:text-[9px] font-black uppercase tracking-widest text-emerald-600/70">Receita Mensal</p>
+              <div className="w-8 h-8 md:w-8 md:h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
                 <TrendingUp size={15} />
               </div>
             </div>
-            <p className="text-lg lg:text-xl font-black text-gray-900">R$ {formatCurrency(dashboard.receitaMes)}</p>
+            <p className="text-3xl md:text-xl lg:text-2xl font-black text-gray-900 text-center md:text-left w-full relative z-10">
+              R$ {formatCurrency(dashboard.receitaMes)}
+            </p>
           </div>
           {/* Receita Anual */}
           <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm group hover:shadow-md transition-shadow">
@@ -367,7 +372,7 @@ export default function AdminFinanceiro() {
             <p className="text-lg lg:text-xl font-black text-gray-900">{dashboard.qtdInadimplentes}</p>
           </div>
           {/* Trial Ativo */}
-          <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm group hover:shadow-md transition-shadow col-span-2 md:col-span-1">
+          <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm group hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2">
               <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Em Trial</p>
               <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
