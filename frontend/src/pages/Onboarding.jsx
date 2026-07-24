@@ -213,27 +213,36 @@ export default function Onboarding() {
       setFakeProgress(100);
       await new Promise(r => setTimeout(r, 400));
 
-      // Engatilha Sucesso UI + Disparo de Confete Dark (Elegante e Original)
+      // Desativa loading ANTES de mostrar sucesso (loading=false + success=true mantém a tela de sucesso visível)
+      setLoading(false);
       setSuccess(true);
       
-      confetti({
-        particleCount: 160,
-        spread: 90,
-        origin: { y: 0.6 },
-        colors: ['#000000', '#111827', '#E5E7EB', '#FFFFFF'],
-        disableForReducedMotion: true,
-        useWorker: true
-      });
+      // Confetti com try/catch para não quebrar no Android
+      try {
+        confetti({
+          particleCount: 160,
+          spread: 90,
+          origin: { y: 0.6 },
+          colors: ['#000000', '#111827', '#E5E7EB', '#FFFFFF'],
+          disableForReducedMotion: true,
+          useWorker: true
+        });
+      } catch (confettiErr) {
+        console.warn('Confetti não disponível:', confettiErr);
+      }
+
+      // Determina destino da navegação
+      const isActivation = result && result.requiresActivation;
 
       // Fade-out suave antes de navegar
       setTimeout(() => {
-        confetti.reset(); // Libera o canvas e para qualquer animação restante
+        try { confetti.reset(); } catch(e) {}
         setIsTransitioningOut(true);
       }, 3500);
 
       // Navega após o fade-out completar (300ms de transição CSS)
       setTimeout(() => {
-        if (result && result.requiresActivation) {
+        if (isActivation) {
           navigate('/login', { state: { email: formData.email, requiresActivation: true, activationCode: result.activationCode } });
         } else {
           navigate('/');
@@ -241,10 +250,9 @@ export default function Onboarding() {
       }, 3900);
 
     } catch (err) {
-      setError(err.message || 'Falha ao processar o Onboarding. Tente novamente.');
-      setStep(1); // Retorna em caso de falha severa
-    } finally {
       setLoading(false);
+      setError(err.message || 'Falha ao processar o Onboarding. Tente novamente.');
+      setStep(1);
     }
   };
 
