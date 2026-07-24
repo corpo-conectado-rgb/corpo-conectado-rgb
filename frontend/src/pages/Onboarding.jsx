@@ -227,19 +227,18 @@ export default function Onboarding() {
       setFakeProgress(100);
       await new Promise(r => setTimeout(r, 400));
 
-      // Desativa loading ANTES de mostrar sucesso (loading=false + success=true mantém a tela de sucesso visível)
+      // Desativa loading ANTES de mostrar sucesso
       setLoading(false);
       setSuccess(true);
       
-      // Confetti com try/catch para não quebrar no Android
+      // Confetti — sem useWorker para evitar crash em Android WebViews
       try {
         confetti({
-          particleCount: 160,
-          spread: 90,
+          particleCount: 100,
+          spread: 80,
           origin: { y: 0.6 },
           colors: ['#000000', '#111827', '#E5E7EB', '#FFFFFF'],
-          disableForReducedMotion: true,
-          useWorker: true
+          disableForReducedMotion: true
         });
       } catch (confettiErr) {
         console.warn('Confetti não disponível:', confettiErr);
@@ -248,20 +247,41 @@ export default function Onboarding() {
       // Determina destino da navegação
       const isActivation = result && result.requiresActivation;
 
-      // Fade-out suave antes de navegar
-      setTimeout(() => {
+      // Helper de navegação segura (garante que sempre navega, mesmo se estado do React já desmontou)
+      const doNavigate = () => {
         try { confetti.reset(); } catch(e) {}
-        setIsTransitioningOut(true);
-      }, 3500);
-
-      // Navega após o fade-out completar (300ms de transição CSS)
-      setTimeout(() => {
         if (isActivation) {
           navigate('/login', { state: { email: formData.email, requiresActivation: true, activationCode: result.activationCode } });
         } else {
           navigate('/');
         }
-      }, 3900);
+      };
+
+      // Fade-out suave antes de navegar
+      setTimeout(() => {
+        try {
+          setIsTransitioningOut(true);
+        } catch(e) {
+          // Se o setState falhar (componente desmontado), navega direto
+          doNavigate();
+          return;
+        }
+      }, 3000);
+
+      // Navega após o fade-out completar
+      setTimeout(doNavigate, 3400);
+
+      // Safety net: se por qualquer razão a navegação não ocorreu em 6s, força a saída
+      setTimeout(() => {
+        try {
+          if (window.location.pathname === '/onboarding') {
+            console.warn('[Onboarding] Safety net: forçando navegação');
+            doNavigate();
+          }
+        } catch(e) {
+          window.location.href = '/login';
+        }
+      }, 6000);
 
     } catch (err) {
       setLoading(false);
