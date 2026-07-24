@@ -58,7 +58,8 @@ export default function PDFPreviewModal({ isOpen, onClose, aluno, profissional, 
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Ficha_Treino_${(aluno?.nome || 'Aluno').replace(/\s+/g, '_')}.pdf`;
+      const safeName = (aluno?.nome || 'Aluno').normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_');
+      a.download = `Ficha_Treino_${safeName}.pdf`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -74,9 +75,10 @@ export default function PDFPreviewModal({ isOpen, onClose, aluno, profissional, 
     try {
       const doc = <FichaTreinoPDF aluno={aluno} profissional={profissional} treinos={treinos} />;
       const blob = await pdf(doc).toBlob();
+      const safeName = (aluno?.nome || 'Aluno').normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '_');
       const file = new File(
         [blob], 
-        `Ficha_Treino_${(aluno?.nome || 'Aluno').replace(/\s+/g, '_')}.pdf`, 
+        `Ficha_Treino_${safeName}.pdf`, 
         { type: 'application/pdf' }
       );
 
