@@ -1,7 +1,7 @@
 const { Jimp } = require('jimp');
 
 async function run() {
-  const bg = new Jimp({ width: 1200, height: 630, color: '#09090b' });
+  const bg = new Jimp({ width: 1200, height: 630, color: '#091122' });
   const logo = await Jimp.read('public/Icone_Corpo_Conectado_Premium.png');
   
   logo.resize({ w: 400, h: 400 });
