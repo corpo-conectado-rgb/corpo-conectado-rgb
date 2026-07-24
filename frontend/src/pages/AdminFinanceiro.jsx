@@ -328,8 +328,8 @@ export default function AdminFinanceiro() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
           {/* Receita Mensal */}
           <div className="bg-white rounded-xl p-5 border border-emerald-100 shadow-sm shadow-emerald-50 group hover:shadow-md transition-shadow col-span-2 md:col-span-1 flex flex-col justify-center relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-              <TrendingUp size={64} className="text-emerald-500" />
+            <div className="absolute -bottom-2 -right-2 opacity-10 pointer-events-none">
+              <TrendingUp size={80} className="text-emerald-500" />
             </div>
             <div className="flex items-center justify-between mb-3 w-full relative z-10">
               <p className="text-[10px] md:text-[9px] font-black uppercase tracking-widest text-emerald-600/70">Receita Mensal</p>
