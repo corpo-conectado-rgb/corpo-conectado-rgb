@@ -178,55 +178,7 @@ export default function AdminConfiguracoes() {
       <div className="flex-1 min-h-0 px-6 lg:px-8 pb-6 lg:pb-8 overflow-y-auto bg-gray-50/50">
         <div className="max-w-4xl mx-auto xl:max-w-6xl py-4 space-y-8">
 
-          {/* ─────────── Section 1: Configurações Globais ─────────── */}
-          <section>
-            <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">
-              <Shield size={14} /> Configurações Globais
-            </h2>
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 md:p-6">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
-                    <Smartphone size={20} className="text-indigo-500" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-black text-gray-900 mb-1">Solicitar Ativação de Dispositivo</h3>
-                    <p className="text-sm text-gray-500 font-medium leading-relaxed">
-                      Quando ativado, novos acessos exigirão aprovação do administrador antes de liberar o dispositivo.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Custom Toggle Switch */}
-                <button
-                  onClick={toggleActivation}
-                  disabled={configLoading || toggling}
-                  className="shrink-0 focus:outline-none disabled:opacity-50 transition-opacity"
-                  title={requireActivation ? 'Desativar' : 'Ativar'}
-                >
-                  {configLoading ? (
-                    <div className="w-14 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                      <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                    </div>
-                  ) : requireActivation ? (
-                    <div className="relative w-14 h-8 bg-emerald-500 rounded-full transition-colors shadow-inner cursor-pointer">
-                      <div className="absolute right-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transition-all flex items-center justify-center">
-                        <CheckCircle size={14} className="text-emerald-500" />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="relative w-14 h-8 bg-gray-300 rounded-full transition-colors shadow-inner cursor-pointer">
-                      <div className="absolute left-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transition-all flex items-center justify-center">
-                        <XCircle size={14} className="text-gray-400" />
-                      </div>
-                    </div>
-                  )}
-                </button>
-              </div>
-            </div>
-          </section>
-
-          {/* ─────────── Section 1.5: Ambiente de Demonstração ─────────── */}
+          {/* ─────────── Section 1: Ambiente de Demonstração ─────────── */}
           <section>
             <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2 mb-4">
               <Play size={14} /> Modo de Demonstração
@@ -284,6 +236,54 @@ export default function AdminConfiguracoes() {
                     Limpa as edições feitas na demonstração e restaura o perfil perfeito.
                   </p>
                 </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ─────────── Section 1.5: Configurações Globais ─────────── */}
+          <section>
+            <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4 flex items-center gap-2">
+              <Shield size={14} /> Configurações Globais
+            </h2>
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 md:p-6">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
+                    <Smartphone size={20} className="text-indigo-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-gray-900 mb-1">Solicitar Ativação de Dispositivo</h3>
+                    <p className="text-sm text-gray-500 font-medium leading-relaxed">
+                      Quando ativado, novos acessos exigirão aprovação do administrador antes de liberar o dispositivo.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Custom Toggle Switch */}
+                <button
+                  onClick={toggleActivation}
+                  disabled={configLoading || toggling}
+                  className="shrink-0 focus:outline-none disabled:opacity-50 transition-opacity"
+                  title={requireActivation ? 'Desativar' : 'Ativar'}
+                >
+                  {configLoading ? (
+                    <div className="w-14 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                      <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  ) : requireActivation ? (
+                    <div className="relative w-14 h-8 bg-emerald-500 rounded-full transition-colors shadow-inner cursor-pointer">
+                      <div className="absolute right-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transition-all flex items-center justify-center">
+                        <CheckCircle size={14} className="text-emerald-500" />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative w-14 h-8 bg-gray-300 rounded-full transition-colors shadow-inner cursor-pointer">
+                      <div className="absolute left-1 top-1 w-6 h-6 bg-white rounded-full shadow-md transition-all flex items-center justify-center">
+                        <XCircle size={14} className="text-gray-400" />
+                      </div>
+                    </div>
+                  )}
+                </button>
               </div>
             </div>
           </section>
