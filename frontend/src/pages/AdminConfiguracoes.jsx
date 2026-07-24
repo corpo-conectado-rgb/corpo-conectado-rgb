@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Smartphone, CheckCircle, XCircle, Trash2, Shield, ToggleLeft, ToggleRight, Monitor, User, X } from 'lucide-react';
+import { Settings, Smartphone, CheckCircle, XCircle, Trash2, Shield, ToggleLeft, ToggleRight, Monitor, User, X, Play, RefreshCw, Key } from 'lucide-react';
 import { apiFetch } from '../services/api';
 
 export default function AdminConfiguracoes() {
@@ -7,6 +7,7 @@ export default function AdminConfiguracoes() {
   const [requireActivation, setRequireActivation] = useState(false);
   const [configLoading, setConfigLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
+  const [resetandoDemo, setResetandoDemo] = useState(false);
 
   // Dispositivos
   const [dispositivos, setDispositivos] = useState([]);
@@ -48,6 +49,21 @@ export default function AdminConfiguracoes() {
       alert('Erro ao atualizar configuração: ' + err.message);
     } finally {
       setToggling(false);
+    }
+  };
+
+  const handleResetDemo = async () => {
+    if (!window.confirm('Tem certeza que deseja resetar o ambiente de demonstração? Isso apagará todas as edições feitas na conta demo e recriará os dados padrão.')) {
+      return;
+    }
+    try {
+      setResetandoDemo(true);
+      const res = await apiFetch('/demo/reset', { method: 'POST' });
+      alert(res.message || 'Ambiente restaurado com sucesso!');
+    } catch (err) {
+      alert('Erro ao restaurar ambiente: ' + err.message);
+    } finally {
+      setResetandoDemo(false);
     }
   };
 
@@ -206,6 +222,68 @@ export default function AdminConfiguracoes() {
                     </div>
                   )}
                 </button>
+              </div>
+            </div>
+          </section>
+
+          {/* ─────────── Section 1.5: Ambiente de Demonstração ─────────── */}
+          <section>
+            <h2 className="text-[10px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-2 mb-4">
+              <Play size={14} /> Modo de Demonstração
+            </h2>
+            
+            <div className="bg-gradient-to-br from-indigo-900 to-black rounded-2xl p-5 md:p-6 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500 opacity-20 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+              
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                <div className="flex-1">
+                  <h3 className="text-xl font-black text-white mb-2 flex items-center gap-2">
+                    <Shield size={20} className="text-indigo-400" />
+                    Ambiente Isolado
+                  </h3>
+                  <p className="text-indigo-100/70 text-sm font-medium mb-4 max-w-xl">
+                    Utilize este ambiente para apresentar o sistema a investidores ou futuros alunos. A conta contém treinos avançados, biometria preenchida, pagamentos simulados e gráficos prontos.
+                  </p>
+                  
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="bg-white/10 rounded-xl p-3 border border-white/5 flex items-center gap-3">
+                      <User size={18} className="text-indigo-300" />
+                      <div>
+                        <p className="text-[10px] text-indigo-200/70 font-black uppercase">E-mail Demo</p>
+                        <p className="text-sm text-white font-bold tracking-wide">demo@corpoconectado.com</p>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white/10 rounded-xl p-3 border border-white/5 flex items-center gap-3">
+                      <Key size={18} className="text-indigo-300" />
+                      <div>
+                        <p className="text-[10px] text-indigo-200/70 font-black uppercase">Senha</p>
+                        <p className="text-sm text-white font-bold tracking-wide">demo</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="shrink-0 flex flex-col items-center justify-center border-t md:border-t-0 md:border-l border-white/10 pt-5 md:pt-0 md:pl-6">
+                  <button
+                    onClick={handleResetDemo}
+                    disabled={resetandoDemo}
+                    className="w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-400 text-white px-6 py-4 rounded-xl font-black transition-all shadow-lg shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed group"
+                  >
+                    {resetandoDemo ? (
+                      <>
+                        <RefreshCw size={18} className="animate-spin" /> Restaurando...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw size={18} className="group-hover:rotate-180 transition-transform duration-500" /> Resetar Ambiente
+                      </>
+                    )}
+                  </button>
+                  <p className="text-[10px] text-center text-indigo-200/50 font-bold mt-3 max-w-[200px]">
+                    Limpa as edições feitas na demonstração e restaura o perfil perfeito.
+                  </p>
+                </div>
               </div>
             </div>
           </section>

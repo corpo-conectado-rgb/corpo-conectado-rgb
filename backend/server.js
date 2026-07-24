@@ -54,6 +54,7 @@ const dashboardRoutes = require('./routes/dashboard');
 const solicitacoesRoutes = require('./routes/solicitacoes');
 const configRoutes = require('./routes/config');
 const financeiroRoutes = require('./routes/financeiro');
+const demoRoutes = require('./routes/demo');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/workouts', workoutRoutes);
@@ -64,6 +65,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/solicitacoes', solicitacoesRoutes);
 app.use('/api/config', configRoutes);
 app.use('/api/financeiro', financeiroRoutes);
+app.use('/api/demo', demoRoutes);
 
 // --- Start Server ---
 const PORT = process.env.PORT || 3000;
