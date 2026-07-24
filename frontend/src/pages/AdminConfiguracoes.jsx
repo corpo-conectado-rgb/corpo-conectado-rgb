@@ -20,6 +20,7 @@ export default function AdminConfiguracoes() {
 
   // Modal de reset do demo
   const [resetModal, setResetModal] = useState(false);
+  const [demoFeedback, setDemoFeedback] = useState({ show: false, message: '', type: 'success' });
 
   useEffect(() => {
     fetchConfig();
@@ -60,10 +61,14 @@ export default function AdminConfiguracoes() {
       setResetandoDemo(true);
       const res = await apiFetch('/demo/reset', { method: 'POST' });
       setResetModal(false);
-      // Timeout simples para que o modal de confirmar suma antes do aviso
-      setTimeout(() => alert(res.message || 'Ambiente restaurado com sucesso!'), 300);
+      setTimeout(() => {
+        setDemoFeedback({ show: true, message: res.message || 'Ambiente restaurado com sucesso!', type: 'success' });
+      }, 300);
     } catch (err) {
-      alert('Erro ao restaurar ambiente: ' + err.message);
+      setResetModal(false);
+      setTimeout(() => {
+        setDemoFeedback({ show: true, message: 'Erro ao restaurar ambiente: ' + err.message, type: 'error' });
+      }, 300);
     } finally {
       setResetandoDemo(false);
     }
@@ -478,6 +483,30 @@ export default function AdminConfiguracoes() {
                 Cancelar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Feedback (Sucesso/Erro do Reset) */}
+      {demoFeedback.show && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => setDemoFeedback({ ...demoFeedback, show: false })} />
+          <div className={`relative bg-white w-full max-w-sm rounded-3xl shadow-2xl animate-scale-in flex flex-col overflow-hidden text-center p-6 border-t-8 ${demoFeedback.type === 'success' ? 'border-emerald-500' : 'border-red-500'}`}>
+            <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 ${demoFeedback.type === 'success' ? 'bg-emerald-50 text-emerald-500' : 'bg-red-50 text-red-500'}`}>
+              {demoFeedback.type === 'success' ? <CheckCircle size={28} /> : <XCircle size={28} />}
+            </div>
+            <h3 className="text-xl font-black text-gray-900 mb-2">
+              {demoFeedback.type === 'success' ? 'Tudo Certo!' : 'Ops, algo deu errado'}
+            </h3>
+            <p className="text-sm text-gray-500 font-medium mb-6 px-2">
+              {demoFeedback.message}
+            </p>
+            <button
+              onClick={() => setDemoFeedback({ ...demoFeedback, show: false })}
+              className={`w-full text-white font-black uppercase tracking-widest text-xs py-4 rounded-xl active:scale-95 transition-all shadow-lg ${demoFeedback.type === 'success' ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/25' : 'bg-red-500 hover:bg-red-600 shadow-red-500/25'}`}
+            >
+              Continuar
+            </button>
           </div>
         </div>
       )}
