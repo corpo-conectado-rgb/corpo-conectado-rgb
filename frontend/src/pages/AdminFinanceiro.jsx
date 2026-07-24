@@ -405,23 +405,27 @@ export default function AdminFinanceiro() {
               return (
                 <div
                   key={aluno.id}
-                  className={`bg-white rounded-2xl border p-4 lg:p-5 shadow-sm hover:shadow-md transition-all duration-300 group ${getCardBorder(aluno)} ${isUrgent ? 'ring-1 ring-amber-200' : ''} ${isExpired ? 'ring-1 ring-red-100' : ''}`}
+                  className={`bg-white rounded-2xl border p-3 md:p-4 lg:p-5 shadow-sm hover:shadow-md transition-all duration-300 group ${getCardBorder(aluno)} ${isUrgent ? 'ring-1 ring-amber-200' : ''} ${isExpired ? 'ring-1 ring-red-100' : ''}`}
                 >
                   {/* Row Superior — Nome + Ações */}
-                  <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-start justify-between mb-0 md:mb-4">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-700 font-bold text-sm shrink-0">
                         {aluno.nome ? aluno.nome.charAt(0).toUpperCase() : '?'}
                       </div>
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="text-sm font-bold text-gray-900 truncate">{aluno.nome}</h3>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h3 className="text-sm font-bold text-gray-900 truncate mr-1">{aluno.nome}</h3>
                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${sc.bg} ${sc.text} border ${sc.border}`}>
                             {StatusIcon && <StatusIcon size={10} />}
                             {statusInfo.text}
                           </span>
+                          <span className={`md:hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${pc.bg} ${pc.text} border ${pc.border}`}>
+                            {PayIcon && <PayIcon size={10} />}
+                            {paymentInfo.text}
+                          </span>
                         </div>
-                        <p className="text-[11px] text-gray-400 font-medium truncate">{aluno.email}</p>
+                        <p className="text-[11px] text-gray-400 font-medium truncate mt-0.5">{aluno.email}</p>
                       </div>
                     </div>
 
@@ -462,8 +466,8 @@ export default function AdminFinanceiro() {
                     </div>
                   </div>
 
-                  {/* Row Inferior — 3 Mini-módulos */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Row Inferior — 3 Mini-módulos (Oculto no Mobile) */}
+                  <div className="hidden md:grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {/* Módulo 1: Assinatura */}
                     <div className="bg-gray-50 rounded-xl p-3 border border-gray-100/80">
                       <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-1.5">Assinatura</p>
