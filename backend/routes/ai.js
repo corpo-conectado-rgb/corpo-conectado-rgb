@@ -291,8 +291,20 @@ Inclua UM bloco JSON SEMPRE que o professor pedir para sugerir, montar, criar ou
     let lastError = null;
     let chosenModel = null;
 
+    // Mascarar a chave da API (Mostra os primeiros 4 e os últimos 4 caracteres)
+    const apiKey = process.env.GEMINI_API_KEY || "";
+    const maskedKey = apiKey.length > 8 ? apiKey.substring(0, 4) + '...' + apiKey.substring(apiKey.length - 4) : "INVALID_KEY";
+
     for (const modelName of modelsToTry) {
       try {
+        console.log(`[Assistente IA Debug] =======================================`);
+        console.log(`[Assistente IA Debug] Iniciando chamada para o Google Gemini`);
+        console.log(`[Assistente IA Debug] SDK: @google/genai (v2.x)`);
+        console.log(`[Assistente IA Debug] Model: ${modelName}`);
+        console.log(`[Assistente IA Debug] Endpoint: Padrão do @google/genai (v1alpha/v1)`);
+        console.log(`[Assistente IA Debug] API Key utilizada: ${maskedKey}`);
+        console.log(`[Assistente IA Debug] =======================================`);
+
         result = await aiClient.models.generateContent({
           model: modelName,
           contents: contents,
