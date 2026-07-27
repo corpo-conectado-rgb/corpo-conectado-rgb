@@ -265,9 +265,6 @@ Inclua UM bloco JSON SEMPRE que o professor pedir para sugerir, montar, criar ou
         action: null
       });
     }
-    // Utilizando o modelo mais recente e recomendado pela nova documentação do SDK
-    // Conforme solicitado, removemos os fallbacks para versões antigas.
-    const chosenModel = 'gemini-2.0-flash';
     const aiClient = aiConfig.getClient();
 
     // Converter mensagens para o formato do novo SDK (multi-turn)
@@ -281,14 +278,41 @@ Inclua UM bloco JSON SEMPRE que o professor pedir para sugerir, montar, criar ou
       contents.shift();
     }
 
-    // Chamada usando o novo SDK unificado @google/genai
-    const result = await aiClient.models.generateContent({
-      model: chosenModel,
-      contents: contents,
-      config: {
-        systemInstruction: systemInstruction
+    // Lista de prioridade de modelos. Se um falhar por cota (429) ou acesso (404),
+    // o sistema tentará o próximo da lista automaticamente.
+    const modelsToTry = [
+      'gemini-2.0-flash', 
+      'gemini-1.5-flash', 
+      'gemini-1.5-pro', 
+      'gemini-pro'
+    ];
+    
+    let result = null;
+    let lastError = null;
+    let chosenModel = null;
+
+    for (const modelName of modelsToTry) {
+      try {
+        result = await aiClient.models.generateContent({
+          model: modelName,
+          contents: contents,
+          config: {
+            systemInstruction: systemInstruction
+          }
+        });
+        chosenModel = modelName;
+        console.log(`[Assistente IA] Requisição bem sucedida com o modelo: ${chosenModel}`);
+        break; // Sucesso, sai do loop
+      } catch (err) {
+        console.warn(`[Assistente IA] Falha ao tentar o modelo ${modelName}:`, err.message);
+        lastError = err;
       }
-    });
+    }
+
+    if (!result) {
+      // Se todos falharam, joga o último erro para ser tratado pelo catch principal
+      throw lastError;
+    }
     
     let responseText = result.text;
 
