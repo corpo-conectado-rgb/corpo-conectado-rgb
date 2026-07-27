@@ -173,6 +173,18 @@ async function buildStudentContext(userId) {
   return ctx;
 }
 
+// Rota de debug para listar modelos disponíveis para a chave de API
+router.get('/models', async (req, res) => {
+  try {
+    const fetch = require('node-fetch') || global.fetch;
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`);
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ============================================
 // POST /api/ai/chat — Assistente IA Conversacional
 // ============================================
@@ -266,7 +278,7 @@ Inclua UM bloco JSON SEMPRE que o professor pedir para sugerir, montar, criar ou
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: "gemini-pro"
+      model: "gemini-1.5-pro"
     });
 
     // Converter mensagens para o formato do Gemini (multi-turn)
