@@ -281,6 +281,7 @@ Inclua UM bloco JSON SEMPRE que o professor pedir para sugerir, montar, criar ou
     // Lista de prioridade de modelos. Se um falhar por cota (429) ou acesso (404),
     // o sistema tentará o próximo da lista automaticamente.
     const modelsToTry = [
+      'gemini-2.5-flash',
       'gemini-2.0-flash', 
       'gemini-1.5-flash', 
       'gemini-1.5-pro', 
