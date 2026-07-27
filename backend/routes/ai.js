@@ -266,8 +266,7 @@ Inclua UM bloco JSON SEMPRE que o professor pedir para sugerir, montar, criar ou
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash-latest",
-      systemInstruction: systemInstruction
+      model: "gemini-pro"
     });
 
     // Converter mensagens para o formato do Gemini (multi-turn)
@@ -281,6 +280,13 @@ Inclua UM bloco JSON SEMPRE que o professor pedir para sugerir, montar, criar ou
     while (geminiHistory.length > 0 && geminiHistory[0].role === 'model') {
       geminiHistory.shift();
     }
+
+    // Injetar o systemInstruction diretamente no histórico como a primeira mensagem
+    // Isso garante total compatibilidade com projetos/API keys legadas que só têm acesso ao gemini-pro (1.0)
+    geminiHistory.unshift(
+      { role: 'user', parts: [{ text: "INSTRUÇÕES DO SISTEMA (Leia com atenção e aplique a partir de agora):\n\n" + systemInstruction }] },
+      { role: 'model', parts: [{ text: "Entendido. Li as instruções do sistema e todo o contexto do aluno. Pode enviar a sua solicitação que eu ajudarei na prescrição seguindo as regras." }] }
+    );
 
     const lastMessage = messages[messages.length - 1];
 
