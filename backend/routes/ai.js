@@ -265,9 +265,9 @@ Inclua UM bloco JSON SEMPRE que o professor pedir para sugerir, montar, criar ou
         action: null
       });
     }
-    // Usamos gemini-1.5-flash-latest pois a chave de API da Vercel é legada
-    // e exige explicitamente o sufixo "-latest" ou "gemini-pro"
-    const chosenModel = 'gemini-1.5-flash-latest';
+    // Usamos gemini-pro (v1.0) pois a chave de API da Vercel é legada
+    // e não tem acesso aos modelos 1.5.
+    const chosenModel = 'gemini-pro';
     const aiClient = aiConfig.getClient();
 
     // Converter mensagens para o formato do novo SDK (multi-turn)
