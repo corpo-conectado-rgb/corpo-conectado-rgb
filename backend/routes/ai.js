@@ -265,16 +265,9 @@ Inclua UM bloco JSON SEMPRE que o professor pedir para sugerir, montar, criar ou
         action: null
       });
     }
-
-    // Autodescoberta do modelo dinâmico
-    let chosenModel;
-    try {
-      chosenModel = await aiConfig.getBestAvailableModel(process.env.GEMINI_API_KEY);
-    } catch (discoveryError) {
-      console.error("[Assistente IA] Erro na autodescoberta do modelo:", discoveryError);
-      return res.status(503).json({ error: 'O Assistente Inteligente está temporariamente indisponível. Verifique as configurações da Chave de API.' });
-    }
-
+    // Usamos gemini-1.5-pro direto através da nova SDK unificada (@google/genai)
+    // O modelo é resolvido automaticamente para a versão suportada pela chave na API v1alpha/v1.
+    const chosenModel = 'gemini-1.5-pro';
     const aiClient = aiConfig.getClient();
 
     // Converter mensagens para o formato do novo SDK (multi-turn)
