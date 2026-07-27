@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+
 const adminMiddleware = require('../middlewares/adminMiddleware');
 const { getCachedRows } = require('../services/googleSheets');
 const { calcularIdade } = require('../utils/dateUtils');
@@ -275,35 +275,29 @@ Inclua UM bloco JSON SEMPRE que o professor pedir para sugerir, montar, criar ou
       return res.status(503).json({ error: 'O Assistente Inteligente está temporariamente indisponível. Verifique as configurações da Chave de API.' });
     }
 
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({
-      model: chosenModel
-    });
+    const aiClient = aiConfig.getClient();
 
-    // Converter mensagens para o formato do Gemini (multi-turn)
-    let geminiHistory = messages.slice(0, -1).map(msg => ({
+    // Converter mensagens para o formato do novo SDK (multi-turn)
+    let contents = messages.map(msg => ({
       role: msg.role === 'user' ? 'user' : 'model',
       parts: [{ text: msg.content }]
     }));
 
-    // O Gemini exige que o histórico comece com a role 'user'.
-    // Removemos as mensagens iniciais do assistente (como a saudação padrão).
-    while (geminiHistory.length > 0 && geminiHistory[0].role === 'model') {
-      geminiHistory.shift();
+    // O Gemini prefere que a primeira mensagem seja do user.
+    while (contents.length > 0 && contents[0].role === 'model') {
+      contents.shift();
     }
 
-    // Injetar o systemInstruction diretamente no histórico como a primeira mensagem
-    // Isso garante total compatibilidade com projetos/API keys legadas que só têm acesso ao gemini-pro (1.0)
-    geminiHistory.unshift(
-      { role: 'user', parts: [{ text: "INSTRUÇÕES DO SISTEMA (Leia com atenção e aplique a partir de agora):\n\n" + systemInstruction }] },
-      { role: 'model', parts: [{ text: "Entendido. Li as instruções do sistema e todo o contexto do aluno. Pode enviar a sua solicitação que eu ajudarei na prescrição seguindo as regras." }] }
-    );
-
-    const lastMessage = messages[messages.length - 1];
-
-    const chat = model.startChat({ history: geminiHistory });
-    const result = await chat.sendMessage(lastMessage.content);
-    let responseText = result.response.text();
+    // Chamada usando o novo SDK unificado @google/genai
+    const result = await aiClient.models.generateContent({
+      model: chosenModel,
+      contents: contents,
+      config: {
+        systemInstruction: systemInstruction
+      }
+    });
+    
+    let responseText = result.text;
 
     // Extrair ação se houver (bloco JSON delimitado)
     let action = null;
