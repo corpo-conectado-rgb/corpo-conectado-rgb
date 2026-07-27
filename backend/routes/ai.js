@@ -315,7 +315,7 @@ Inclua UM bloco JSON SEMPRE que o professor pedir para sugerir, montar, criar ou
 
   } catch (error) {
     console.error("Erro no Assistente IA:", error);
-    res.status(500).json({ error: 'Falha na comunicação com o Assistente Inteligente.' });
+    res.status(500).json({ error: `Falha na comunicação com o Assistente Inteligente. Detalhes: ${error.message}` });
   }
 });
 
