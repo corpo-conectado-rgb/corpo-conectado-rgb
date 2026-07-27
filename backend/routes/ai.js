@@ -265,9 +265,9 @@ Inclua UM bloco JSON SEMPRE que o professor pedir para sugerir, montar, criar ou
         action: null
       });
     }
-    // Usamos gemini-1.5-pro direto através da nova SDK unificada (@google/genai)
-    // O modelo é resolvido automaticamente para a versão suportada pela chave na API v1alpha/v1.
-    const chosenModel = 'gemini-1.5-pro';
+    // Usamos gemini-1.5-flash-latest pois a chave de API da Vercel é legada
+    // e exige explicitamente o sufixo "-latest" ou "gemini-pro"
+    const chosenModel = 'gemini-1.5-flash-latest';
     const aiClient = aiConfig.getClient();
 
     // Converter mensagens para o formato do novo SDK (multi-turn)
