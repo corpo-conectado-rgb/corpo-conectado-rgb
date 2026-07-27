@@ -271,10 +271,16 @@ Inclua UM bloco JSON SEMPRE que o professor pedir para sugerir, montar, criar ou
     });
 
     // Converter mensagens para o formato do Gemini (multi-turn)
-    const geminiHistory = messages.slice(0, -1).map(msg => ({
+    let geminiHistory = messages.slice(0, -1).map(msg => ({
       role: msg.role === 'user' ? 'user' : 'model',
       parts: [{ text: msg.content }]
     }));
+
+    // O Gemini exige que o histórico comece com a role 'user'.
+    // Removemos as mensagens iniciais do assistente (como a saudação padrão).
+    while (geminiHistory.length > 0 && geminiHistory[0].role === 'model') {
+      geminiHistory.shift();
+    }
 
     const lastMessage = messages[messages.length - 1];
 
