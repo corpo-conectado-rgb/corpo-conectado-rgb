@@ -12,7 +12,7 @@ export default function Login() {
   const [email, setEmail] = useState(location.state?.email || '');
   const [suggestedEmail, setSuggestedEmail] = useState('');
   const [showEmailSuggestion, setShowEmailSuggestion] = useState(false);
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState(location.state?.senha || '');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
@@ -25,13 +25,13 @@ export default function Login() {
   const [pollingActive, setPollingActive] = useState(!!location.state?.requiresActivation);
   const pollingRef = useRef(null);
 
-  // Se veio do Onboarding com requiresActivation, limpa o state do history para não reativar num refresh
+  // Se veio do Onboarding com requiresActivation, limpa o state de forma segura (sem quebrar o React Router)
   useEffect(() => {
     if (location.state?.requiresActivation) {
-      // Modifica o history state diretamente sem engatilhar re-render pesado no React Router
-      window.history.replaceState({}, document.title, location.pathname);
+      // Limpa o estado via React Router para não reativar acidentalmente
+      navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location]);
+  }, [location, navigate]);
 
   // Recupera o último e-mail apenas como sugestão
   useEffect(() => {

@@ -251,7 +251,7 @@ export default function Onboarding() {
       const doNavigate = () => {
         try { confetti.reset(); } catch(e) {}
         if (isActivation) {
-          navigate('/login', { state: { email: formData.email, requiresActivation: true, activationCode: result.activationCode } });
+          navigate('/login', { state: { email: formData.email, senha: formData.senha, requiresActivation: true, activationCode: result.activationCode } });
         } else {
           navigate('/');
         }
