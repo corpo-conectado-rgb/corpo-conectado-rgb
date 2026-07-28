@@ -289,7 +289,7 @@ Inclua UM bloco JSON SEMPRE que o professor pedir para sugerir, montar, criar ou
     ];
     
     let result = null;
-    let lastError = null;
+    let firstError = null;
     let chosenModel = null;
 
     // Mascarar a chave da API (Mostra os primeiros 4 e os últimos 4 caracteres)
@@ -318,13 +318,16 @@ Inclua UM bloco JSON SEMPRE que o professor pedir para sugerir, montar, criar ou
         break; // Sucesso, sai do loop
       } catch (err) {
         console.warn(`[Assistente IA] Falha ao tentar o modelo ${modelName}:`, err.message);
-        lastError = err;
+        if (!firstError) {
+          firstError = err; // Salva apenas o primeiro erro (provavelmente o mais relevante, como 429 Rate Limit)
+        }
       }
     }
 
     if (!result) {
-      // Se todos falharam, joga o último erro para ser tratado pelo catch principal
-      throw lastError;
+      // Se todos falharam, joga o primeiro erro encontrado (que geralmente é o 429 de cota do modelo principal)
+      // para não mascarar a causa real com um 404 dos modelos desativados na fallback chain.
+      throw firstError;
     }
     
     let responseText = result.text;
