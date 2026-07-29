@@ -52,10 +52,10 @@ export default function FloatingAlfred() {
     };
   }, [isOpen]);
 
-  // Atalho de teclado Ctrl+A para abrir/fechar o Alfred
+  // Atalho de teclado Ctrl+F para abrir/fechar o Alfred
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
         e.preventDefault();
         setIsOpen(prev => !prev);
       }
