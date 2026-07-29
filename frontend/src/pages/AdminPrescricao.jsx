@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, BrainCircuit, Dumbbell, AlertTriangle, Activity, User, PlusCircle, Trash, Trash2, X, CalendarDays, MinusCircle, Bot, Loader2, Copy, Search } from 'lucide-react';
+import { ArrowLeft, Save, BrainCircuit, Dumbbell, AlertTriangle, Activity, User, PlusCircle, Trash, Trash2, X, CalendarDays, MinusCircle, Bot, Loader2, Copy, Search, ArrowUp, ArrowDown } from 'lucide-react';
 import { apiFetch } from '../services/api';
 import Toast from '../components/Toast';
 import { useCopilot } from '../contexts/CopilotContext';
@@ -119,6 +119,24 @@ export default function AdminPrescricao() {
     novosDias[diaIdx].exercicios.splice(exIdx, 1);
     setDiasTreino(novosDias);
   }
+
+  const moverExCima = (diaIdx, exIdx) => {
+    if (exIdx === 0) return;
+    const novosDias = [...diasTreino];
+    const exAtual = novosDias[diaIdx].exercicios[exIdx];
+    novosDias[diaIdx].exercicios[exIdx] = novosDias[diaIdx].exercicios[exIdx - 1];
+    novosDias[diaIdx].exercicios[exIdx - 1] = exAtual;
+    setDiasTreino(novosDias);
+  };
+
+  const moverExBaixo = (diaIdx, exIdx) => {
+    if (exIdx === diasTreino[diaIdx].exercicios.length - 1) return;
+    const novosDias = [...diasTreino];
+    const exAtual = novosDias[diaIdx].exercicios[exIdx];
+    novosDias[diaIdx].exercicios[exIdx] = novosDias[diaIdx].exercicios[exIdx + 1];
+    novosDias[diaIdx].exercicios[exIdx + 1] = exAtual;
+    setDiasTreino(novosDias);
+  };
 
   const removerDia = (diaIdx) => {
     const novosDias = [...diasTreino];
@@ -452,7 +470,15 @@ export default function AdminPrescricao() {
                              <Trash2 size={12} />
                            </button>
 
-                           <div className="flex items-center justify-center font-black text-sm w-6 text-gray-400">{exIdx + 1}</div>
+                           <div className="flex flex-col items-center justify-center w-8 shrink-0">
+                             <button onClick={() => moverExCima(diaIdx, exIdx)} disabled={exIdx === 0} className={`p-0.5 rounded transition ${exIdx === 0 ? 'text-gray-200 cursor-not-allowed' : 'text-gray-400 hover:text-black hover:bg-gray-200'}`}>
+                               <ArrowUp size={14} strokeWidth={3} />
+                             </button>
+                             <div className="font-black text-sm text-gray-400 py-1">{exIdx + 1}</div>
+                             <button onClick={() => moverExBaixo(diaIdx, exIdx)} disabled={exIdx === dia.exercicios.length - 1} className={`p-0.5 rounded transition ${exIdx === dia.exercicios.length - 1 ? 'text-gray-200 cursor-not-allowed' : 'text-gray-400 hover:text-black hover:bg-gray-200'}`}>
+                               <ArrowDown size={14} strokeWidth={3} />
+                             </button>
+                           </div>
                            <input type="text" placeholder="Nome da Máquina/Técnica" value={ex.nome} onChange={e=>updateEx(diaIdx, exIdx, 'nome', e.target.value)} className="flex-[3] w-full lg:w-auto bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-black text-gray-900 outline-none min-w-0 md:min-w-[200px]" />
                            <div className="flex gap-2 flex-1 w-full relative">
                              <input type="number" placeholder="Séries" value={ex.series} onChange={e=>updateEx(diaIdx, exIdx, 'series', e.target.value)} className="w-[80px] shrink-0 bg-white border border-gray-200 rounded-lg px-2 py-2 text-center text-sm font-bold placeholder-gray-400" />
