@@ -548,7 +548,6 @@ export default function AdminPrescricao() {
                       <div>
                         <h3 className="font-black text-gray-900 text-sm">{modelo.nome_ficha}</h3>
                         <p className="text-xs font-medium text-gray-500 mt-0.5">Aluno: <span className="font-bold text-gray-700">{modelo.nome_aluno}</span></p>
-                        {modelo.objetivo && <p className="text-[10px] text-blue-600 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded inline-block font-bold mt-2 uppercase">{modelo.objetivo}</p>}
                       </div>
                       <button
                         onClick={() => aplicarModelo(modelo.id_treino)}
