@@ -485,7 +485,7 @@ export default function AdminPrescricao() {
                              <input type="text" placeholder="Reps" value={ex.repeticoes} onChange={e=>updateEx(diaIdx, exIdx, 'repeticoes', e.target.value)} className="w-[80px] shrink-0 bg-white border border-gray-200 rounded-lg px-2 py-2 text-center text-sm font-bold placeholder-gray-400" />
                              <input type="number" placeholder="Desc.(s)" value={ex.descanso} onChange={e=>updateEx(diaIdx, exIdx, 'descanso', e.target.value)} className="w-[80px] shrink-0 bg-white border border-gray-200 rounded-lg px-2 py-2 text-center text-sm font-bold placeholder-gray-400" />
                            </div>
-                           <input type="text" placeholder="Drop-set, 2 steps..." value={ex.observacoes} onChange={e=>updateEx(diaIdx, exIdx, 'observacoes', e.target.value)} className="flex-[2] w-full lg:w-auto bg-transparent border-b border-gray-200 rounded-none px-2 py-2.5 text-xs font-medium text-gray-500 outline-none" />
+                           <input type="text" placeholder="Drop-set, 2 steps..." value={ex.observacoes} onChange={e=>updateEx(diaIdx, exIdx, 'observacoes', e.target.value)} className="flex-[2] min-w-0 w-full lg:w-auto bg-transparent border-b border-gray-200 rounded-none px-2 py-2.5 text-xs font-medium text-gray-500 outline-none" />
                         </div>
                       ))}
                     </div>
