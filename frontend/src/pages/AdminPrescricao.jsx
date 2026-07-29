@@ -10,8 +10,8 @@ export default function AdminPrescricao() {
   const navigate = useNavigate();
   
   const GRUPOS_MUSCULARES = [
-    { cat: 'Superiores', itens: ['Peito', 'Costas', 'Ombro', 'Bíceps', 'Tríceps', 'Antebraço'] },
-    { cat: 'Inferiores', itens: ['Quadríceps', 'Posterior', 'Glúteo', 'Panturrilha'] },
+    { cat: 'Superiores', itens: ['Superiores', 'Peito', 'Costas', 'Ombro', 'Bíceps', 'Tríceps', 'Antebraço'] },
+    { cat: 'Inferiores', itens: ['Inferiores', 'Quadríceps', 'Posterior', 'Glúteo', 'Panturrilha'] },
     { cat: 'Core / Outros', itens: ['Abdômen', 'Cardio', 'Full Body'] }
   ];
 
