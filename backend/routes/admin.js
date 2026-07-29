@@ -116,7 +116,7 @@ router.get('/usuarios/:id/ficha-ativa', adminMiddleware, async (req, res) => {
           nome: ex.get('nome'),
           series: Number(ex.get('series')) || 3,
           reps: ex.get('repeticoes') || '10-12',
-          descanso: Number(ex.get('descanso')) || 60,
+          descanso: ex.get('descanso') !== undefined && ex.get('descanso') !== null && ex.get('descanso') !== '' ? Number(ex.get('descanso')) : '',
           grupomuscular: dia.get('foco_muscular') || 'Geral',
           observacoes: ex.get('observacoes') || ''
         }))
@@ -160,7 +160,7 @@ router.get('/fichas/usuario/:id/builder', adminMiddleware, async (req, res) => {
           nome: ex.get('nome') || '',
           series: ex.get('series') || 3,
           repeticoes: ex.get('repeticoes') || '10-12',
-          descanso: ex.get('descanso') || 60,
+          descanso: ex.get('descanso') !== undefined && ex.get('descanso') !== null ? ex.get('descanso') : '',
           carga: ex.get('carga') || '',
           observacoes: ex.get('observacoes') || ''
         }))
@@ -239,7 +239,7 @@ router.get('/fichas/clone/:treinoId', adminMiddleware, async (req, res) => {
           nome: ex.get('nome') || '',
           series: ex.get('series') || 3,
           repeticoes: ex.get('repeticoes') || '10-12',
-          descanso: ex.get('descanso') || 60,
+          descanso: ex.get('descanso') !== undefined && ex.get('descanso') !== null ? ex.get('descanso') : '',
           carga: ex.get('carga') || '',
           observacoes: ex.get('observacoes') || ''
         }))
@@ -312,7 +312,7 @@ router.post('/fichas', adminMiddleware, async (req, res) => {
           series: String(ex.series),
           repeticoes: String(ex.repeticoes),
           carga: String(ex.carga || ''),
-          descanso: String(ex.descanso || '60'),
+          descanso: ex.descanso !== undefined && ex.descanso !== null ? String(ex.descanso) : '',
           observacoes: ex.observacoes || ''
         });
       }

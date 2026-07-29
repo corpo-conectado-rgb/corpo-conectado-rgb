@@ -383,10 +383,14 @@ export default function Treinos() {
       }
 
       const ex = fichaAtiva.exercicios[exIndex];
-      setDescansoMax(ex.descanso);
-      setDescansoSeg(ex.descanso);
-      setDescansoFimTimestamp(Date.now() + (ex.descanso * 1000));
-      setDescansoAtivo(true);
+      const descansoTime = Number(ex.descanso) || 0;
+      
+      if (descansoTime > 0) {
+        setDescansoMax(descansoTime);
+        setDescansoSeg(descansoTime);
+        setDescansoFimTimestamp(Date.now() + (descansoTime * 1000));
+        setDescansoAtivo(true);
+      }
     }
   };
 
@@ -721,7 +725,7 @@ export default function Treinos() {
             {[
               { label: 'Séries', valor: exAtual.series },
               { label: 'Reps', valor: exAtual.reps },
-              { label: 'Descanso', valor: `${exAtual.descanso}s` },
+              { label: 'Descanso', valor: exAtual.descanso ? `${exAtual.descanso}s` : '-' },
             ].map(({ label, valor }) => (
               <div key={label} className="flex-1 bg-gray-50 border border-gray-100 rounded-xl py-2.5 text-center">
                 <span className="text-base font-black text-gray-900 block">{valor}</span>
