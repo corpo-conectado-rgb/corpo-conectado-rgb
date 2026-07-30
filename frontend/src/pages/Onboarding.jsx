@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Loader2, ArrowLeft, ArrowRight, Dumbbell, Target, User, Activity, Flame, ShieldAlert, Timer, MapPin, Eye, EyeOff } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { formatName } from '../utils/formatters';
 
 function calcularIdade(dataNascimento) {
   if (!dataNascimento) return null;
@@ -94,7 +95,11 @@ export default function Onboarding() {
   });
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    let value = e.target.value;
+    if (e.target.name === 'nome') {
+      value = formatName(value);
+    }
+    setFormData({ ...formData, [e.target.name]: value });
   };
 
   const handleSelect = (field, value) => {

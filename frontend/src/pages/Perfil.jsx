@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { CheckCircle2, AlertCircle, Goal, Activity, Timer, MapPin, ShieldAlert, Settings2, X, Check, MessageSquarePlus, Phone, ArrowRight, Lock, Loader2, User as UserIcon, Scale, CalendarHeart, ClipboardList, Shield, CreditCard, ChevronRight } from 'lucide-react';
 import { apiFetch } from '../services/api';
+import { formatName } from '../utils/formatters';
 
 // Definição dos campos editáveis e suas regras
 const CAMPOS_CONFIG = {
@@ -102,7 +103,11 @@ export default function Perfil() {
   };
 
   const handleFieldChange = (campo, valor) => {
-    setEditedFields(prev => ({ ...prev, [campo]: valor }));
+    let finalValue = valor;
+    if (campo === 'nome') {
+      finalValue = formatName(valor);
+    }
+    setEditedFields(prev => ({ ...prev, [campo]: finalValue }));
   };
 
   const getFieldValue = (campo) => {
