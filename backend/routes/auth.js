@@ -33,9 +33,9 @@ async function fetchCompleteProfile(userRowId) {
       const historicoRows = await getCachedRows(HISTORICO_PESO_SHEET, HISTORICO_PESO_HEADERS);
       const userHistorico = historicoRows.filter(r => r.get('user_id') === userRowId);
       if (userHistorico.length > 0) {
-        pesoInicial = Number(userHistorico[0].get('peso'));
+        pesoInicial = Number(String(userHistorico[0].get('peso') || '0').replace(',', '.'));
         const ultimoRegistro = userHistorico[userHistorico.length - 1];
-        pesoAtual = Number(ultimoRegistro.get('peso'));
+        pesoAtual = Number(String(ultimoRegistro.get('peso') || '0').replace(',', '.'));
         dataAtualizacaoPeso = ultimoRegistro.get('data_registro') || null;
       }
     } catch (errHist) {
@@ -45,7 +45,10 @@ async function fetchCompleteProfile(userRowId) {
     if (anamneseRow) {
       const dataNascimento = anamneseRow.get('data_nascimento');
       const idadeFixa = anamneseRow.get('idade');
-      const pesoAnamnese = anamneseRow.get('peso');
+      let pesoAnamnese = anamneseRow.get('peso');
+      if (pesoAnamnese !== undefined && pesoAnamnese !== null && pesoAnamnese !== '') {
+        pesoAnamnese = Number(String(pesoAnamnese).replace(',', '.'));
+      }
       
       profileData = {
         data_nascimento: dataNascimento,
@@ -413,7 +416,12 @@ router.put('/profile', authMiddleware, async (req, res) => {
 const handleAtualizacaoPeso = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { peso } = req.body;
+    let { peso } = req.body;
+
+    // Converte vírgula para ponto e remove espaços, garantindo padronização no BD
+    if (peso !== undefined && peso !== null) {
+      peso = String(peso).replace(',', '.').trim();
+    }
 
     if (!peso || isNaN(Number(peso)) || Number(peso) <= 0) {
       return res.status(400).json({ error: 'Peso inválido. Informe um número válido e positivo.' });
@@ -427,6 +435,7 @@ const handleAtualizacaoPeso = async (req, res) => {
     const anamneseRow = anamneseRows.find(r => r.get('id_usuario') === userId);
 
     const pesoAnteriorAnamnese = anamneseRow ? anamneseRow.get('peso') : null;
+    const pesoAnteriorClean = pesoAnteriorAnamnese ? String(pesoAnteriorAnamnese).replace(',', '.').trim() : null;
 
     // 2. Acessar ou criar a aba historico_peso
     const historicoSheet = await getSheet(HISTORICO_PESO_SHEET, HISTORICO_PESO_HEADERS);
@@ -435,11 +444,11 @@ const handleAtualizacaoPeso = async (req, res) => {
 
     // Se o usuário ainda não tem nenhum histórico gravado, salvamos primeiro o registro "zero"
     // com o peso original da Anamnese para manter a referência de início da jornada
-    if (userHistorico.length === 0 && pesoAnteriorAnamnese && !isNaN(Number(pesoAnteriorAnamnese))) {
+    if (userHistorico.length === 0 && pesoAnteriorClean && !isNaN(Number(pesoAnteriorClean))) {
       await historicoSheet.addRow({
         id: uuidv4(),
         user_id: userId,
-        peso: Number(pesoAnteriorAnamnese).toFixed(1),
+        peso: Number(pesoAnteriorClean).toFixed(1),
         data_registro: 'Anamnese Inicial'
       });
     }

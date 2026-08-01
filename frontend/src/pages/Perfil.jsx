@@ -160,14 +160,15 @@ export default function Perfil() {
 
   const handleSalvarNovoPeso = async (e) => {
     e.preventDefault();
-    if (!novoPesoInput || isNaN(Number(novoPesoInput)) || Number(novoPesoInput) <= 0) {
+    const pesoNumerico = String(novoPesoInput).replace(',', '.').trim();
+    if (!pesoNumerico || isNaN(Number(pesoNumerico)) || Number(pesoNumerico) <= 0) {
       return;
     }
     try {
       setSalvandoPeso(true);
       await apiFetch('/auth/peso', {
         method: 'POST',
-        body: JSON.stringify({ peso: novoPesoInput })
+        body: JSON.stringify({ peso: Number(pesoNumerico).toFixed(1) })
       });
       await refreshProfile();
       setIsPesoModalOpen(false);
@@ -188,7 +189,11 @@ export default function Perfil() {
 
       if (diretas.length > 0) {
         const payload = {};
-        diretas.forEach(alt => { payload[alt.campo] = alt.para; });
+        diretas.forEach(alt => { 
+          let val = alt.para;
+          if (alt.campo === 'peso' || alt.campo === 'altura') val = String(val).replace(',', '.').trim();
+          payload[alt.campo] = val; 
+        });
         
         if (payload.peso) {
           await apiFetch('/auth/peso', {
@@ -208,6 +213,9 @@ export default function Perfil() {
       }
 
       if (controladas.length > 0) {
+        controladas.forEach(alt => {
+          if (alt.campo === 'peso' || alt.campo === 'altura') alt.para = String(alt.para).replace(',', '.').trim();
+        });
         await apiFetch('/solicitacoes', {
           method: 'POST',
           body: JSON.stringify({
@@ -389,7 +397,7 @@ export default function Perfil() {
               </div>
               <div className="bg-white/5 rounded-2xl p-3 border border-white/5 backdrop-blur-sm">
                 <p className="text-[9px] uppercase tracking-widest text-gray-400 font-bold mb-1">Altura</p>
-                <p className="font-black text-lg text-white">{user?.altura ? `${user.altura}m` : '--'}</p>
+                <p className="font-black text-lg text-white">{user?.altura ? `${String(user.altura).replace('.', ',')}m` : '--'}</p>
               </div>
             </div>
 
@@ -402,13 +410,13 @@ export default function Perfil() {
                   </span>
                   <div className="flex items-baseline gap-2.5 mt-0.5 flex-wrap">
                     <span className="font-black text-2xl text-white tracking-tight">
-                      {user?.peso ? `${user.peso} kg` : '--'}
+                      {user?.peso ? `${String(user.peso).replace('.', ',')} kg` : '--'}
                     </span>
                     {/* Badge de Evolução em relação ao peso inicial */}
                     {(() => {
                       if (!user?.peso || !user?.peso_inicial) return null;
-                      const atual = Number(user.peso);
-                      const inicial = Number(user.peso_inicial);
+                      const atual = Number(String(user.peso).replace(',', '.'));
+                      const inicial = Number(String(user.peso_inicial).replace(',', '.'));
                       if (isNaN(atual) || isNaN(inicial) || inicial === 0) return null;
                       const diff = atual - inicial;
                       if (Math.abs(diff) < 0.1) {
@@ -427,8 +435,8 @@ export default function Perfil() {
                             : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-emerald-900/20'
                         }`}>
                           <span>{isGain ? '▲' : '▼'}</span>
-                          <span>{isGain ? `+${percent}%` : `${percent}%`}</span>
-                          <span className="text-[9px] opacity-75 font-semibold font-sans">({isGain ? `+${diff.toFixed(1)}kg` : `${diff.toFixed(1)}kg`})</span>
+                          <span>{isGain ? `+${String(percent).replace('.', ',')}%` : `${String(percent).replace('.', ',')}%`}</span>
+                          <span className="text-[9px] opacity-75 font-semibold font-sans">({isGain ? `+${String(diff.toFixed(1)).replace('.', ',')}kg` : `${String(diff.toFixed(1)).replace('.', ',')}kg`})</span>
                         </span>
                       );
                     })()}
@@ -438,7 +446,7 @@ export default function Perfil() {
                 <button
                   type="button"
                   onClick={() => {
-                    setNovoPesoInput(user?.peso || '');
+                    setNovoPesoInput(user?.peso ? String(user.peso).replace('.', ',') : '');
                     setIsPesoModalOpen(true);
                   }}
                   className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 active:scale-95 text-white text-xs font-bold transition-all shadow-md shadow-purple-900/30 cursor-pointer border border-purple-400/20 shrink-0"
@@ -454,9 +462,9 @@ export default function Perfil() {
                     ? `🕒 Última atualização: ${user.data_atualizacao_peso}`
                     : '🕒 Peso inicial informado na Anamnese'}
                 </span>
-                {user?.peso_inicial && Number(user.peso_inicial) !== Number(user.peso) && (
+                {user?.peso_inicial && Number(String(user.peso_inicial).replace(',', '.')) !== Number(String(user.peso).replace(',', '.')) && (
                   <span className="text-gray-500 font-semibold">
-                    Ref. Inicial: {user.peso_inicial} kg
+                    Ref. Inicial: {String(user.peso_inicial).replace('.', ',')} kg
                   </span>
                 )}
               </div>
@@ -623,11 +631,11 @@ export default function Perfil() {
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="text-[10px] font-bold text-gray-600 mb-1.5 block uppercase tracking-wide">Peso (kg)</label>
-                      <input type="number" step="0.1" value={getFieldValue('peso')} onChange={e => handleFieldChange('peso', e.target.value)} className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-900 focus:border-purple-600 focus:ring-1 focus:ring-purple-600 outline-none transition-all" />
+                      <input type="text" inputMode="decimal" value={String(getFieldValue('peso') || '').replace('.', ',')} onChange={e => handleFieldChange('peso', e.target.value.replace('.', ','))} className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-900 focus:border-purple-600 focus:ring-1 focus:ring-purple-600 outline-none transition-all" />
                     </div>
                     <div>
                       <label className="text-[10px] font-bold text-gray-600 mb-1.5 block uppercase tracking-wide">Altura (m)</label>
-                      <input type="number" step="0.01" value={getFieldValue('altura')} onChange={e => handleFieldChange('altura', e.target.value)} className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-900 focus:border-purple-600 focus:ring-1 focus:ring-purple-600 outline-none transition-all" />
+                      <input type="text" inputMode="decimal" value={String(getFieldValue('altura') || '').replace('.', ',')} onChange={e => handleFieldChange('altura', e.target.value.replace('.', ','))} className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-900 focus:border-purple-600 focus:ring-1 focus:ring-purple-600 outline-none transition-all" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4 opacity-60">
@@ -909,13 +917,19 @@ export default function Perfil() {
                 </label>
                 <div className="relative">
                   <input 
-                    type="number" 
-                    step="0.1" 
-                    min="20"
-                    max="350"
+                    type="text" 
+                    inputMode="decimal"
                     value={novoPesoInput}
-                    onChange={e => setNovoPesoInput(e.target.value)}
-                    placeholder="Ex: 75.0"
+                    onChange={e => {
+                      let val = e.target.value.replace('.', ',');
+                      val = val.replace(/[^0-9,]/g, '');
+                      const partes = val.split(',');
+                      if (partes.length > 2) {
+                        val = partes[0] + ',' + partes.slice(1).join('');
+                      }
+                      setNovoPesoInput(val);
+                    }}
+                    placeholder="Ex: 75,0"
                     className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 text-2xl font-black text-white outline-none focus:border-purple-500 focus:bg-white/10 transition-all text-center placeholder-gray-600"
                     required
                     autoFocus
@@ -942,7 +956,7 @@ export default function Perfil() {
                 </button>
                 <button
                   type="submit"
-                  disabled={salvandoPeso || !novoPesoInput || Number(novoPesoInput) <= 0}
+                  disabled={salvandoPeso || !novoPesoInput || Number(String(novoPesoInput).replace(',', '.')) <= 0}
                   className="w-2/3 bg-purple-600 hover:bg-purple-500 active:scale-95 disabled:opacity-50 text-white font-black text-xs uppercase tracking-widest py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-600/30"
                 >
                   {salvandoPeso ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
