@@ -421,7 +421,7 @@ export default function Perfil() {
                       const diff = atual - inicial;
                       if (Math.abs(diff) < 0.1) {
                         return (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-gray-500/20 text-gray-300 border border-gray-400/20">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-purple-500/10 text-purple-300/80 border border-purple-400/20">
                             Estável
                           </span>
                         );
@@ -429,14 +429,10 @@ export default function Perfil() {
                       const percent = ((diff / inicial) * 100).toFixed(1);
                       const isGain = diff > 0;
                       return (
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black border shadow-sm ${
-                          isGain 
-                            ? 'bg-amber-500/20 text-amber-300 border-amber-500/30 shadow-amber-900/20' 
-                            : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-emerald-900/20'
-                        }`}>
-                          <span>{isGain ? '▲' : '▼'}</span>
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black border shadow-sm bg-purple-500/15 text-purple-200 border-purple-400/30 shadow-purple-950/40">
+                          <span className="text-purple-400">{isGain ? '▲' : '▼'}</span>
                           <span>{isGain ? `+${String(percent).replace('.', ',')}%` : `${String(percent).replace('.', ',')}%`}</span>
-                          <span className="text-[9px] opacity-75 font-semibold font-sans">({isGain ? `+${String(diff.toFixed(1)).replace('.', ',')}kg` : `${String(diff.toFixed(1)).replace('.', ',')}kg`})</span>
+                          <span className="text-[9px] opacity-80 font-bold font-sans">({isGain ? `+${String(diff.toFixed(1)).replace('.', ',')}kg` : `${String(diff.toFixed(1)).replace('.', ',')}kg`})</span>
                         </span>
                       );
                     })()}
