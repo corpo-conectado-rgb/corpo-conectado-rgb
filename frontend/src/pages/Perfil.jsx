@@ -10,7 +10,7 @@ const CAMPOS_CONFIG = {
   nome:          { label: 'Nome Completo',       tipo: 'text',     controlado: true,  impacta: false },
   telefone:      { label: 'Telefone',            tipo: 'tel',      controlado: false, impacta: false, placeholder: '(00) 00000-0000' },
   habitos_local: { label: 'Local de Treino',     tipo: 'select',   controlado: false, impacta: false, opcoes: ['Smart Fit', 'Pratique', 'Contorno', 'Outro'] },
-  peso:          { label: 'Peso (kg)',           tipo: 'number',   controlado: true,  impacta: true  },
+  peso:          { label: 'Peso (kg)',           tipo: 'number',   controlado: false, impacta: false },
   altura:        { label: 'Altura (m)',          tipo: 'number',   controlado: true,  impacta: true  },
   objetivo:      { label: 'Objetivo Principal',  tipo: 'select',   controlado: true,  impacta: true, opcoes: ['Emagrecimento', 'Hipertrofia', 'Saúde Geral'] },
   nivel_fisico:  { label: 'Nível Físico',        tipo: 'select',   controlado: true,  impacta: true, opcoes: ['Iniciante', 'Intermediário', 'Avançado'] },
@@ -39,6 +39,12 @@ export default function Perfil() {
   // Estado da Assinatura
   const [assinatura, setAssinatura] = useState(null);
   const [assinaturaLoading, setAssinaturaLoading] = useState(true);
+
+  // Estados para Atualização e Histórico de Peso
+  const [isPesoModalOpen, setIsPesoModalOpen] = useState(false);
+  const [novoPesoInput, setNovoPesoInput] = useState('');
+  const [salvandoPeso, setSalvandoPeso] = useState(false);
+  const [toastPeso, setToastPeso] = useState({ show: false, message: '' });
 
   useEffect(() => {
     const checkPendente = async () => {
@@ -152,6 +158,29 @@ export default function Perfil() {
     setDrawerStep('REVIEW');
   };
 
+  const handleSalvarNovoPeso = async (e) => {
+    e.preventDefault();
+    if (!novoPesoInput || isNaN(Number(novoPesoInput)) || Number(novoPesoInput) <= 0) {
+      return;
+    }
+    try {
+      setSalvandoPeso(true);
+      await apiFetch('/auth/peso', {
+        method: 'POST',
+        body: JSON.stringify({ peso: novoPesoInput })
+      });
+      await refreshProfile();
+      setIsPesoModalOpen(false);
+      setToastPeso({ show: true, message: 'Peso atualizado e evolução registrada!' });
+      setTimeout(() => setToastPeso({ show: false, message: '' }), 4000);
+    } catch (error) {
+      console.error('Erro ao atualizar peso:', error);
+      alert('Não foi possível registrar o peso. Tente novamente.');
+    } finally {
+      setSalvandoPeso(false);
+    }
+  };
+
   const confirmarAlteracoes = async () => {
     try {
       setEnviandoAlteracao(true);
@@ -160,11 +189,22 @@ export default function Perfil() {
       if (diretas.length > 0) {
         const payload = {};
         diretas.forEach(alt => { payload[alt.campo] = alt.para; });
-        const updatedUser = await apiFetch('/auth/profile', {
-          method: 'PUT',
-          body: JSON.stringify(payload)
-        });
-        updateUser(updatedUser);
+        
+        if (payload.peso) {
+          await apiFetch('/auth/peso', {
+            method: 'POST',
+            body: JSON.stringify({ peso: payload.peso })
+          });
+          delete payload.peso;
+        }
+
+        if (Object.keys(payload).length > 0) {
+          const updatedUser = await apiFetch('/auth/profile', {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+          });
+          updateUser(updatedUser);
+        }
       }
 
       if (controladas.length > 0) {
@@ -342,7 +382,7 @@ export default function Perfil() {
               </div>
             </div>
 
-            <div className="mt-6 md:mt-8 grid grid-cols-3 gap-2 md:gap-3">
+            <div className="mt-6 md:mt-8 grid grid-cols-2 gap-2 md:gap-3">
               <div className="bg-white/5 rounded-2xl p-3 border border-white/5 backdrop-blur-sm">
                 <p className="text-[9px] uppercase tracking-widest text-gray-400 font-bold mb-1 flex items-center gap-1">Idade <Lock size={8} className="opacity-50" /></p>
                 <p className="font-black text-lg text-white">{user?.idade || '--'}</p>
@@ -351,9 +391,74 @@ export default function Perfil() {
                 <p className="text-[9px] uppercase tracking-widest text-gray-400 font-bold mb-1">Altura</p>
                 <p className="font-black text-lg text-white">{user?.altura ? `${user.altura}m` : '--'}</p>
               </div>
-              <div className="bg-white/5 rounded-2xl p-3 border border-white/5 backdrop-blur-sm">
-                <p className="text-[9px] uppercase tracking-widest text-gray-400 font-bold mb-1">Peso</p>
-                <p className="font-black text-lg text-white">{user?.peso ? `${user.peso}kg` : '--'}</p>
+            </div>
+
+            {/* Painel Interativo de Peso & Evolução Corporal */}
+            <div className="mt-3 bg-gradient-to-r from-purple-950/50 via-gray-900/60 to-white/5 rounded-2xl p-4 border border-purple-500/20 backdrop-blur-sm relative overflow-hidden transition-all hover:border-purple-500/40 shadow-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase tracking-widest text-purple-300 font-bold mb-1 flex items-center gap-1.5">
+                    <Scale size={12} className="text-purple-400" /> Peso Atual & Evolução
+                  </span>
+                  <div className="flex items-baseline gap-2.5 mt-0.5 flex-wrap">
+                    <span className="font-black text-2xl text-white tracking-tight">
+                      {user?.peso ? `${user.peso} kg` : '--'}
+                    </span>
+                    {/* Badge de Evolução em relação ao peso inicial */}
+                    {(() => {
+                      if (!user?.peso || !user?.peso_inicial) return null;
+                      const atual = Number(user.peso);
+                      const inicial = Number(user.peso_inicial);
+                      if (isNaN(atual) || isNaN(inicial) || inicial === 0) return null;
+                      const diff = atual - inicial;
+                      if (Math.abs(diff) < 0.1) {
+                        return (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-gray-500/20 text-gray-300 border border-gray-400/20">
+                            Estável
+                          </span>
+                        );
+                      }
+                      const percent = ((diff / inicial) * 100).toFixed(1);
+                      const isGain = diff > 0;
+                      return (
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black border shadow-sm ${
+                          isGain 
+                            ? 'bg-amber-500/20 text-amber-300 border-amber-500/30 shadow-amber-900/20' 
+                            : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-emerald-900/20'
+                        }`}>
+                          <span>{isGain ? '▲' : '▼'}</span>
+                          <span>{isGain ? `+${percent}%` : `${percent}%`}</span>
+                          <span className="text-[9px] opacity-75 font-semibold font-sans">({isGain ? `+${diff.toFixed(1)}kg` : `${diff.toFixed(1)}kg`})</span>
+                        </span>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNovoPesoInput(user?.peso || '');
+                    setIsPesoModalOpen(true);
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 active:scale-95 text-white text-xs font-bold transition-all shadow-md shadow-purple-900/30 cursor-pointer border border-purple-400/20 shrink-0"
+                >
+                  <Scale size={14} />
+                  <span>Atualizar</span>
+                </button>
+              </div>
+              
+              <div className="mt-3 pt-2.5 border-t border-white/5 flex items-center justify-between text-[10px] text-gray-400 font-medium">
+                <span>
+                  {user?.data_atualizacao_peso 
+                    ? `🕒 Última atualização: ${user.data_atualizacao_peso}`
+                    : '🕒 Peso inicial informado na Anamnese'}
+                </span>
+                {user?.peso_inicial && Number(user.peso_inicial) !== Number(user.peso) && (
+                  <span className="text-gray-500 font-semibold">
+                    Ref. Inicial: {user.peso_inicial} kg
+                  </span>
+                )}
               </div>
             </div>
             
@@ -770,6 +875,90 @@ export default function Perfil() {
               </>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Modal de Atualização de Peso */}
+      {isPesoModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-[#121317] border border-white/10 rounded-3xl max-w-sm w-full p-6 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-40 h-40 rounded-full bg-purple-600/20 blur-2xl pointer-events-none" />
+            
+            <div className="flex items-center justify-between mb-5 relative z-10">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center border border-purple-500/30">
+                  <Scale size={20} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-white leading-none">Atualizar Peso</h3>
+                  <p className="text-[11px] text-gray-400 font-medium mt-1">Registre sua evolução corporal</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsPesoModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-white/5 text-gray-400 hover:text-white flex items-center justify-center transition-all"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSalvarNovoPeso} className="space-y-4 relative z-10">
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-purple-300 mb-2 block">
+                  Novo Peso Atual (kg)
+                </label>
+                <div className="relative">
+                  <input 
+                    type="number" 
+                    step="0.1" 
+                    min="20"
+                    max="350"
+                    value={novoPesoInput}
+                    onChange={e => setNovoPesoInput(e.target.value)}
+                    placeholder="Ex: 75.0"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3.5 text-2xl font-black text-white outline-none focus:border-purple-500 focus:bg-white/10 transition-all text-center placeholder-gray-600"
+                    required
+                    autoFocus
+                  />
+                  <span className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm pointer-events-none">
+                    KG
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-purple-950/30 border border-purple-500/10 rounded-xl p-3 text-center">
+                <p className="text-xs text-purple-200/80 italic">
+                  "Acompanhar seu progresso é o primeiro passo para a consistência e superação."
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsPesoModalOpen(false)}
+                  className="w-1/3 py-3.5 rounded-xl font-bold text-xs text-gray-400 hover:text-white transition-all hover:bg-white/5"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={salvandoPeso || !novoPesoInput || Number(novoPesoInput) <= 0}
+                  className="w-2/3 bg-purple-600 hover:bg-purple-500 active:scale-95 disabled:opacity-50 text-white font-black text-xs uppercase tracking-widest py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-600/30"
+                >
+                  {salvandoPeso ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                  <span>{salvandoPeso ? 'Registrando...' : 'Registrar Peso'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Toast de Sucesso para Peso */}
+      {toastPeso.show && (
+        <div className="fixed bottom-6 right-6 z-50 bg-[#121317] border border-emerald-500/40 text-emerald-400 px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-slideUp font-bold text-sm">
+          <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
+          <span>{toastPeso.message}</span>
         </div>
       )}
 

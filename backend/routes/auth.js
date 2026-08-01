@@ -15,6 +15,8 @@ const DISPOSITIVOS_SHEET = 'dispositivos';
 const DISPOSITIVOS_HEADERS = ['id', 'user_id', 'user_nome', 'user_email', 'device_id', 'device_name', 'codigo_ativacao', 'status', 'data_solicitacao', 'data_autorizacao'];
 const CONFIG_SHEET = 'configuracoes';
 const CONFIG_HEADERS = ['chave', 'valor'];
+const HISTORICO_PESO_SHEET = 'historico_peso';
+const HISTORICO_PESO_HEADERS = ['id', 'user_id', 'peso', 'data_registro'];
 
 // Função Helper para buscar dados completos de anamnese e impedir repetição de código
 async function fetchCompleteProfile(userRowId) {
@@ -23,15 +25,35 @@ async function fetchCompleteProfile(userRowId) {
     const anamneseRows = await getCachedRows('anamnese', ANAMNESE_HEADERS);
     const anamneseRow = anamneseRows.find(r => r.get('id_usuario') === userRowId);
     
+    // Buscar histórico de peso
+    let pesoAtual = null;
+    let pesoInicial = null;
+    let dataAtualizacaoPeso = null;
+    try {
+      const historicoRows = await getCachedRows(HISTORICO_PESO_SHEET, HISTORICO_PESO_HEADERS);
+      const userHistorico = historicoRows.filter(r => r.get('user_id') === userRowId);
+      if (userHistorico.length > 0) {
+        pesoInicial = Number(userHistorico[0].get('peso'));
+        const ultimoRegistro = userHistorico[userHistorico.length - 1];
+        pesoAtual = Number(ultimoRegistro.get('peso'));
+        dataAtualizacaoPeso = ultimoRegistro.get('data_registro') || null;
+      }
+    } catch (errHist) {
+      console.log('Sem tabela ou histórico de peso encontrado.');
+    }
+
     if (anamneseRow) {
       const dataNascimento = anamneseRow.get('data_nascimento');
       const idadeFixa = anamneseRow.get('idade');
+      const pesoAnamnese = anamneseRow.get('peso');
       
       profileData = {
         data_nascimento: dataNascimento,
         idade: dataNascimento ? calcularIdade(dataNascimento) : idadeFixa,
         altura: anamneseRow.get('altura'),
-        peso: anamneseRow.get('peso'),
+        peso: pesoAtual || pesoAnamnese,
+        peso_inicial: pesoInicial || pesoAnamnese,
+        data_atualizacao_peso: dataAtualizacaoPeso || null,
         sexo: anamneseRow.get('sexo'),
         objetivo: anamneseRow.get('objetivo'),
         nivel_fisico: anamneseRow.get('nivel_fisico'),
@@ -40,6 +62,12 @@ async function fetchCompleteProfile(userRowId) {
         habitos_tempo: anamneseRow.get('habitos_tempo'),
         habitos_local: anamneseRow.get('habitos_local'),
         telefone: anamneseRow.get('telefone') || '',
+      };
+    } else if (pesoAtual) {
+      profileData = {
+        peso: pesoAtual,
+        peso_inicial: pesoInicial || pesoAtual,
+        data_atualizacao_peso: dataAtualizacaoPeso || null,
       };
     }
   } catch (err) {
@@ -339,7 +367,7 @@ router.put('/profile', authMiddleware, async (req, res) => {
     const { telefone, habitos_local, nome } = req.body;
 
     // Campos controlados que NÃO podem ser alterados diretamente
-    const camposControlados = ['peso', 'altura', 'objetivo', 'nivel_fisico', 'habitos_freq', 'lesoes_criticas', 'sexo', 'data_nascimento', 'idade'];
+    const camposControlados = ['altura', 'objetivo', 'nivel_fisico', 'habitos_freq', 'lesoes_criticas', 'sexo', 'data_nascimento', 'idade'];
     const tentouAlterarControlado = camposControlados.some(campo => req.body[campo] !== undefined);
     if (tentouAlterarControlado) {
       return res.status(403).json({ error: 'Campos controlados só podem ser alterados via solicitação ao administrador.' });
@@ -380,5 +408,81 @@ router.put('/profile', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Erro ao atualizar perfil.' });
   }
 });
+
+// Rota para atualização de peso e registro de histórico de evolução corporal
+const handleAtualizacaoPeso = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { peso } = req.body;
+
+    if (!peso || isNaN(Number(peso)) || Number(peso) <= 0) {
+      return res.status(400).json({ error: 'Peso inválido. Informe um número válido e positivo.' });
+    }
+
+    const pesoNum = Number(peso).toFixed(1);
+
+    // 1. Buscar ou inicializar anamnese para pegar peso original caso seja 1º registro de histórico
+    const anamneseSheet = await getSheet(ANAMNESE_SHEET, ANAMNESE_HEADERS);
+    const anamneseRows = await anamneseSheet.getRows();
+    const anamneseRow = anamneseRows.find(r => r.get('id_usuario') === userId);
+
+    const pesoAnteriorAnamnese = anamneseRow ? anamneseRow.get('peso') : null;
+
+    // 2. Acessar ou criar a aba historico_peso
+    const historicoSheet = await getSheet(HISTORICO_PESO_SHEET, HISTORICO_PESO_HEADERS);
+    const historicoRows = await historicoSheet.getRows();
+    const userHistorico = historicoRows.filter(r => r.get('user_id') === userId);
+
+    // Se o usuário ainda não tem nenhum histórico gravado, salvamos primeiro o registro "zero"
+    // com o peso original da Anamnese para manter a referência de início da jornada
+    if (userHistorico.length === 0 && pesoAnteriorAnamnese && !isNaN(Number(pesoAnteriorAnamnese))) {
+      await historicoSheet.addRow({
+        id: uuidv4(),
+        user_id: userId,
+        peso: Number(pesoAnteriorAnamnese).toFixed(1),
+        data_registro: 'Anamnese Inicial'
+      });
+    }
+
+    // Data de hoje no formato DD/MM/YYYY
+    const hoje = new Date();
+    const dia = String(hoje.getDate()).padStart(2, '0');
+    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const ano = hoje.getFullYear();
+    const dataFormatada = `${dia}/${mes}/${ano}`;
+
+    // Adicionar o novo registro de peso
+    await historicoSheet.addRow({
+      id: uuidv4(),
+      user_id: userId,
+      peso: pesoNum,
+      data_registro: dataFormatada
+    });
+
+    // 3. Atualizar o peso atual no cadastro da anamnese para manter tudo sincronizado
+    if (anamneseRow) {
+      anamneseRow.set('peso', pesoNum);
+      await anamneseRow.save();
+    }
+
+    // Invalidar caches
+    invalidateCache(HISTORICO_PESO_SHEET);
+    invalidateCache(ANAMNESE_SHEET);
+
+    // Retornar perfil recarregado
+    const profileData = await fetchCompleteProfile(userId);
+    res.json({
+      message: 'Peso atualizado com sucesso!',
+      peso: pesoNum,
+      ...profileData
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar peso:', error);
+    res.status(500).json({ error: 'Erro ao registrar atualização de peso.' });
+  }
+};
+
+router.post('/peso', authMiddleware, handleAtualizacaoPeso);
+router.put('/peso', authMiddleware, handleAtualizacaoPeso);
 
 module.exports = router;
