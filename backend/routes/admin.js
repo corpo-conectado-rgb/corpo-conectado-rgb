@@ -468,7 +468,7 @@ async function gerarDadosAcompanhamento() {
     const nome = alunoRow.get('nome') || 'Anônimo';
     const email = alunoRow.get('email') || '';
     const dataCriacao = alunoRow.get('data_criacao') || '';
-    const ultimoAcessoStr = alunoRow.get('ultimo_acesso') || '';
+    let ultimoAcessoStr = alunoRow.get('ultimo_acesso') || '';
 
     // Anamnese
     const anamnese = anamneseRows.find(r => r.get('id_usuario') === id);
@@ -562,6 +562,15 @@ async function gerarDadosAcompanhamento() {
         volumeMes += t.volume_total;
       }
     });
+
+    // Reconciliação lógica de coerência: É impossível ter treinado recentemente e não ter acessado o aplicativo.
+    // Se o dia do último treino for mais recente que o último acesso registrado, equalizamos o acesso com o treino.
+    if (ultimoTreinoData && diasSemTreinar !== null) {
+      if (diasSemTreinar < diasSemAcessar) {
+        diasSemAcessar = diasSemTreinar;
+        ultimoAcessoStr = `${ultimoTreinoData}T12:00:00`;
+      }
+    }
 
     // Cálculo de Streaks (Semanas consecutivas) e Maior Streak
     let streakAtual = 0;
