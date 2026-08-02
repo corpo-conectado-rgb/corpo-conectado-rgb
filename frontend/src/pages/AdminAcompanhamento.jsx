@@ -97,7 +97,7 @@ export default function AdminAcompanhamento() {
         <div>
           <h1 className="text-3xl font-black text-gray-900 tracking-tight flex items-center gap-3">
             <Activity className="text-purple-600" size={32} />
-            Acompanhamento & BI
+            Acompanhamento de Alunos
           </h1>
           <p className="text-gray-500 font-medium text-sm mt-1">
             Supervisão ágil de engajamento, retenção e inteligência analítica de alunos

@@ -23,7 +23,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
   const adminMenu = user?.role === 'admin' ? [
     { name: 'Solicitações', icon: Bell, path: '/admin/solicitacoes' },
-    { name: 'Acompanhamento & BI', icon: Activity, path: '/admin/acompanhamento' },
+    { name: 'Acompanhamento', icon: Activity, path: '/admin/acompanhamento' },
     { name: 'Gestão de Fichas', icon: FileText, path: '/admin/alunos' },
     { name: 'Configurações', icon: Settings, path: '/admin/configuracoes' },
     { name: 'Financeiro', icon: Wallet, path: '/admin/financeiro' }
