@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Users, Activity, TrendingUp, AlertTriangle, ShieldCheck, Clock, 
   Search, RefreshCw, Calendar, ArrowUpRight, Flame, Trophy, 
-  Dumbbell, UserCheck, UserX, BarChart3, ChevronRight, Weight, X, ExternalLink, Phone, Mail, Award
+  Dumbbell, UserCheck, UserX, BarChart3, ChevronRight, Weight, X, ExternalLink, Phone, Mail, Award, Filter, ChevronDown, Check
 } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip } from 'recharts';
 import { apiFetch } from '../services/api';
@@ -15,6 +15,7 @@ export default function AdminAcompanhamento() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterRisco, setFilterRisco] = useState('TODOS'); // 'TODOS' | 'ENGAJADOS' | 'ALERTA' | 'RISCO_ABANDONO' | 'TRIAL'
+  const [showFilters, setShowFilters] = useState(false);
   
   // Estado para o Drawer/Modal de Detalhes do Aluno
   const [selectedAluno, setSelectedAluno] = useState(null);
@@ -188,9 +189,9 @@ export default function AdminAcompanhamento() {
            * ============================================================== */
           <div className="space-y-6 max-w-7xl mx-auto">
             
-            {/* Barra de Controles: Pesquisa e Filtros Rápidos */}
-            <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
-              <div className="relative w-full md:w-80">
+            {/* Barra de Controles: Pesquisa e Botão Suspenso de Filtros */}
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs">
+              <div className="relative w-full md:w-96">
                 <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
@@ -201,27 +202,60 @@ export default function AdminAcompanhamento() {
                 />
               </div>
 
-              {/* Pílulas de Filtro Rápido */}
-              <div className="flex flex-wrap gap-1.5 w-full md:w-auto">
-                {[
-                  { id: 'TODOS', label: 'Todos os Alunos', color: 'bg-gray-800 text-white' },
-                  { id: 'ENGAJADOS', label: '🟢 Engajados', color: 'bg-emerald-600 text-white' },
-                  { id: 'ALERTA', label: '🟡 Em Alerta (4+ dias)', color: 'bg-amber-500 text-white' },
-                  { id: 'RISCO_ABANDONO', label: '🔴 Risco Abandono', color: 'bg-red-600 text-white' },
-                  { id: 'TRIAL', label: '🕒 Trial / Em Teste', color: 'bg-blue-600 text-white' }
-                ].map((btn) => (
-                  <button
-                    key={btn.id}
-                    onClick={() => setFilterRisco(btn.id)}
-                    className={`px-3.5 py-1.5 rounded-full font-bold text-xs transition ${
-                      filterRisco === btn.id 
-                        ? `${btn.color} shadow-md` 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
-                  >
-                    {btn.label}
-                  </button>
-                ))}
+              {/* Menu suspenso de Filtro Rápido */}
+              <div className="relative w-full md:w-auto">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`w-full md:w-auto flex items-center justify-between gap-3 px-4 py-2 rounded-xl text-sm font-bold border transition shadow-2xs ${
+                    filterRisco !== 'TODOS' || showFilters
+                      ? 'bg-[var(--color-noir-navy)] text-white border-[var(--color-noir-navy)]'
+                      : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Filter size={16} className={filterRisco !== 'TODOS' ? 'text-purple-400' : 'text-gray-400'} />
+                    <span>Filtro: <strong className="font-black text-xs uppercase tracking-wider">{[
+                      { id: 'TODOS', label: 'Todos' },
+                      { id: 'ENGAJADOS', label: 'Engajados' },
+                      { id: 'ALERTA', label: 'Em Alerta' },
+                      { id: 'RISCO_ABANDONO', label: 'Risco Abandono' },
+                      { id: 'TRIAL', label: 'Trial' }
+                    ].find(f => f.id === filterRisco)?.label}</strong></span>
+                  </div>
+                  <ChevronDown size={16} className={`transition-transform duration-200 ${showFilters ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Dropdown Flutuante de Opções de Filtro */}
+                {showFilters && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowFilters(false)} />
+                    <div className="absolute right-0 mt-2 w-full md:w-64 bg-white border border-gray-200 rounded-2xl shadow-2xl p-2 z-20 space-y-1 animate-scale-up">
+                      {[
+                        { id: 'TODOS', label: 'Todos os Alunos' },
+                        { id: 'ENGAJADOS', label: '🟢 Engajados' },
+                        { id: 'ALERTA', label: '🟡 Em Alerta (4+ dias)' },
+                        { id: 'RISCO_ABANDONO', label: '🔴 Risco Abandono' },
+                        { id: 'TRIAL', label: '🕒 Trial / Em Teste' }
+                      ].map((btn) => (
+                        <button
+                          key={btn.id}
+                          onClick={() => {
+                            setFilterRisco(btn.id);
+                            setShowFilters(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-xs transition ${
+                            filterRisco === btn.id
+                              ? 'bg-[var(--color-noir-navy)] text-white shadow-md'
+                              : 'text-gray-700 hover:bg-gray-100'
+                          }`}
+                        >
+                          <span>{btn.label}</span>
+                          {filterRisco === btn.id && <Check size={16} className="text-purple-400" />}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
