@@ -47,27 +47,42 @@ export default function AdminAcompanhamento() {
     return String(val).replace('.', ',');
   };
 
-  // Helper de formatação humanizada de Último Acesso (Hoje às HH:MM, Ontem, Há X dias)
-  const formatAcessoHuman = (dateStr, dias) => {
-    if (dias === 0) {
-      if (!dateStr) return 'Hoje';
-      try {
-        const d = new Date(dateStr);
-        if (!isNaN(d.getTime())) {
-          const hh = String(d.getHours()).padStart(2, '0');
-          const mm = String(d.getMinutes()).padStart(2, '0');
-          if (hh !== '00' || mm !== '00') {
-            return `Hoje às ${hh}:${mm}`;
-          }
-        }
-      } catch (e) {
-        // Fallback
-      }
-      return 'Hoje';
+  // Helper de formatação humanizada de Último Acesso (Hoje às HH:MM, Ontem às HH:MM, Há X dias)
+  const formatAcessoHuman = (dateStr, diasBackend) => {
+    if (!dateStr) {
+      if (diasBackend === 0) return 'Hoje';
+      if (diasBackend === 1) return 'Ontem';
+      if (diasBackend > 1 && diasBackend < 90) return `Há ${diasBackend} dias`;
+      return 'Sem acesso recente';
     }
-    if (dias === 1) return 'Ontem';
-    if (dias > 1 && dias < 90) return `Há ${dias} dias`;
-    return 'Sem acesso recente';
+    
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return diasBackend === 0 ? 'Hoje' : diasBackend === 1 ? 'Ontem' : `Há ${diasBackend} dias`;
+
+      const now = new Date();
+      const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const refMidnight = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const diffDays = Math.round((nowMidnight - refMidnight) / 86400000);
+      const dias = Math.max(0, isNaN(diffDays) ? (diasBackend ?? 99) : diffDays);
+
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      const timeStr = (hh !== '00' || mm !== '00') ? ` às ${hh}:${mm}` : '';
+
+      if (dias === 0) {
+        return `Hoje${timeStr}`;
+      }
+      if (dias === 1) {
+        return `Ontem${timeStr}`;
+      }
+      if (dias > 1 && dias < 90) {
+        return `Há ${dias} dias`;
+      }
+      return 'Sem acesso recente';
+    } catch (e) {
+      return 'Sem acesso recente';
+    }
   };
 
   // Helper de formatação humanizada de Último Treino (Hoje, Ontem, Há X dias)

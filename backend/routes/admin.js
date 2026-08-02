@@ -495,11 +495,18 @@ async function gerarDadosAcompanhamento() {
       }
     }
 
+    // Helper para calcular diferença em dias civis (desconsiderando horas)
+    const calcDiasCivil = (d) => {
+      if (!d || isNaN(d.getTime())) return 99;
+      const agoraMid = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
+      const dMid = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      return Math.max(0, Math.round((agoraMid - dMid) / 86400000));
+    };
+
     // Dias sem acessar o app
     let diasSemAcessar = 99;
     if (ultimoAcessoStr) {
-      const diffTime = agora - new Date(ultimoAcessoStr);
-      diasSemAcessar = Math.max(0, Math.floor(diffTime / 86400000));
+      diasSemAcessar = calcDiasCivil(new Date(ultimoAcessoStr));
     } else if (dataCriacao) {
       // Tentar converter data de criação no formato DD/MM/YYYY ou ISO
       let dtCria = new Date(dataCriacao);
@@ -508,7 +515,7 @@ async function gerarDadosAcompanhamento() {
         dtCria = new Date(`${partes[2]}-${partes[1]}-${partes[0]}T00:00:00`);
       }
       if (!isNaN(dtCria.getTime())) {
-        diasSemAcessar = Math.max(0, Math.floor((agora - dtCria) / 86400000));
+        diasSemAcessar = calcDiasCivil(dtCria);
       }
     }
 
@@ -536,7 +543,7 @@ async function gerarDadosAcompanhamento() {
       const dt = new Date(t.data + 'T12:00:00');
       if (!ultimoTreinoData) {
         ultimoTreinoData = t.data;
-        diasSemTreinar = Math.max(0, Math.floor((agora - dt) / 86400000));
+        diasSemTreinar = calcDiasCivil(dt);
       }
       if (dt >= seteDiasAtras) freqSemana++;
       if (dt >= trintaDiasAtras) freqMes++;
