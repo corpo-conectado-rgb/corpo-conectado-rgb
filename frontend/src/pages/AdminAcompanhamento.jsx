@@ -137,30 +137,41 @@ export default function AdminAcompanhamento() {
           </p>
         </div>
 
-        {/* Botões de Navegação entre Abas */}
+        {/* Botões de Navegação entre Abas - Icones com Tooltip no Hover */}
         <div className="flex items-center gap-2 bg-gray-100 p-1.5 rounded-xl self-start md:self-auto">
-          <button
-            onClick={() => setActiveTab('alunos')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-black text-xs transition uppercase tracking-wider ${
-              activeTab === 'alunos' 
-                ? 'bg-[var(--color-noir-navy)] text-white shadow-md' 
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            <Users size={15} />
-            Acompanhamento de Alunos
-          </button>
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-black text-xs transition uppercase tracking-wider ${
-              activeTab === 'dashboard' 
-                ? 'bg-[var(--color-noir-navy)] text-white shadow-md' 
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            <BarChart3 size={15} />
-            Dashboard Gerencial
-          </button>
+          <div className="relative group">
+            <button
+              onClick={() => setActiveTab('alunos')}
+              title="Acompanhamento de Alunos"
+              className={`flex items-center justify-center p-3 rounded-lg transition ${
+                activeTab === 'alunos' 
+                  ? 'bg-[var(--color-noir-navy)] text-white shadow-md' 
+                  : 'text-gray-500 hover:text-gray-900 hover:bg-white/60'
+              }`}
+            >
+              <Users size={20} />
+            </button>
+            <span className="pointer-events-none absolute -bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2.5 py-1 text-xs font-semibold text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 shadow-lg z-50">
+              Acompanhamento de Alunos
+            </span>
+          </div>
+
+          <div className="relative group">
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              title="Dashboard Gerencial"
+              className={`flex items-center justify-center p-3 rounded-lg transition ${
+                activeTab === 'dashboard' 
+                  ? 'bg-[var(--color-noir-navy)] text-white shadow-md' 
+                  : 'text-gray-500 hover:text-gray-900 hover:bg-white/60'
+              }`}
+            >
+              <BarChart3 size={20} />
+            </button>
+            <span className="pointer-events-none absolute -bottom-10 right-0 md:left-1/2 md:-translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2.5 py-1 text-xs font-semibold text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 shadow-lg z-50">
+              Dashboard Gerencial
+            </span>
+          </div>
         </div>
       </div>
 
