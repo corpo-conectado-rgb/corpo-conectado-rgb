@@ -24,9 +24,11 @@ async function updateUltimoAcesso(userId) {
     const rows = await sheet.getRows();
     const row = rows.find(r => r.get('id') === userId);
     if (row) {
-      const agora = new Date().toISOString();
+      const agora = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
       const ultimo = row.get('ultimo_acesso') || '';
-      if (!ultimo || ultimo.split('T')[0] !== agora.split('T')[0]) {
+      const dataHoje = agora.split(/[,\s]+/)[0];
+      const dataUltima = ultimo.split(/[,\s|T]+/)[0];
+      if (!ultimo || dataUltima !== dataHoje) {
         row.set('ultimo_acesso', agora);
         await row.save();
         invalidateCache(USERS_SHEET);
@@ -297,7 +299,7 @@ router.post('/login', async (req, res) => {
         role,
         data_criacao: userRow.get('data_criacao'),
         trial_expira: userRow.get('trial_expira') || '',
-        ultimo_acesso: new Date().toISOString(),
+        ultimo_acesso: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
         ...profileData 
       } 
     });
@@ -382,7 +384,7 @@ router.get('/me', authMiddleware, async (req, res) => {
       role: userRow.get('role') || 'user',
       data_criacao: userRow.get('data_criacao'),
       trial_expira: userRow.get('trial_expira') || '',
-      ultimo_acesso: userRow.get('ultimo_acesso') || new Date().toISOString(),
+      ultimo_acesso: userRow.get('ultimo_acesso') || new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
       ...profileData
     });
   } catch (error) {

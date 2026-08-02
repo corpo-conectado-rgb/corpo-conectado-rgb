@@ -47,6 +47,24 @@ export default function AdminAcompanhamento() {
     return String(val).replace('.', ',');
   };
 
+  // Helper para converter data BR (DD/MM/YYYY) ou ISO sem inverter dia e mês no navegador
+  const parseDateSafe = (str) => {
+    if (!str) return null;
+    const s = String(str).trim();
+    if (s.includes('/')) {
+      const parts = s.split(/[,\s]+/);
+      const dataPart = parts[0];
+      const horaPart = parts[1] || '00:00:00';
+      const [dia, mes, ano] = dataPart.split('/');
+      if (dia && mes && ano) {
+        const d = new Date(`${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}T${horaPart}`);
+        if (!isNaN(d.getTime())) return d;
+      }
+    }
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  };
+
   // Helper de formatação humanizada de Último Acesso (Hoje às HH:MM, Ontem às HH:MM, Há X dias)
   const formatAcessoHuman = (dateStr, diasBackend) => {
     if (!dateStr) {
@@ -57,8 +75,8 @@ export default function AdminAcompanhamento() {
     }
     
     try {
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return diasBackend === 0 ? 'Hoje' : diasBackend === 1 ? 'Ontem' : `Há ${diasBackend} dias`;
+      const d = parseDateSafe(dateStr);
+      if (!d || isNaN(d.getTime())) return diasBackend === 0 ? 'Hoje' : diasBackend === 1 ? 'Ontem' : `Há ${diasBackend} dias`;
 
       const now = new Date();
       const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());

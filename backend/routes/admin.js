@@ -495,6 +495,24 @@ async function gerarDadosAcompanhamento() {
       }
     }
 
+    // Helper para converter data no formato brasileiro (DD/MM/YYYY) ou ISO para Date de forma confiável
+    const parseDateBrOrIso = (dateStr) => {
+      if (!dateStr) return null;
+      const s = String(dateStr).trim();
+      if (s.includes('/')) {
+        const parts = s.split(/[,\s]+/);
+        const dataPart = parts[0];
+        const horaPart = parts[1] || '00:00:00';
+        const [dia, mes, ano] = dataPart.split('/');
+        if (dia && mes && ano) {
+          const d = new Date(`${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}T${horaPart}`);
+          if (!isNaN(d.getTime())) return d;
+        }
+      }
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? null : d;
+    };
+
     // Helper para calcular diferença em dias civis (desconsiderando horas)
     const calcDiasCivil = (d) => {
       if (!d || isNaN(d.getTime())) return 99;
@@ -506,17 +524,9 @@ async function gerarDadosAcompanhamento() {
     // Dias sem acessar o app
     let diasSemAcessar = 99;
     if (ultimoAcessoStr) {
-      diasSemAcessar = calcDiasCivil(new Date(ultimoAcessoStr));
+      diasSemAcessar = calcDiasCivil(parseDateBrOrIso(ultimoAcessoStr));
     } else if (dataCriacao) {
-      // Tentar converter data de criação no formato DD/MM/YYYY ou ISO
-      let dtCria = new Date(dataCriacao);
-      if (isNaN(dtCria.getTime()) && dataCriacao.includes('/')) {
-        const partes = dataCriacao.split(' ')[0].split('/');
-        dtCria = new Date(`${partes[2]}-${partes[1]}-${partes[0]}T00:00:00`);
-      }
-      if (!isNaN(dtCria.getTime())) {
-        diasSemAcessar = calcDiasCivil(dtCria);
-      }
+      diasSemAcessar = calcDiasCivil(parseDateBrOrIso(dataCriacao));
     }
 
     // Treinos Histórico
