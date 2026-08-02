@@ -443,4 +443,334 @@ router.delete('/usuarios/:id', adminMiddleware, async (req, res) => {
   }
 });
 
+// ==========================================================
+// MÓDULO ACOMPANHAMENTO DE ALUNOS & DASHBOARD GERENCIAL (BI)
+// ==========================================================
+async function gerarDadosAcompanhamento() {
+  const usuariosRows = await getCachedRows('usuarios', ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role', 'trial_expira', 'ultimo_acesso']);
+  const anamneseRows = await getCachedRows('anamnese', ['id_usuario', 'idade', 'altura', 'peso', 'sexo', 'objetivo', 'nivel_fisico', 'lesoes_criticas', 'habitos_freq', 'habitos_tempo', 'habitos_local', 'data_nascimento', 'telefone']);
+  const histTreinosRows = await getCachedRows('historico_treinos', ['id', 'user_id', 'treino_id', 'dia_treino_id', 'letra', 'nome_dia', 'data', 'hora_inicio', 'hora_fim', 'duracao_seg', 'volume_total', 'exercicios_feitos', 'exercicios_total', 'detalhes']);
+  const histPesoRows = await getCachedRows('historico_peso', ['id', 'user_id', 'peso', 'data_registro']);
+  const treinosRows = await getCachedRows('treinos', ['id', 'user_id', 'nome_ficha', 'objetivo', 'status', 'data_inicio', 'data_termino']);
+  const assinaturasRows = await getCachedRows('assinaturas', ['id', 'user_id', 'status']);
+
+  const agora = new Date();
+  agora.setHours(23, 59, 59, 999);
+  const hojeStr = agora.toISOString().split('T')[0];
+  const trintaDiasAtras = new Date(agora.getTime() - (30 * 86400000));
+  const seteDiasAtras = new Date(agora.getTime() - (7 * 86400000));
+
+  // Apenas alunos reais (não admin)
+  const alunos = usuariosRows.filter(r => r.get('role') !== 'admin');
+
+  const listaAlunos = alunos.map(alunoRow => {
+    const id = alunoRow.get('id');
+    const nome = alunoRow.get('nome') || 'Anônimo';
+    const email = alunoRow.get('email') || '';
+    const dataCriacao = alunoRow.get('data_criacao') || '';
+    const ultimoAcessoStr = alunoRow.get('ultimo_acesso') || '';
+
+    // Anamnese
+    const anamnese = anamneseRows.find(r => r.get('id_usuario') === id);
+    const telefone = anamnese ? anamnese.get('telefone') : '';
+    const pesoAnamnese = anamnese && anamnese.get('peso') ? Number(String(anamnese.get('peso')).replace(',', '.')) : 0;
+    const objetivo = anamnese ? (anamnese.get('objetivo') || 'Geral') : 'Geral';
+
+    // Assinatura & Trial
+    const assinatura = assinaturasRows.find(r => r.get('user_id') === id && r.get('status') === 'ATIVA');
+    const statusPlano = assinatura ? 'ASSINANTE' : 'TRIAL';
+
+    // Ficha Ativa / Status
+    const fichasAtivas = treinosRows.filter(r => r.get('user_id') === id && (r.get('status') === 'ativo' || r.get('status') === 'ativa'));
+    let fichaStatus = 'SEM_TREINO';
+    let nomeFicha = '';
+    if (fichasAtivas.length > 0) {
+      const ficha = fichasAtivas[0];
+      nomeFicha = ficha.get('nome_ficha') || 'Ficha Atual';
+      const dataTermino = ficha.get('data_termino');
+      if (dataTermino && new Date(dataTermino) < new Date(hojeStr)) {
+        fichaStatus = 'VENCIDA';
+      } else {
+        fichaStatus = 'ATIVA';
+      }
+    }
+
+    // Dias sem acessar o app
+    let diasSemAcessar = 99;
+    if (ultimoAcessoStr) {
+      const diffTime = agora - new Date(ultimoAcessoStr);
+      diasSemAcessar = Math.max(0, Math.floor(diffTime / 86400000));
+    } else if (dataCriacao) {
+      // Tentar converter data de criação no formato DD/MM/YYYY ou ISO
+      let dtCria = new Date(dataCriacao);
+      if (isNaN(dtCria.getTime()) && dataCriacao.includes('/')) {
+        const partes = dataCriacao.split(' ')[0].split('/');
+        dtCria = new Date(`${partes[2]}-${partes[1]}-${partes[0]}T00:00:00`);
+      }
+      if (!isNaN(dtCria.getTime())) {
+        diasSemAcessar = Math.max(0, Math.floor((agora - dtCria) / 86400000));
+      }
+    }
+
+    // Treinos Histórico
+    const treinosAluno = histTreinosRows
+      .filter(r => r.get('user_id') === id)
+      .map(r => ({
+        data: r.get('data'),
+        duracao_seg: Number(r.get('duracao_seg')) || 0,
+        volume_total: Number(r.get('volume_total')) || 0
+      }))
+      .sort((a, b) => new Date(b.data) - new Date(a.data));
+
+    let ultimoTreinoData = '';
+    let diasSemTreinar = null;
+    let freqSemana = 0;
+    let freqMes = 0;
+    let treinosMesAtual = 0;
+    let volumeMes = 0;
+
+    const mesAtual = agora.getMonth();
+    const anoAtual = agora.getFullYear();
+
+    treinosAluno.forEach(t => {
+      const dt = new Date(t.data + 'T12:00:00');
+      if (!ultimoTreinoData) {
+        ultimoTreinoData = t.data;
+        diasSemTreinar = Math.max(0, Math.floor((agora - dt) / 86400000));
+      }
+      if (dt >= seteDiasAtras) freqSemana++;
+      if (dt >= trintaDiasAtras) freqMes++;
+      if (dt.getMonth() === mesAtual && dt.getFullYear() === anoAtual) {
+        treinosMesAtual++;
+        volumeMes += t.volume_total;
+      }
+    });
+
+    // Cálculo de Streaks (Semanas consecutivas) e Maior Streak
+    let streakAtual = 0;
+    let maiorStreak = 0;
+    if (treinosAluno.length > 0) {
+      const weekSet = new Set();
+      treinosAluno.forEach(t => {
+        const d = new Date(t.data + 'T12:00:00');
+        const fd = new Date(d.getFullYear(), 0, 1);
+        const wn = Math.ceil((((d - fd) / 86400000) + fd.getDay() + 1) / 7);
+        weekSet.add(`${d.getFullYear()}-${wn}`);
+      });
+
+      // Calcular Streak Atual
+      const currentWeekD = new Date(agora);
+      const fdCurr = new Date(currentWeekD.getFullYear(), 0, 1);
+      const wnCurr = Math.ceil((((currentWeekD - fdCurr) / 86400000) + fdCurr.getDay() + 1) / 7);
+      let checkWeekStr = `${currentWeekD.getFullYear()}-${wnCurr}`;
+      let checkDate = new Date(currentWeekD);
+
+      while (weekSet.has(checkWeekStr)) {
+        streakAtual++;
+        checkDate.setDate(checkDate.getDate() - 7);
+        const fd2 = new Date(checkDate.getFullYear(), 0, 1);
+        const wn2 = Math.ceil((((checkDate - fd2) / 86400000) + fd2.getDay() + 1) / 7);
+        checkWeekStr = `${checkDate.getFullYear()}-${wn2}`;
+      }
+      if (streakAtual === 0) {
+        // Testa a semana anterior se ainda não treinou na semana corrente
+        let prevDate = new Date(currentWeekD);
+        prevDate.setDate(prevDate.getDate() - 7);
+        const fdPrev = new Date(prevDate.getFullYear(), 0, 1);
+        const wnPrev = Math.ceil((((prevDate - fdPrev) / 86400000) + fdPrev.getDay() + 1) / 7);
+        let prevWeekStr = `${prevDate.getFullYear()}-${wnPrev}`;
+        while (weekSet.has(prevWeekStr)) {
+          streakAtual++;
+          prevDate.setDate(prevDate.getDate() - 7);
+          const fd2 = new Date(prevDate.getFullYear(), 0, 1);
+          const wn2 = Math.ceil((((prevDate - fd2) / 86400000) + fd2.getDay() + 1) / 7);
+          prevWeekStr = `${prevDate.getFullYear()}-${wn2}`;
+        }
+      }
+
+      // Calcular Maior Streak na História
+      const weeksArr = Array.from(weekSet).sort();
+      let tempStreak = 0;
+      let lastYearWeek = null;
+      weeksArr.forEach(w => {
+        const [ano, semana] = w.split('-').map(Number);
+        if (!lastYearWeek) {
+          tempStreak = 1;
+        } else {
+          const [lastAno, lastSemana] = lastYearWeek;
+          const isNext = (ano === lastAno && semana === lastSemana + 1) || (ano === lastAno + 1 && semana === 1);
+          if (isNext) tempStreak++;
+          else tempStreak = 1;
+        }
+        if (tempStreak > maiorStreak) maiorStreak = tempStreak;
+        lastYearWeek = [ano, semana];
+      });
+      if (streakAtual > maiorStreak) maiorStreak = streakAtual;
+    }
+
+    // Evolução de Peso
+    const pesosAluno = histPesoRows
+      .filter(r => r.get('user_id') === id)
+      .map(r => ({
+        data_registro: r.get('data_registro'),
+        peso: Number(String(r.get('peso')).replace(',', '.')) || 0
+      }))
+      .filter(r => r.peso > 0)
+      .sort((a, b) => new Date(a.data_registro) - new Date(b.data_registro));
+
+    let pesoAtual = pesoAnamnese;
+    let pesoInicial = pesoAnamnese;
+    let dataUltimoPeso = '';
+    let graficoPeso = [];
+
+    if (pesoAnamnese > 0) {
+      graficoPeso.push({ data: 'Inicial', peso: pesoAnamnese });
+    }
+
+    if (pesosAluno.length > 0) {
+      pesoAtual = pesosAluno[pesosAluno.length - 1].peso;
+      if (pesoInicial === 0) pesoInicial = pesosAluno[0].peso;
+      dataUltimoPeso = pesosAluno[pesosAluno.length - 1].data_registro;
+
+      pesosAluno.slice(-5).forEach(p => {
+        const d = new Date(p.data_registro);
+        const diaMes = (!isNaN(d.getTime())) ? `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}` : 'Atual';
+        graficoPeso.push({ data: diaMes, peso: p.peso });
+      });
+    }
+
+    const variacaoKg = (pesoAtual && pesoInicial && pesoInicial > 0) ? Number((pesoAtual - pesoInicial).toFixed(1)) : 0;
+    const variacaoPct = (pesoAtual && pesoInicial && pesoInicial > 0) ? Number(((variacaoKg / pesoInicial) * 100).toFixed(1)) : 0;
+
+    // Status de Risco (Churn)
+    let statusEngajamento = 'ENGAJADO';
+    if (diasSemTreinar === null || diasSemTreinar > 7 || diasSemAcessar > 15) {
+      statusEngajamento = 'RISCO_ABANDONO';
+    } else if (diasSemTreinar > 3 || diasSemAcessar > 5) {
+      statusEngajamento = 'ALERTA';
+    }
+
+    return {
+      id,
+      nome,
+      email,
+      telefone,
+      objetivo,
+      statusPlano,
+      fichaStatus,
+      nomeFicha,
+      dataCriacao,
+      ultimoAcesso: ultimoAcessoStr || dataCriacao,
+      diasSemAcessar,
+      ultimoTreino: ultimoTreinoData,
+      diasSemTreinar,
+      freqSemana,
+      freqMes,
+      treinosMesAtual,
+      volumeMes,
+      streakAtual,
+      maiorStreak,
+      pesoAtual,
+      pesoInicial,
+      variacaoKg,
+      variacaoPct,
+      dataUltimoPeso,
+      graficoPeso,
+      statusEngajamento
+    };
+  });
+
+  return listaAlunos;
+}
+
+router.get('/acompanhamento-alunos', adminMiddleware, async (req, res) => {
+  try {
+    const listaAlunos = await gerarDadosAcompanhamento();
+    res.json(listaAlunos);
+  } catch (error) {
+    console.error('Erro em /admin/acompanhamento-alunos:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/dashboard-gerencial', adminMiddleware, async (req, res) => {
+  try {
+    const listaAlunos = await gerarDadosAcompanhamento();
+    
+    const totalAtivos = listaAlunos.filter(a => a.statusPlano === 'ASSINANTE').length;
+    const totalTrial = listaAlunos.filter(a => a.statusPlano === 'TRIAL').length;
+    const ativosHoje = listaAlunos.filter(a => a.diasSemAcessar === 0).length;
+    const treinaramHoje = listaAlunos.filter(a => a.diasSemTreinar === 0).length;
+    
+    const inativos7Dias = listaAlunos.filter(a => a.diasSemTreinar === null || a.diasSemTreinar >= 7).length;
+    const semAcesso15Dias = listaAlunos.filter(a => a.diasSemAcessar >= 15).length;
+
+    const totalAlunos = listaAlunos.length || 1;
+    const mediaTreinosSemana = (listaAlunos.reduce((acc, curr) => acc + curr.freqSemana, 0) / totalAlunos).toFixed(1);
+    const mediaTreinosMes = (listaAlunos.reduce((acc, curr) => acc + curr.freqMes, 0) / totalAlunos).toFixed(1);
+
+    const alunosEngajados = listaAlunos.filter(a => a.statusEngajamento === 'ENGAJADO').length;
+    const taxaFrequenciaAtiva = Math.round((alunosEngajados / totalAlunos) * 100);
+
+    // Volume total da plataforma no mês em Toneladas (ou KG)
+    const volumeTotalKg = listaAlunos.reduce((acc, curr) => acc + curr.volumeMes, 0);
+
+    // Evolução Média de Peso
+    const evolucoes = listaAlunos.filter(a => a.variacaoKg !== 0);
+    const evolucaoMediaKg = evolucoes.length > 0 
+      ? (evolucoes.reduce((acc, curr) => acc + curr.variacaoKg, 0) / evolucoes.length).toFixed(1)
+      : '0.0';
+
+    // Últimos alunos cadastrados (5)
+    const ultimosCadastrados = [...listaAlunos].reverse().slice(0, 5).map(a => ({
+      id: a.id,
+      nome: a.nome,
+      dataCriacao: a.dataCriacao,
+      statusPlano: a.statusPlano
+    }));
+
+    // Últimos que atualizaram o peso (5)
+    const ultimosAtualizaramPeso = [...listaAlunos]
+      .filter(a => a.dataUltimoPeso)
+      .sort((a, b) => new Date(b.dataUltimoPeso) - new Date(a.dataUltimoPeso))
+      .slice(0, 5)
+      .map(a => ({
+        id: a.id,
+        nome: a.nome,
+        pesoAtual: a.pesoAtual,
+        variacaoKg: a.variacaoKg,
+        variacaoPct: a.variacaoPct,
+        dataUltimoPeso: a.dataUltimoPeso
+      }));
+
+    res.json({
+      base: {
+        totalAlunos: listaAlunos.length,
+        totalAtivos,
+        totalTrial,
+        ativosHoje,
+        ultimosCadastrados
+      },
+      engajamento: {
+        treinaramHoje,
+        inativos7Dias,
+        semAcesso15Dias,
+        mediaTreinosSemana,
+        mediaTreinosMes,
+        taxaFrequenciaAtiva
+      },
+      evolucao: {
+        evolucaoMediaKg,
+        ultimosAtualizaramPeso
+      },
+      comunidade: {
+        volumeTotalKg
+      }
+    });
+  } catch (error) {
+    console.error('Erro em /admin/dashboard-gerencial:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;

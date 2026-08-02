@@ -22,7 +22,7 @@ router.post('/reset', adminMiddleware, async (req, res) => {
     console.log('[DEMO] Iniciando restauração do ambiente de demonstração...');
 
     // 1. Limpeza
-    const usersSheet = await getSheet('usuarios', ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role', 'trial_expira']);
+    const usersSheet = await getSheet('usuarios', ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role', 'trial_expira', 'ultimo_acesso']);
     const uRows = await usersSheet.getRows();
     const demoUsers = uRows.filter(r => (r.get('email') || '').toLowerCase() === DEMO_EMAIL.toLowerCase());
     

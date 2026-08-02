@@ -754,7 +754,7 @@ router.put('/admin/cobranca/:id/pagar', adminMiddleware, async (req, res) => {
 // ============================================
 // Constantes auxiliares para Trial
 // ============================================
-const USERS_HEADERS = ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role', 'trial_expira'];
+const USERS_HEADERS = ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role', 'trial_expira', 'ultimo_acesso'];
 const CONFIG_HEADERS = ['chave', 'valor'];
 const SOLICITACOES_HEADERS = ['id', 'aluno_id', 'aluno_nome', 'tipo', 'mensagem', 'status', 'data_criacao', 'data_resolucao', 'observacao_admin'];
 

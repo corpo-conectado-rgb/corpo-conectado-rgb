@@ -9,7 +9,7 @@ const { calcularIdade } = require('../utils/dateUtils');
 
 const USERS_SHEET = 'usuarios';
 const ANAMNESE_SHEET = 'anamnese';
-const HEADERS = ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role', 'trial_expira'];
+const HEADERS = ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role', 'trial_expira', 'ultimo_acesso'];
 const ANAMNESE_HEADERS = ['id_usuario', 'idade', 'altura', 'peso', 'sexo', 'objetivo', 'nivel_fisico', 'lesoes_criticas', 'habitos_freq', 'habitos_tempo', 'habitos_local', 'data_nascimento', 'telefone'];
 const DISPOSITIVOS_SHEET = 'dispositivos';
 const DISPOSITIVOS_HEADERS = ['id', 'user_id', 'user_nome', 'user_email', 'device_id', 'device_name', 'codigo_ativacao', 'status', 'data_solicitacao', 'data_autorizacao'];
@@ -17,6 +17,25 @@ const CONFIG_SHEET = 'configuracoes';
 const CONFIG_HEADERS = ['chave', 'valor'];
 const HISTORICO_PESO_SHEET = 'historico_peso';
 const HISTORICO_PESO_HEADERS = ['id', 'user_id', 'peso', 'data_registro'];
+
+async function updateUltimoAcesso(userId) {
+  try {
+    const sheet = await getSheet(USERS_SHEET, HEADERS);
+    const rows = await sheet.getRows();
+    const row = rows.find(r => r.get('id') === userId);
+    if (row) {
+      const agora = new Date().toISOString();
+      const ultimo = row.get('ultimo_acesso') || '';
+      if (!ultimo || ultimo.split('T')[0] !== agora.split('T')[0]) {
+        row.set('ultimo_acesso', agora);
+        await row.save();
+        invalidateCache(USERS_SHEET);
+      }
+    }
+  } catch (e) {
+    console.error('Erro silencioso ao atualizar ultimo_acesso:', e);
+  }
+}
 
 // Função Helper para buscar dados completos de anamnese e impedir repetição de código
 async function fetchCompleteProfile(userRowId) {
@@ -264,6 +283,9 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign({ id: userId, role }, process.env.JWT_SECRET || 'secret_super_seguro_para_desenvolvimento', { expiresIn: '7d' });
     
+    // Registro silencioso do último acesso do aluno
+    updateUltimoAcesso(userId);
+
     const profileData = await fetchCompleteProfile(userId);
 
     res.json({ 
@@ -275,6 +297,7 @@ router.post('/login', async (req, res) => {
         role,
         data_criacao: userRow.get('data_criacao'),
         trial_expira: userRow.get('trial_expira') || '',
+        ultimo_acesso: new Date().toISOString(),
         ...profileData 
       } 
     });
@@ -349,6 +372,9 @@ router.get('/me', authMiddleware, async (req, res) => {
     
     const profileData = await fetchCompleteProfile(userRow.get('id'));
 
+    // Atualização silenciosa do último acesso do usuário logado (máximo de 1x por dia)
+    updateUltimoAcesso(req.user.id);
+
     res.json({
       id: userRow.get('id'),
       nome: userRow.get('nome'),
@@ -356,6 +382,7 @@ router.get('/me', authMiddleware, async (req, res) => {
       role: userRow.get('role') || 'user',
       data_criacao: userRow.get('data_criacao'),
       trial_expira: userRow.get('trial_expira') || '',
+      ultimo_acesso: userRow.get('ultimo_acesso') || new Date().toISOString(),
       ...profileData
     });
   } catch (error) {
