@@ -29,7 +29,40 @@
     <meta property="twitter:image" content="https://corpo-conectado-rgb.vercel.app/og-image.jpg">
   </head>
   <body>
+    <noscript>
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px;font-family:system-ui,sans-serif;text-align:center;background:#111;color:#fff">
+        <h1 style="font-size:20px;font-weight:900;margin-bottom:12px">Corpo Conectado</h1>
+        <p style="font-size:14px;color:#aaa">Ative o JavaScript no seu navegador para acessar o aplicativo.</p>
+      </div>
+    </noscript>
     <div id="root"></div>
+    <script>
+      // Detecção de navegador incompatível (Tailwind v4 requer CSS @property — Chrome 111+, Safari 16.4+, Firefox 128+)
+      (function() {
+        try {
+          if (!CSS || !CSS.supports || !CSS.supports('(--a: 0)') || !window.CSS.registerProperty) {
+            throw 'unsupported';
+          }
+        } catch(e) {
+          document.getElementById('root').innerHTML =
+            '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px;font-family:system-ui,sans-serif;text-align:center;background:#111;color:#fff">' +
+              '<div style="width:64px;height:64px;margin-bottom:24px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);display:flex;align-items:center;justify-content:center">' +
+                '<span style="font-size:28px">⚡</span>' +
+              '</div>' +
+              '<h1 style="font-size:22px;font-weight:900;margin-bottom:8px">Atualize seu navegador</h1>' +
+              '<p style="font-size:14px;color:#aaa;max-width:320px;line-height:1.6;margin-bottom:24px">' +
+                'O <strong style="color:#fff">Corpo Conectado</strong> utiliza tecnologias modernas que seu navegador atual não suporta. ' +
+                'Por favor, atualize o <strong style="color:#fff">Google Chrome</strong> pela Play Store para a versão mais recente.' +
+              '</p>' +
+              '<a href="https://play.google.com/store/apps/details?id=com.android.chrome" ' +
+                'style="display:inline-block;padding:14px 32px;background:#7c3aed;color:#fff;font-weight:800;font-size:14px;border-radius:12px;text-decoration:none">' +
+                'Atualizar Chrome' +
+              '</a>' +
+              '<p style="font-size:11px;color:#555;margin-top:20px">Versão mínima: Chrome 111 · Safari 16.4 · Firefox 128</p>' +
+            '</div>';
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
