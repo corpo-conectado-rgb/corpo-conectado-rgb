@@ -24,12 +24,26 @@ async function updateUltimoAcesso(userId) {
     const rows = await sheet.getRows();
     const row = rows.find(r => r.get('id') === userId);
     if (row) {
-      const agora = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-      const ultimo = row.get('ultimo_acesso') || '';
-      const dataHoje = agora.split(/[,\s]+/)[0];
-      const dataUltima = ultimo.split(/[,\s|T]+/)[0];
-      if (!ultimo || dataUltima !== dataHoje) {
-        row.set('ultimo_acesso', agora);
+      const agora = new Date();
+      const hojeStr = agora.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }); // "DD/MM/YYYY"
+
+      // Normaliza o valor armazenado para DD/MM/YYYY independente do formato original
+      const ultimo = (row.get('ultimo_acesso') || '').trim();
+      let dataUltimaStr = '';
+      if (ultimo) {
+        // Formato ISO: "2026-08-04..." → extrair YYYY-MM-DD e converter para DD/MM/YYYY
+        if (/^\d{4}-\d{2}-\d{2}/.test(ultimo)) {
+          const [ano, mes, dia] = ultimo.split('T')[0].split('-');
+          dataUltimaStr = `${dia}/${mes}/${ano}`;
+        } else {
+          // Formato BR: "04/08/2026, 15:30:00" → extrair DD/MM/YYYY
+          dataUltimaStr = ultimo.split(/[,\s]+/)[0];
+        }
+      }
+
+      if (!ultimo || dataUltimaStr !== hojeStr) {
+        const agoraFormatado = agora.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+        row.set('ultimo_acesso', agoraFormatado);
         await row.save();
         invalidateCache(USERS_SHEET);
       }
