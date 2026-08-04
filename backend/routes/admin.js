@@ -534,6 +534,7 @@ async function gerarDadosAcompanhamento() {
       .filter(r => r.get('user_id') === id)
       .map(r => ({
         data: r.get('data'),
+        hora_fim: r.get('hora_fim') || '',
         duracao_seg: Number(r.get('duracao_seg')) || 0,
         volume_total: Number(r.get('volume_total')) || 0,
         exercicios_feitos: Number(r.get('exercicios_feitos')) || 0,
@@ -584,7 +585,9 @@ async function gerarDadosAcompanhamento() {
     if (ultimoTreinoData && diasSemTreinar !== null) {
       if (diasSemTreinar < diasSemAcessar) {
         diasSemAcessar = diasSemTreinar;
-        ultimoAcessoStr = `${ultimoTreinoData}T12:00:00`;
+        // Usa o horário real de conclusão do treino (hora_fim) ao invés de um horário fixo
+        const horaRealTreino = treinosAluno[0]?.hora_fim || '';
+        ultimoAcessoStr = horaRealTreino ? `${ultimoTreinoData}, ${horaRealTreino}` : `${ultimoTreinoData}`;
       }
     }
 
