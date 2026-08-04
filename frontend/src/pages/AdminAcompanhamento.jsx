@@ -66,7 +66,7 @@ export default function AdminAcompanhamento() {
     return isNaN(d.getTime()) ? null : d;
   };
 
-  // Helper de formatação humanizada de Último Acesso (Hoje às HH:MM, Ontem às HH:MM, Há X dias)
+  // Helper de formatação humanizada de Último Acesso (Hoje, Ontem, Há X dias)
   const formatAcessoHuman = (dateStr, diasBackend) => {
     if (!dateStr) {
       if (diasBackend === 0) return 'Hoje';
@@ -85,19 +85,9 @@ export default function AdminAcompanhamento() {
       const diffDays = Math.round((nowMidnight - refMidnight) / 86400000);
       const dias = Math.max(0, isNaN(diffDays) ? (diasBackend ?? 99) : diffDays);
 
-      const hh = String(d.getHours()).padStart(2, '0');
-      const mm = String(d.getMinutes()).padStart(2, '0');
-      const timeStr = (hh !== '00' || mm !== '00') ? ` às ${hh}:${mm}` : '';
-
-      if (dias === 0) {
-        return `Hoje${timeStr}`;
-      }
-      if (dias === 1) {
-        return `Ontem${timeStr}`;
-      }
-      if (dias > 1 && dias < 90) {
-        return `Há ${dias} dias`;
-      }
+      if (dias === 0) return 'Hoje';
+      if (dias === 1) return 'Ontem';
+      if (dias > 1 && dias < 90) return `Há ${dias} dias`;
       return 'Sem acesso recente';
     } catch (e) {
       return 'Sem acesso recente';
