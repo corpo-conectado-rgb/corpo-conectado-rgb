@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const { getSheet, getCachedRows, invalidateCache } = require('../services/googleSheets');
 const authMiddleware = require('../middlewares/authMiddleware');
 const { calcularIdade } = require('../utils/dateUtils');
+const { updateUltimoAcesso } = require('../services/accessTracker');
 
 const USERS_SHEET = 'usuarios';
 const ANAMNESE_SHEET = 'anamnese';
@@ -17,45 +18,6 @@ const CONFIG_SHEET = 'configuracoes';
 const CONFIG_HEADERS = ['chave', 'valor'];
 const HISTORICO_PESO_SHEET = 'historico_peso';
 const HISTORICO_PESO_HEADERS = ['id', 'user_id', 'peso', 'data_registro'];
-
-async function updateUltimoAcesso(userId) {
-  try {
-    const sheet = await getSheet(USERS_SHEET, HEADERS);
-    const rows = await sheet.getRows();
-    const row = rows.find(r => r.get('id') === userId);
-    if (row) {
-      const agora = new Date();
-
-      // Tenta converter o último acesso salvo para Date para calcular a diferença
-      const ultimo = (row.get('ultimo_acesso') || '').trim();
-      let ultimaDate = null;
-      if (ultimo) {
-        // Formato BR: "04/08/2026, 19:30:00"
-        const matchBr = ultimo.match(/^(\d{2})\/(\d{2})\/(\d{4})[,\s]+(\d{2}):(\d{2}):(\d{2})/);
-        if (matchBr) {
-          ultimaDate = new Date(`${matchBr[3]}-${matchBr[2]}-${matchBr[1]}T${matchBr[4]}:${matchBr[5]}:${matchBr[6]}-03:00`);
-        } else {
-          // Formato ISO: "2026-08-04T12:00:00"
-          const d = new Date(ultimo);
-          if (!isNaN(d.getTime())) ultimaDate = d;
-        }
-      }
-
-      // Atualiza se: nunca registrou, se a data anterior é inválida, ou se passaram mais de 15 minutos
-      const THROTTLE_MS = 15 * 60 * 1000; // 15 minutos
-      const deveAtualizar = !ultimaDate || isNaN(ultimaDate.getTime()) || (agora.getTime() - ultimaDate.getTime()) > THROTTLE_MS;
-
-      if (deveAtualizar) {
-        const agoraFormatado = agora.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-        row.set('ultimo_acesso', agoraFormatado);
-        await row.save();
-        invalidateCache(USERS_SHEET);
-      }
-    }
-  } catch (e) {
-    console.error('Erro silencioso ao atualizar ultimo_acesso:', e);
-  }
-}
 
 // Função Helper para buscar dados completos de anamnese e impedir repetição de código
 async function fetchCompleteProfile(userRowId) {
