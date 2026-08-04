@@ -41,6 +41,9 @@ export const AuthProvider = ({ children }) => {
         setUser(JSON.parse(storageUser));
         setLoading(false); // Render instantly with cached data
         
+        // Registra atividade do aluno (último acesso) de forma independente
+        apiFetch('/auth/heartbeat', { method: 'POST' }).catch(() => {});
+
         // Sync fresh data silently in the background (cold start safe)
         try {
           const data = await apiFetch('/auth/me');

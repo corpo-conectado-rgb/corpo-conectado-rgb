@@ -541,4 +541,15 @@ const handleAtualizacaoPeso = async (req, res) => {
 router.post('/peso', authMiddleware, handleAtualizacaoPeso);
 router.put('/peso', authMiddleware, handleAtualizacaoPeso);
 
+// Endpoint leve para registrar atividade do aluno (último acesso)
+// Chamado pelo frontend a cada abertura do app, sem depender do /me
+router.post('/heartbeat', authMiddleware, async (req, res) => {
+  try {
+    updateUltimoAcesso(req.user.id);
+    res.json({ ok: true });
+  } catch (e) {
+    res.json({ ok: true }); // Nunca falha para o cliente
+  }
+});
+
 module.exports = router;
