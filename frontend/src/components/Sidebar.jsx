@@ -93,11 +93,11 @@ export default function Sidebar({ isOpen, onClose }) {
                     to={item.path}
                     onClick={onClose}
                     className={({ isActive }) => clsx(
-                      isActive ? 'sidebar-item-active' : 'sidebar-item text-gray-400 hover:text-blue-300'
+                      isActive ? 'sidebar-item-active' : 'sidebar-item'
                     )}
                   >
                     <Icon size={18} />
-                    <span className="tracking-wide font-black">{item.name}</span>
+                    <span className="tracking-wide">{item.name}</span>
                   </NavLink>
                 );
               })}
