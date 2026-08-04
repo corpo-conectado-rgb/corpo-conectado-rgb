@@ -23,10 +23,10 @@ export default function Sidebar({ isOpen, onClose }) {
 
   const adminMenu = user?.role === 'admin' ? [
     { name: 'Solicitações', icon: Bell, path: '/admin/solicitacoes' },
-    { name: 'Acompanhamento', icon: Activity, path: '/admin/acompanhamento' },
     { name: 'Gestão de Fichas', icon: FileText, path: '/admin/alunos' },
-    { name: 'Configurações', icon: Settings, path: '/admin/configuracoes' },
-    { name: 'Financeiro', icon: Wallet, path: '/admin/financeiro' }
+    { name: 'Acompanhamento', icon: Activity, path: '/admin/acompanhamento' },
+    { name: 'Financeiro', icon: Wallet, path: '/admin/financeiro' },
+    { name: 'Configurações', icon: Settings, path: '/admin/configuracoes' }
   ] : [];
 
   return (
