@@ -535,7 +535,9 @@ async function gerarDadosAcompanhamento() {
       .map(r => ({
         data: r.get('data'),
         duracao_seg: Number(r.get('duracao_seg')) || 0,
-        volume_total: Number(r.get('volume_total')) || 0
+        volume_total: Number(r.get('volume_total')) || 0,
+        exercicios_feitos: Number(r.get('exercicios_feitos')) || 0,
+        exercicios_total: Number(r.get('exercicios_total')) || 0
       }))
       .sort((a, b) => new Date(b.data) - new Date(a.data));
 
@@ -545,6 +547,8 @@ async function gerarDadosAcompanhamento() {
     let freqMes = 0;
     let treinosMesAtual = 0;
     let volumeMes = 0;
+    let somaFeitos = 0;
+    let somaPrescritos = 0;
 
     const mesAtual = agora.getMonth();
     const anoAtual = agora.getFullYear();
@@ -561,7 +565,19 @@ async function gerarDadosAcompanhamento() {
         treinosMesAtual++;
         volumeMes += t.volume_total;
       }
+      if (t.exercicios_total > 0) {
+        somaFeitos += Math.min(t.exercicios_feitos, t.exercicios_total);
+        somaPrescritos += t.exercicios_total;
+      }
     });
+
+    let eficienciaPct = 0;
+    if (somaPrescritos > 0) {
+      eficienciaPct = Math.round((somaFeitos / somaPrescritos) * 100);
+    } else if (treinosAluno.length > 0) {
+      eficienciaPct = 100;
+    }
+    const totalTreinos = treinosAluno.length;
 
     // Reconciliação lógica de coerência: É impossível ter treinado recentemente e não ter acessado o aplicativo.
     // Se o dia do último treino for mais recente que o último acesso registrado, equalizamos o acesso com o treino.
@@ -702,7 +718,9 @@ async function gerarDadosAcompanhamento() {
       variacaoPct,
       dataUltimoPeso,
       graficoPeso,
-      statusEngajamento
+      statusEngajamento,
+      eficienciaPct,
+      totalTreinos
     };
   });
 
@@ -769,6 +787,44 @@ router.get('/dashboard-gerencial', adminMiddleware, async (req, res) => {
         dataUltimoPeso: a.dataUltimoPeso
       }));
 
+    // TOP 5 RANKINGS PARA PAINEL DE INTELIGÊNCIA ANALÍTICA
+    const top5TreinosMes = [...listaAlunos]
+      .filter(a => a.treinosMesAtual > 0)
+      .sort((a, b) => b.treinosMesAtual - a.treinosMesAtual || b.volumeMes - a.volumeMes)
+      .slice(0, 5)
+      .map(a => ({ id: a.id, nome: a.nome, email: a.email, valor: a.treinosMesAtual, label: `${a.treinosMesAtual} treinos`, totalTreinos: a.totalTreinos }));
+
+    const top5Streak = [...listaAlunos]
+      .filter(a => a.streakAtual > 0 || a.maiorStreak > 0)
+      .sort((a, b) => (b.streakAtual || b.maiorStreak) - (a.streakAtual || a.maiorStreak))
+      .slice(0, 5)
+      .map(a => {
+        const streakVal = a.streakAtual || a.maiorStreak;
+        return { id: a.id, nome: a.nome, email: a.email, valor: streakVal, label: `${streakVal} sem. seguidas`, totalTreinos: a.totalTreinos };
+      });
+
+    const top5Volume = [...listaAlunos]
+      .filter(a => a.volumeMes > 0)
+      .sort((a, b) => b.volumeMes - a.volumeMes)
+      .slice(0, 5)
+      .map(a => {
+        const val = a.volumeMes;
+        const valStr = val >= 1000 ? `${(val / 1000).toFixed(1).replace('.', ',')} t` : `${val} kg`;
+        return { id: a.id, nome: a.nome, email: a.email, valor: val, label: valStr, totalTreinos: a.totalTreinos };
+      });
+
+    const top5Eficiencia = [...listaAlunos]
+      .filter(a => a.totalTreinos > 0 && a.eficienciaPct > 0)
+      .sort((a, b) => {
+        if (b.eficienciaPct !== a.eficienciaPct) {
+          return b.eficienciaPct - a.eficienciaPct;
+        }
+        // Critério de desempate solicitado: quantidade de treinos realizados
+        return b.totalTreinos - a.totalTreinos;
+      })
+      .slice(0, 5)
+      .map(a => ({ id: a.id, nome: a.nome, email: a.email, valor: a.eficienciaPct, label: `${a.eficienciaPct}%`, totalTreinos: a.totalTreinos }));
+
     res.json({
       base: {
         totalAlunos: listaAlunos.length,
@@ -791,6 +847,12 @@ router.get('/dashboard-gerencial', adminMiddleware, async (req, res) => {
       },
       comunidade: {
         volumeTotalKg
+      },
+      top5: {
+        treinosMes: top5TreinosMes,
+        streak: top5Streak,
+        volumeMes: top5Volume,
+        eficiencia: top5Eficiencia
       }
     });
   } catch (error) {

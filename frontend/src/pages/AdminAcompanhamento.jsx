@@ -388,6 +388,223 @@ export default function AdminAcompanhamento() {
                 </div>
               </div>
 
+              {/* BLOCO DESTAQUE: TOP 5 RANKINGS & INTELIGÊNCIA ANALÍTICA */}
+              {dashboard.top5 && (
+                <div>
+                  <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <Trophy size={16} className="text-amber-500" />
+                    Top 5 — Destaques do Mês & Desempenho
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    {/* TOP 1: Constância no Mês */}
+                    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <div className="p-2 bg-purple-50 rounded-xl text-purple-600">
+                              <Dumbbell size={18} />
+                            </div>
+                            <div>
+                              <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider">Treinos no Mês</h3>
+                              <span className="text-[11px] font-semibold text-gray-400">Maior constância no período corrente</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {(!dashboard.top5.treinosMes || dashboard.top5.treinosMes.length === 0) ? (
+                          <div className="py-8 text-center text-gray-400 font-bold text-sm">
+                            Nenhum treino registrado neste mês.
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {(() => {
+                              const maxVal = Math.max(...dashboard.top5.treinosMes.map(x => x.valor), 1);
+                              return dashboard.top5.treinosMes.map((item, i) => {
+                                const pct = Math.max(Math.round((item.valor / maxVal) * 100), 12);
+                                return (
+                                  <div key={item.id} className="space-y-1">
+                                    <div className="flex items-center justify-between text-xs">
+                                      <div className="flex items-center gap-2 truncate pr-2">
+                                        <span className="w-5 font-black text-center text-sm inline-block">
+                                          {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`}
+                                        </span>
+                                        <span className="font-extrabold text-gray-800 truncate">{item.nome}</span>
+                                      </div>
+                                      <span className="font-black text-purple-700 shrink-0">{item.label}</span>
+                                    </div>
+                                    <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                                      <div 
+                                        className="h-full bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full transition-all duration-500"
+                                        style={{ width: `${pct}%` }}
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              });
+                            })()}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* TOP 2: Frequência Consecutiva (Streak) */}
+                    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <div className="p-2 bg-amber-50 rounded-xl text-amber-500">
+                              <Flame size={18} />
+                            </div>
+                            <div>
+                              <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider">Frequência Consecutiva</h3>
+                              <span className="text-[11px] font-semibold text-gray-400">Sequência ininterrupta (Semanas ativas)</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {(!dashboard.top5.streak || dashboard.top5.streak.length === 0) ? (
+                          <div className="py-8 text-center text-gray-400 font-bold text-sm">
+                            Nenhum aluno com sequência consecutiva ativa.
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {(() => {
+                              const maxVal = Math.max(...dashboard.top5.streak.map(x => x.valor), 1);
+                              return dashboard.top5.streak.map((item, i) => {
+                                const pct = Math.max(Math.round((item.valor / maxVal) * 100), 12);
+                                return (
+                                  <div key={item.id} className="space-y-1">
+                                    <div className="flex items-center justify-between text-xs">
+                                      <div className="flex items-center gap-2 truncate pr-2">
+                                        <span className="w-5 font-black text-center text-sm inline-block">
+                                          {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`}
+                                        </span>
+                                        <span className="font-extrabold text-gray-800 truncate">{item.nome}</span>
+                                      </div>
+                                      <span className="font-black text-amber-600 shrink-0">{item.label}</span>
+                                    </div>
+                                    <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                                      <div 
+                                        className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500"
+                                        style={{ width: `${pct}%` }}
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              });
+                            })()}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* TOP 3: Volume Total Movimentado no Mês */}
+                    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <div className="p-2 bg-blue-50 rounded-xl text-blue-600">
+                              <BarChart3 size={18} />
+                            </div>
+                            <div>
+                              <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider">Volume Carga (Mês)</h3>
+                              <span className="text-[11px] font-semibold text-gray-400">Total de carga movimentada em kg / toneladas</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {(!dashboard.top5.volumeMes || dashboard.top5.volumeMes.length === 0) ? (
+                          <div className="py-8 text-center text-gray-400 font-bold text-sm">
+                            Nenhum volume de treino registrado neste mês.
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {(() => {
+                              const maxVal = Math.max(...dashboard.top5.volumeMes.map(x => x.valor), 1);
+                              return dashboard.top5.volumeMes.map((item, i) => {
+                                const pct = Math.max(Math.round((item.valor / maxVal) * 100), 12);
+                                return (
+                                  <div key={item.id} className="space-y-1">
+                                    <div className="flex items-center justify-between text-xs">
+                                      <div className="flex items-center gap-2 truncate pr-2">
+                                        <span className="w-5 font-black text-center text-sm inline-block">
+                                          {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`}
+                                        </span>
+                                        <span className="font-extrabold text-gray-800 truncate">{item.nome}</span>
+                                      </div>
+                                      <span className="font-black text-blue-700 shrink-0">{item.label}</span>
+                                    </div>
+                                    <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                                      <div 
+                                        className="h-full bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full transition-all duration-500"
+                                        style={{ width: `${pct}%` }}
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              });
+                            })()}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* TOP 4: Eficiência de Conclusão */}
+                    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <div className="p-2 bg-emerald-50 rounded-xl text-emerald-600">
+                              <Award size={18} />
+                            </div>
+                            <div>
+                              <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider">Eficiência nos Treinos</h3>
+                              <span className="text-[11px] font-semibold text-gray-400">% de exercícios concluídos (desempate: nº de treinos)</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {(!dashboard.top5.eficiencia || dashboard.top5.eficiencia.length === 0) ? (
+                          <div className="py-8 text-center text-gray-400 font-bold text-sm">
+                            Nenhuma sessão concluída para avaliar eficiência.
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {dashboard.top5.eficiencia.map((item, i) => {
+                              const pct = Math.max(Math.min(item.valor, 100), 12);
+                              return (
+                                <div key={item.id} className="space-y-1">
+                                  <div className="flex items-center justify-between text-xs">
+                                    <div className="flex items-center gap-2 truncate pr-2">
+                                      <span className="w-5 font-black text-center text-sm inline-block">
+                                        {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`}
+                                      </span>
+                                      <span className="font-extrabold text-gray-800 truncate">{item.nome}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                      <span className="text-[10px] font-bold text-gray-400">({item.totalTreinos} treinos)</span>
+                                      <span className="font-black text-emerald-700">{item.label}</span>
+                                    </div>
+                                  </div>
+                                  <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                                    <div 
+                                      className="h-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full transition-all duration-500"
+                                      style={{ width: `${pct}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              )}
+
               {/* BLOCO 2: ENGAGEMENT & RETENÇÃO (TERMÔMETRO DA ACADEMIA) */}
               <div>
                 <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
