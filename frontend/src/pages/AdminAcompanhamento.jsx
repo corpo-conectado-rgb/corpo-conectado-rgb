@@ -269,7 +269,6 @@ export default function AdminAcompanhamento() {
                 {filteredAlunos.map(a => {
                   const isGain = a.variacaoKg > 0;
                   const isStable = Math.abs(a.variacaoKg) < 0.1;
-                  const isAtivoHoje = a.diasSemAcessar === 0 || a.diasSemTreinar === 0;
 
                   return (
                     <div 
@@ -277,34 +276,8 @@ export default function AdminAcompanhamento() {
                       onClick={() => setSelectedAluno(a)}
                       className="bg-white hover:bg-purple-50/20 rounded-2xl border border-gray-200/80 p-5 shadow-xs hover:shadow-md hover:border-purple-300 transition-all cursor-pointer flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-6 group"
                     >
-                      {/* Coluna 1: Nome e Status */}
+                      {/* Coluna 1: Nome e Email */}
                       <div className="w-full lg:w-3/12 min-w-[210px]">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          {isAtivoHoje ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/80">
-                              🟢 Ativo hoje
-                            </span>
-                          ) : a.statusEngajamento === 'ALERTA' ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/80">
-                              🟡 Inativo ({a.diasSemTreinar !== null ? `${a.diasSemTreinar}d` : '---'})
-                            </span>
-                          ) : a.statusEngajamento === 'RISCO_ABANDONO' ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-red-600 bg-red-50 px-2.5 py-0.5 rounded-full border border-red-200/80">
-                              🔴 Inativo ({a.diasSemTreinar !== null ? `${a.diasSemTreinar}d` : '---'})
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full">
-                              ⚪ Inativo hoje
-                            </span>
-                          )}
-
-                          {a.statusPlano === 'TRIAL' && (
-                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 uppercase tracking-tight">
-                              Trial
-                            </span>
-                          )}
-                        </div>
-                        
                         <h3 className="text-base font-black text-gray-900 tracking-tight group-hover:text-purple-700 transition line-clamp-1">
                           {a.nome}
                         </h3>
