@@ -287,61 +287,50 @@ export default function AdminAcompanhamento() {
                       </div>
 
                       {/* Colunas Centrais: Indicadores Horizontais Rápida Leitura */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 lg:gap-6 flex-1 w-full border-t border-b lg:border-y-0 border-gray-100 py-3 lg:py-0">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4 flex-1 w-full border-t border-b lg:border-y-0 border-gray-100 py-3 lg:py-0">
                         
-                        {/* 1. Último acesso */}
+                        {/* 1. Acesso */}
                         <div>
-                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">
-                            📅 Último Acesso
+                          <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block mb-0.5">
+                            Acesso
                           </span>
-                          <span className={`text-sm font-black ${a.diasSemAcessar > 15 ? 'text-red-600' : 'text-gray-800'}`}>
+                          <span className={`text-sm font-black truncate block ${a.diasSemAcessar > 15 ? 'text-red-600' : 'text-gray-900'}`}>
                             {formatAcessoHuman(a.ultimoAcesso, a.diasSemAcessar)}
                           </span>
                         </div>
 
-                        {/* 2. Último treino */}
+                        {/* 2. Treino */}
                         <div>
-                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">
-                            🏋️ Último Treino
+                          <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block mb-0.5">
+                            Treino
                           </span>
-                          <span className={`text-sm font-black ${a.diasSemTreinar > 7 ? 'text-red-600' : 'text-gray-800'}`}>
+                          <span className={`text-sm font-black truncate block ${a.diasSemTreinar > 7 ? 'text-red-600' : 'text-gray-900'}`}>
                             {formatTreinoHuman(a.diasSemTreinar, a.ultimoTreino)}
                           </span>
                         </div>
 
                         {/* 3. Frequência */}
                         <div>
-                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">
-                            📈 Frequência
+                          <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block mb-0.5">
+                            Frequência
                           </span>
-                          <span className="text-sm font-black text-gray-800 block">
-                            {a.freqSemana === 1 ? '1 treino esta semana' : `${a.freqSemana} treinos esta sem.`}
-                          </span>
-                          <span className="text-[10px] font-bold text-gray-400 block -mt-0.5">
-                            ({a.treinosMesAtual}x no mês)
+                          <span className="text-sm font-black text-gray-900 truncate block">
+                            {a.freqSemana || 0}x semana
                           </span>
                         </div>
 
-                        {/* 4. Peso e Variação */}
+                        {/* 4. Peso */}
                         <div>
-                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">
-                            ⚖️ Peso
+                          <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block mb-0.5">
+                            Peso
                           </span>
-                          <div className="flex flex-col items-start gap-1">
-                            <span className="text-sm font-black text-gray-900 leading-none">
+                          <div className="flex items-baseline gap-1.5 truncate">
+                            <span className="text-sm font-black text-gray-900">
                               {formatNumBr(a.pesoAtual)} kg
                             </span>
-                            
-                            {/* Tag roxa suave neutra (Padrão Corpo Conectado) */}
-                            {isStable ? (
-                              <span className="text-[10px] font-extrabold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                                Estável
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-black bg-purple-500/15 text-purple-700 border border-purple-200/50 leading-none">
-                                <span className="text-[9px]">{isGain ? '▲' : '▼'}</span>
-                                <span>{isGain ? `+${formatNumBr(a.variacaoKg)} kg` : `${formatNumBr(a.variacaoKg)} kg`}</span>
-                                <span className="opacity-80">({isGain ? `+${formatNumBr(a.variacaoPct)}%` : `${formatNumBr(a.variacaoPct)}%`})</span>
+                            {!isStable && (
+                              <span className="text-xs font-semibold text-gray-500">
+                                ({isGain ? `+${formatNumBr(a.variacaoKg)}` : `${formatNumBr(a.variacaoKg)}`})
                               </span>
                             )}
                           </div>
