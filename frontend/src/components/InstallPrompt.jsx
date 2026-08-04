@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Download, Share, PlusSquare, ChevronRight } from 'lucide-react';
+import { X, Download, Share, PlusSquare, ChevronRight, AlertCircle } from 'lucide-react';
 
 // Detecta plataforma
 const isIOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent);
 const isAndroid = () => /Android/i.test(navigator.userAgent);
 const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+const isSafari = () => /Safari/i.test(navigator.userAgent) && !/CriOS|FxiOS|OPiOS|EdgiOS|Chrome/i.test(navigator.userAgent);
 
 const STORAGE_KEY = '@CorpoConectado:installDismissed';
 const DISMISS_DAYS = 7;
 
 export default function InstallPrompt() {
   const [show, setShow] = useState(false);
-  const [platform, setPlatform] = useState('unknown'); // 'android' | 'ios' | 'unknown'
+  const [platform, setPlatform] = useState('unknown'); // 'android' | 'ios' | 'ios-not-safari' | 'unknown'
   const [isInstalling, setIsInstalling] = useState(false);
   const [installSuccess, setInstallSuccess] = useState(false);
   const deferredPromptRef = useRef(null);
@@ -30,7 +31,11 @@ export default function InstallPrompt() {
 
     // Detect platform
     if (isIOS()) {
-      setPlatform('ios');
+      if (isSafari()) {
+        setPlatform('ios');
+      } else {
+        setPlatform('ios-not-safari');
+      }
       // Show after a short delay
       const timer = setTimeout(() => setShow(true), 3000);
       return () => clearTimeout(timer);
@@ -104,8 +109,36 @@ export default function InstallPrompt() {
           Acesse mais rápido direto da sua tela inicial, como um app nativo.
         </p>
 
-        {platform === 'ios' ? (
-          /* ─── iOS Instructions ─── */
+        {platform === 'ios-not-safari' ? (
+          /* ─── iOS but NOT Safari ─── */
+          <div className="space-y-3 mb-5">
+            <div className="flex items-start gap-3 p-4 bg-amber-50 rounded-xl border border-amber-100">
+              <AlertCircle size={20} className="text-amber-500 shrink-0 mt-0.5" />
+              <div className="text-left">
+                <p className="text-sm font-bold text-amber-800">Abra no Safari</p>
+                <p className="text-xs text-amber-600 mt-1 leading-relaxed">
+                  No iPhone, a instalação de aplicativos web só funciona pelo <strong>Safari</strong>. 
+                  Copie o link abaixo e abra no Safari para instalar.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl">
+              <code className="text-[11px] font-bold text-gray-600 flex-1 text-left truncate">corpo-conectado-rgb.vercel.app</code>
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText('https://corpo-conectado-rgb.vercel.app');
+                  const btn = document.getElementById('copy-btn');
+                  if (btn) { btn.textContent = 'Copiado!'; setTimeout(() => { btn.textContent = 'Copiar'; }, 2000); }
+                }}
+                id="copy-btn"
+                className="px-3 py-1.5 bg-purple-600 text-white text-xs font-bold rounded-lg shrink-0 active:scale-95 transition-transform"
+              >
+                Copiar
+              </button>
+            </div>
+          </div>
+        ) : platform === 'ios' ? (
+          /* ─── iOS Safari Instructions ─── */
           <div className="space-y-4 text-left mb-5">
             <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
               <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center shrink-0 mt-0.5">
@@ -154,7 +187,7 @@ export default function InstallPrompt() {
                 <p className="text-sm font-bold text-gray-900">Instalando...</p>
                 <p className="text-xs text-gray-500 text-center mt-1">Aguarde. Isso pode levar alguns segundos dependendo da conexão.</p>
               </div>
-            ) : (
+            ) : deferredPromptRef.current ? (
               <button
                 onClick={handleInstall}
                 className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-white bg-purple-600 hover:bg-purple-700 active:scale-[0.98] transition-all text-sm shadow-lg shadow-purple-600/20"
@@ -162,6 +195,21 @@ export default function InstallPrompt() {
                 <Download size={18} />
                 Instalar Agora
               </button>
+            ) : (
+              /* Fallback: beforeinstallprompt não disparou */
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl text-left">
+                  <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-sm">⋮</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">Instalar pelo Menu</p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Toque nos <span className="font-bold text-gray-700">3 pontos (⋮)</span> no canto superior do Chrome e selecione <span className="font-bold text-gray-700">"Instalar app"</span> ou <span className="font-bold text-gray-700">"Adicionar à tela inicial"</span>.
+                    </p>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         )}
