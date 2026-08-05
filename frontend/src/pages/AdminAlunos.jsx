@@ -418,23 +418,18 @@ export default function AdminAlunos() {
       {/* Data Grid / Tabela — Scroll interno independente */}
       <div className="flex-1 min-h-0 px-6 lg:px-8 xl:px-10 pb-6 lg:pb-8">
         <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm h-full flex flex-col">
-          {/* Cabeçalho da tabela — Fixo (Apenas Desktop) */}
-          <div className="flex-shrink-0 overflow-x-auto hidden lg:block">
-            <table className="w-full text-left border-collapse min-w-[800px]">
-              <thead>
-                <tr className="bg-[#FAFAFA] border-b border-gray-100 text-[10px] uppercase font-black tracking-widest text-gray-400">
-                  <th className="px-5 py-3 w-[30%]">Aluno & Contato</th>
-                  <th className="px-5 py-3 w-[25%]">Foco & Perfil</th>
-                  <th className="px-5 py-3 w-[20%]">Status</th>
-                  <th className="px-5 py-3 w-[15%] text-center">Início Cadastro</th>
-                  <th className="px-5 py-3 text-center">Ações</th>
+          {/* Tabela Unificada com Sticky Header (Apenas Desktop) */}
+          <div className="flex-1 overflow-y-auto overflow-x-hidden hidden lg:block">
+            <table className="w-full text-left border-collapse table-fixed">
+              <thead className="sticky top-0 z-10 bg-[#FAFAFA] border-b border-gray-100 text-[10px] uppercase font-black tracking-widest text-gray-400 shadow-2xs">
+                <tr>
+                  <th className="px-4 py-3.5 w-[28%]">Aluno & Contato</th>
+                  <th className="px-4 py-3.5 w-[22%]">Foco & Perfil</th>
+                  <th className="px-4 py-3.5 w-[18%]">Status</th>
+                  <th className="px-4 py-3.5 w-[14%] text-center">Início Cadastro</th>
+                  <th className="px-4 py-3.5 w-[18%] text-center">Ações</th>
                 </tr>
               </thead>
-            </table>
-          </div>
-          {/* Corpo da tabela — Scroll (Apenas Desktop) */}
-          <div className="flex-1 overflow-y-auto overflow-x-auto hidden lg:block">
-            <table className="w-full text-left border-collapse min-w-[800px]">
               <tbody className="divide-y divide-gray-100/60">
                 {loading ? (
                   <tr>
@@ -448,38 +443,38 @@ export default function AdminAlunos() {
                   alunosFiltrados.map((aluno) => (
                     <tr key={aluno.id} className="hover:bg-gray-50/80 transition-all duration-300 group">
                       {/* INFO ATLETA */}
-                      <td className="px-5 py-3 w-[30%]">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-700 font-bold text-sm shadow-sm group-hover:bg-white group-hover:border-gray-300 transition-all duration-300">
+                      <td className="px-4 py-3 w-[28%] min-w-0">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-700 font-bold text-sm shadow-2xs group-hover:bg-white group-hover:border-gray-300 transition-all duration-300 shrink-0">
                              {aluno.nome ? aluno.nome.charAt(0).toUpperCase() : '?'}
                           </div>
-                          <div>
-                            <div className="text-[13px] font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                          <div className="min-w-0 flex-1">
+                            <div className="text-[13px] font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate">
                               {aluno.nome || 'Sem Nome'}
                             </div>
-                            <div className="text-[11px] text-gray-400 font-medium">{aluno.email}</div>
+                            <div className="text-[11px] text-gray-400 font-medium truncate">{aluno.email}</div>
                           </div>
                         </div>
                       </td>
 
                       {/* DADOS FÍSICOS/MÉDICOS */}
-                      <td className="px-5 py-3 w-[25%]">
+                      <td className="px-4 py-3 w-[22%] min-w-0">
                         {aluno.objetivo ? (
-                          <div className="flex flex-col gap-1">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-100 text-gray-600 border border-gray-200/60 w-fit">
+                          <div className="flex flex-col gap-1 min-w-0">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-100 text-gray-600 border border-gray-200/60 w-fit truncate max-w-full">
                               {aluno.objetivo}
                             </span>
-                            <span className="text-[11px] font-medium text-gray-400">{aluno.idade || '--'} anos • {aluno.peso ? `${aluno.peso}kg` : '--'} • Nível: {aluno.nivel_fisico}</span>
+                            <span className="text-[11px] font-medium text-gray-400 truncate max-w-full block">{aluno.idade || '--'} anos • {aluno.peso ? `${aluno.peso}kg` : '--'} • Nível: {aluno.nivel_fisico}</span>
                           </div>
                         ) : (
-                          <span className="inline-block bg-amber-50 text-amber-600 text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded border border-amber-200/50">
+                          <span className="inline-block bg-amber-50 text-amber-600 text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded border border-amber-200/50 truncate max-w-full">
                             Pendente Anamnese
                           </span>
                         )}
                       </td>
 
                       {/* STATUS TREINO */}
-                      <td className="px-5 py-3 w-[20%]">
+                      <td className="px-4 py-3 w-[18%] min-w-0">
                         {aluno.status_treino === 'ATIVO' ? (() => {
                           const diasRest = calcDiasRestantes(aluno.data_termino);
                           const hasDuracao = diasRest !== null;
@@ -490,7 +485,7 @@ export default function AdminAlunos() {
                           const diasText = style?.text || 'text-emerald-600';
 
                           return (
-                            <div className="flex flex-col gap-1">
+                            <div className="flex flex-col gap-1 min-w-0">
                               <span className={`inline-flex items-center whitespace-nowrap gap-1.5 text-[10px] font-bold uppercase tracking-wider ${badgeBg} px-2.5 py-1 rounded-full border ${badgeBorder} w-fit`}>
                                 <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`}></span>
                                 <span className="text-gray-700">Ativo</span>
@@ -507,24 +502,24 @@ export default function AdminAlunos() {
                             </div>
                           );
                         })() : (
-                          <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full border border-gray-200/60">
+                          <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full border border-gray-200/60 w-fit">
                             <span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span> Sem Treino
                           </span>
                         )}
                       </td>
 
                       {/* DATA INSCRIÇÃO */}
-                      <td className="px-5 py-3 text-center w-[15%]">
+                      <td className="px-4 py-3 text-center w-[14%] whitespace-nowrap">
                          <span className="text-[11px] font-medium text-gray-400">{aluno.data_criacao ? aluno.data_criacao.split(',')[0].split(' ')[0] : '--'}</span>
                       </td>
 
                       {/* AÇÕES */}
-                      <td className="px-5 py-3 text-center">
-                        <div className="flex items-center justify-center gap-2">
+                      <td className="px-4 py-3 text-center w-[18%]">
+                        <div className="flex items-center justify-center gap-1.5">
                           {aluno.status_treino === 'ATIVO' ? (
                             <button 
                               onClick={() => openDrawer(aluno)}
-                              className="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-500 hover:text-black hover:bg-gray-50 transition active:scale-95 shrink-0 shadow-sm"
+                              className="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-500 hover:text-black hover:bg-gray-50 transition active:scale-95 shrink-0 shadow-2xs"
                               title="Ver Ficha Ativa"
                             >
                               <Eye size={14} />
@@ -534,7 +529,7 @@ export default function AdminAlunos() {
                           )}
                           <button 
                             onClick={() => navigate(`/admin/prescricao/${aluno.id}`)}
-                            className={`flex justify-center items-center gap-1.5 w-[85px] py-1.5 rounded-lg text-[10px] uppercase tracking-wider font-bold transition shadow-sm ${aluno.status_treino === 'ATIVO' ? 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' : 'bg-black text-white hover:bg-gray-800 border border-black'}`}
+                            className={`flex justify-center items-center gap-1.5 w-[82px] py-1.5 rounded-lg text-[10px] uppercase tracking-wider font-bold transition shadow-2xs shrink-0 ${aluno.status_treino === 'ATIVO' ? 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' : 'bg-black text-white hover:bg-gray-800 border border-black'}`}
                           >
                             <FileText size={12} className={aluno.status_treino === 'ATIVO' ? 'text-gray-500' : 'text-white'} /> {aluno.status_treino === 'ATIVO' ? 'Editar' : 'Ficha'}
                           </button>
