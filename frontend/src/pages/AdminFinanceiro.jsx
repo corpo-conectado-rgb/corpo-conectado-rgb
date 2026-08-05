@@ -383,6 +383,7 @@ export default function AdminFinanceiro() {
               </div>
             </div>
             <p className="text-lg lg:text-xl font-black text-gray-900">{qtdTrialAtivo}</p>
+          </div>
         </div>
 
         {/* ===================== CARDS DE ALUNOS ===================== */}
