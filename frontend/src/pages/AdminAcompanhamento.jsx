@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Users, Activity, TrendingUp, AlertTriangle, ShieldCheck, Clock, 
+  Users, Activity, TrendingUp, ShieldCheck, Clock, 
   Search, RefreshCw, Calendar, ArrowUpRight, Flame, Trophy, 
   Dumbbell, UserCheck, UserX, BarChart3, ChevronRight, Weight, X, ExternalLink, Phone, Mail, Award, Filter, ChevronDown, Check
 } from 'lucide-react';
@@ -557,100 +557,6 @@ export default function AdminAcompanhamento() {
                   </div>
                 </div>
               )}
-
-              {/* BLOCO 2: ENGAGEMENT & RETENÇÃO (TERMÔMETRO DA ACADEMIA) */}
-              <div>
-                <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                  <Flame size={16} className="text-amber-500" />
-                  Saúde de Engajamento & Frequência
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  
-                  {/* Card de Frequência e Treinaram Hoje */}
-                  <div className="bg-slate-900 text-white p-6 rounded-2xl shadow-md flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-extrabold text-purple-300 uppercase tracking-wider">Treinos Realizados Hoje</span>
-                        <Dumbbell className="text-purple-400" size={20} />
-                      </div>
-                      <div className="text-5xl font-black text-white mt-4">{dashboard.engajamento.treinaramHoje}</div>
-                      <p className="text-xs text-slate-400 mt-2">Sessões completadas por alunos nesta data</p>
-                    </div>
-
-                    <div className="mt-6 pt-4 border-t border-slate-800 grid grid-cols-2 gap-3 text-center">
-                      <div className="bg-slate-800/60 p-2.5 rounded-xl">
-                        <span className="text-[10px] font-bold text-slate-400 block uppercase">Média na Semana</span>
-                        <span className="text-lg font-black text-purple-300">{formatNumBr(dashboard.engajamento.mediaTreinosSemana)}x /aluno</span>
-                      </div>
-                      <div className="bg-slate-800/60 p-2.5 rounded-xl">
-                        <span className="text-[10px] font-bold text-slate-400 block uppercase">Média no Mês</span>
-                        <span className="text-lg font-black text-purple-300">{formatNumBr(dashboard.engajamento.mediaTreinosMes)}x /aluno</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Card de Risco Crítico e Abandono */}
-                  <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-xs flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-xs font-black text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
-                        <AlertTriangle size={16} className="text-red-500" />
-                        Alerta de Inatividade & Evasão
-                      </h3>
-
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between p-3 rounded-xl bg-red-50/70 border border-red-100">
-                          <div>
-                            <span className="text-sm font-black text-gray-900 block">7+ Dias Sem Treinar</span>
-                            <span className="text-xs font-semibold text-red-600">Recomendado contato de acompanhamento</span>
-                          </div>
-                          <span className="text-2xl font-black text-red-600">{dashboard.engajamento.inativos7Dias}</span>
-                        </div>
-
-                        <div className="flex items-center justify-between p-3 rounded-xl bg-amber-50/70 border border-amber-100">
-                          <div>
-                            <span className="text-sm font-black text-gray-900 block">15+ Dias Sem Abrir o App</span>
-                            <span className="text-xs font-semibold text-amber-700">Inativos de longa data</span>
-                          </div>
-                          <span className="text-2xl font-black text-amber-700">{dashboard.engajamento.semAcesso15Dias}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => { setActiveTab('alunos'); setFilterRisco('RISCO_ABANDONO'); }}
-                      className="mt-4 w-full py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-black uppercase tracking-wider transition text-center cursor-pointer"
-                    >
-                      Filtrar e Acompanhar Alunos em Risco
-                    </button>
-                  </div>
-
-                  {/* Card: Volume da Plataforma e Taxa Ativa */}
-                  <div className="bg-gradient-to-br from-purple-900 via-indigo-950 to-slate-950 text-white p-6 rounded-2xl shadow-lg flex flex-col justify-between relative overflow-hidden">
-                    <div className="relative z-10">
-                      <span className="text-xs font-extrabold text-purple-300 uppercase tracking-widest">Carga Movimentada pela Comunidade</span>
-                      <div className="text-4xl font-black text-white mt-3">
-                        {dashboard.comunidade.volumeTotalKg >= 1000 
-                          ? `${formatNumBr((dashboard.comunidade.volumeTotalKg / 1000).toFixed(1))} t`
-                          : `${formatNumBr(dashboard.comunidade.volumeTotalKg)} kg`}
-                      </div>
-                      <p className="text-xs text-purple-200 mt-1 font-medium">
-                        Volume total em toneladas levantadas nos treinos deste mês!
-                      </p>
-                    </div>
-
-                    <div className="relative z-10 mt-6 pt-4 border-t border-purple-800/40">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-purple-300 uppercase">Taxa de Engajamento Ativo</span>
-                        <span className="text-xl font-black text-emerald-400">{dashboard.engajamento.taxaFrequenciaAtiva}%</span>
-                      </div>
-                      <div className="w-full bg-purple-950 rounded-full h-2.5 mt-2 overflow-hidden border border-purple-800/30">
-                        <div className="bg-emerald-400 h-2.5 rounded-full" style={{ width: `${dashboard.engajamento.taxaFrequenciaAtiva}%` }}></div>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
 
               {/* BLOCO 3: FEEDS DE CADASTRO RECENTE & EVOLUÇÃO DE PESO */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
