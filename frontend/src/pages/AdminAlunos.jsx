@@ -415,221 +415,151 @@ export default function AdminAlunos() {
         </div>
       </div>
 
-      {/* Data Grid / Tabela — Scroll interno independente */}
-      <div className="flex-1 min-h-0 px-6 lg:px-8 xl:px-10 pb-6 lg:pb-8">
-        <div className="bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm h-full flex flex-col">
-          {/* Tabela Unificada com Sticky Header (Apenas Desktop) */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden hidden lg:block">
-            <table className="w-full text-left border-collapse table-fixed">
-              <thead className="sticky top-0 z-10 bg-[#FAFAFA] border-b border-gray-100 text-[10px] uppercase font-black tracking-widest text-gray-400 shadow-2xs">
-                <tr>
-                  <th className="px-4 py-3.5 w-[28%]">Aluno & Contato</th>
-                  <th className="px-4 py-3.5 w-[22%]">Foco & Perfil</th>
-                  <th className="px-4 py-3.5 w-[18%]">Status</th>
-                  <th className="px-4 py-3.5 w-[14%] text-center">Início Cadastro</th>
-                  <th className="px-4 py-3.5 w-[18%] text-center">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100/60">
-                {loading ? (
-                  <tr>
-                    <td colSpan="5" className="px-6 py-12 text-center text-gray-400 font-bold">Carregando banco biológico...</td>
-                  </tr>
-                ) : alunosFiltrados.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="px-6 py-12 text-center text-gray-400 font-bold">Nenhum atleta encontrado na base de dados.</td>
-                  </tr>
-                ) : (
-                  alunosFiltrados.map((aluno) => (
-                    <tr key={aluno.id} className="hover:bg-gray-50/80 transition-all duration-300 group">
-                      {/* INFO ATLETA */}
-                      <td className="px-4 py-3 w-[28%] min-w-0">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-700 font-bold text-sm shadow-2xs group-hover:bg-white group-hover:border-gray-300 transition-all duration-300 shrink-0">
-                             {aluno.nome ? aluno.nome.charAt(0).toUpperCase() : '?'}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="text-[13px] font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate">
-                              {aluno.nome || 'Sem Nome'}
-                            </div>
-                            <div className="text-[11px] text-gray-400 font-medium truncate">{aluno.email}</div>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* DADOS FÍSICOS/MÉDICOS */}
-                      <td className="px-4 py-3 w-[22%] min-w-0">
-                        {aluno.objetivo ? (
-                          <div className="flex flex-col gap-1 min-w-0">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-gray-100 text-gray-600 border border-gray-200/60 w-fit truncate max-w-full">
-                              {aluno.objetivo}
-                            </span>
-                            <span className="text-[11px] font-medium text-gray-400 truncate max-w-full block">{aluno.idade || '--'} anos • {aluno.peso ? `${aluno.peso}kg` : '--'} • Nível: {aluno.nivel_fisico}</span>
-                          </div>
-                        ) : (
-                          <span className="inline-block bg-amber-50 text-amber-600 text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded border border-amber-200/50 truncate max-w-full">
-                            Pendente Anamnese
-                          </span>
-                        )}
-                      </td>
-
-                      {/* STATUS TREINO */}
-                      <td className="px-4 py-3 w-[18%] min-w-0">
-                        {aluno.status_treino === 'ATIVO' ? (() => {
-                          const diasRest = calcDiasRestantes(aluno.data_termino);
-                          const hasDuracao = diasRest !== null;
-                          const style = hasDuracao ? getDiasRestantesStyle(diasRest) : null;
-                          const dotColor = style?.dot || 'bg-emerald-400';
-                          const badgeBg = style?.bg || 'bg-emerald-50';
-                          const badgeBorder = style?.border || 'border-emerald-100';
-                          const diasText = style?.text || 'text-emerald-600';
-
-                          return (
-                            <div className="flex flex-col gap-1 min-w-0">
-                              <span className={`inline-flex items-center whitespace-nowrap gap-1.5 text-[10px] font-bold uppercase tracking-wider ${badgeBg} px-2.5 py-1 rounded-full border ${badgeBorder} w-fit`}>
-                                <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`}></span>
-                                <span className="text-gray-700">Ativo</span>
-                                {hasDuracao && (
-                                  <>
-                                    <span className="text-gray-300">–</span>
-                                    <span className={`${diasText} font-bold`}>
-                                      {diasRest <= 0 ? 'Expirada' : `${diasRest} dias`}
-                                    </span>
-                                  </>
-                                )}
-                              </span>
-                              <span className="text-[11px] font-medium text-gray-400 truncate max-w-[140px] mt-0.5">{aluno.ficha_nome}</span>
-                            </div>
-                          );
-                        })() : (
-                          <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full border border-gray-200/60 w-fit">
-                            <span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span> Sem Treino
-                          </span>
-                        )}
-                      </td>
-
-                      {/* DATA INSCRIÇÃO */}
-                      <td className="px-4 py-3 text-center w-[14%] whitespace-nowrap">
-                         <span className="text-[11px] font-medium text-gray-400">{aluno.data_criacao ? aluno.data_criacao.split(',')[0].split(' ')[0] : '--'}</span>
-                      </td>
-
-                      {/* AÇÕES */}
-                      <td className="px-4 py-3 text-center w-[18%]">
-                        <div className="flex items-center justify-center gap-1.5">
-                          {aluno.status_treino === 'ATIVO' ? (
-                            <button 
-                              onClick={() => openDrawer(aluno)}
-                              className="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-500 hover:text-black hover:bg-gray-50 transition active:scale-95 shrink-0 shadow-2xs"
-                              title="Ver Ficha Ativa"
-                            >
-                              <Eye size={14} />
-                            </button>
-                          ) : (
-                            <div className="w-8 h-8 shrink-0"></div>
-                          )}
-                          <button 
-                            onClick={() => navigate(`/admin/prescricao/${aluno.id}`)}
-                            className={`flex justify-center items-center gap-1.5 w-[82px] py-1.5 rounded-lg text-[10px] uppercase tracking-wider font-bold transition shadow-2xs shrink-0 ${aluno.status_treino === 'ATIVO' ? 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50' : 'bg-black text-white hover:bg-gray-800 border border-black'}`}
-                          >
-                            <FileText size={12} className={aluno.status_treino === 'ATIVO' ? 'text-gray-500' : 'text-white'} /> {aluno.status_treino === 'ATIVO' ? 'Editar' : 'Ficha'}
-                          </button>
-                          <button
-                            onClick={() => setAlunoParaExcluir(aluno)}
-                            className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 border border-red-100 text-red-500 hover:text-white hover:bg-red-500 transition-all opacity-0 group-hover:opacity-100 active:scale-95 shrink-0"
-                            title="Excluir Aluno"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+      {/* Lista Vertical de Cards Horizontais (Padrão Acompanhamento) */}
+      <div className="flex-1 min-h-0 px-6 lg:px-8 xl:px-10 pb-6 lg:pb-8 overflow-y-auto custom-scrollbar">
+        {loading ? (
+          <div className="bg-white p-12 rounded-2xl border border-gray-200 text-center text-gray-400 font-bold">
+            Carregando banco biológico...
           </div>
+        ) : alunosFiltrados.length === 0 ? (
+          <div className="bg-white p-12 rounded-2xl border border-gray-200 text-center text-gray-400 font-bold">
+            Nenhum atleta encontrado na base de dados.
+          </div>
+        ) : (
+          <div className="flex flex-col space-y-3.5">
+            {alunosFiltrados.map((aluno) => {
+              const isAtivo = aluno.status_treino === 'ATIVO';
+              const diasRest = calcDiasRestantes(aluno.data_termino);
+              const hasDuracao = diasRest !== null;
+              const style = hasDuracao ? getDiasRestantesStyle(diasRest) : null;
+              const dotColor = style?.dot || 'bg-emerald-400';
+              const badgeBg = style?.bg || 'bg-emerald-50';
+              const badgeBorder = style?.border || 'border-emerald-100';
+              const diasText = style?.text || 'text-emerald-600';
 
-          {/* Corpo em Cards (Apenas Mobile) */}
-          <div className="flex-1 overflow-y-auto block lg:hidden p-4 space-y-4">
-            {loading ? (
-              <div className="py-12 text-center text-gray-400 font-bold">Carregando banco biológico...</div>
-            ) : alunosFiltrados.length === 0 ? (
-              <div className="py-12 text-center text-gray-400 font-bold">Nenhum atleta encontrado na base de dados.</div>
-            ) : (
-              alunosFiltrados.map((aluno) => {
-                const isAtivo = aluno.status_treino === 'ATIVO';
-                const diasRest = calcDiasRestantes(aluno.data_termino);
-                const hasDuracao = diasRest !== null;
-                const style = hasDuracao ? getDiasRestantesStyle(diasRest) : null;
-                
-                return (
-                  <div key={aluno.id} className="bg-white border border-gray-100 rounded-2xl p-3 shadow-sm flex flex-col gap-3">
-                    {/* Header do Card (Avatar + Info) */}
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-100 via-blue-50 to-white border border-blue-200/60 flex items-center justify-center text-blue-700 font-black text-sm shadow-sm shrink-0">
-                         {aluno.nome ? aluno.nome.charAt(0).toUpperCase() : '?'}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[13px] font-black text-gray-900 truncate">
-                          {aluno.nome || 'Sem Nome'}
-                        </div>
-                        <div className="text-[10px] text-gray-500 font-medium truncate">{aluno.email}</div>
-                      </div>
-                      <button
-                        onClick={() => setAlunoParaExcluir(aluno)}
-                        className="w-8 h-8 flex items-center justify-center rounded-xl bg-red-50 border border-red-100 text-red-500 active:scale-95 shrink-0"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+              return (
+                <div 
+                  key={aluno.id} 
+                  onClick={() => isAtivo ? openDrawer(aluno) : navigate(`/admin/prescricao/${aluno.id}`)}
+                  className="bg-white hover:bg-gray-50/70 rounded-2xl border border-gray-200/80 p-5 shadow-xs hover:shadow-md hover:border-gray-300 transition-all cursor-pointer flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-6 group"
+                >
+                  {/* Coluna 1: Avatar, Nome e Email */}
+                  <div className="flex items-center gap-3.5 w-full lg:w-4/12 min-w-[250px] pr-2">
+                    <div className="w-11 h-11 rounded-xl bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-700 font-extrabold text-sm shadow-2xs group-hover:bg-black group-hover:text-white group-hover:border-black transition-all duration-300 shrink-0">
+                      {aluno.nome ? aluno.nome.charAt(0).toUpperCase() : '?'}
                     </div>
-
-                    {/* Tags e Dados */}
-                    <div className="flex flex-wrap gap-2">
-                      {aluno.objetivo ? (
-                        <span className="inline-flex items-center px-2 py-1 rounded-md text-[9px] uppercase tracking-widest font-black bg-gray-900 text-white shadow-sm">
-                          {aluno.objetivo}
-                        </span>
-                      ) : (
-                        <span className="inline-flex bg-amber-50 text-amber-600 text-[9px] uppercase font-black tracking-widest px-2 py-1 rounded-md border border-amber-200/50">
-                          Pend. Anamnese
-                        </span>
-                      )}
-                      
-                      {isAtivo ? (
-                        <span className={`inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest ${style?.bg || 'bg-emerald-50'} px-2 py-1 rounded-md border ${style?.border || 'border-emerald-100'}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${style?.dot || 'bg-emerald-400'}`}></span>
-                          {hasDuracao && diasRest <= 0 ? 'Expirada' : 'Ativo'}
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest bg-gray-100 text-gray-500 px-2 py-1 rounded-md">
-                          Sem Treino
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Ações */}
-                    <div className="flex items-center gap-2 pt-1 border-t border-gray-50 mt-1">
-                      {isAtivo && (
-                        <button 
-                          onClick={() => openDrawer(aluno)}
-                          className="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-50 border border-gray-200 text-gray-500 active:scale-95 shrink-0"
-                        >
-                          <Eye size={16} />
-                        </button>
-                      )}
-                      <button 
-                        onClick={() => navigate(`/admin/prescricao/${aluno.id}`)}
-                        className="flex-1 flex justify-center items-center gap-2 bg-black text-white h-10 rounded-xl text-[10px] uppercase tracking-widest font-black active:scale-95 shadow-md"
-                      >
-                        <FileText size={12} fill="white" /> {isAtivo ? 'Editar Ficha' : 'Nova Ficha'}
-                      </button>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-base font-black text-gray-900 tracking-tight group-hover:text-black transition truncate">
+                        {aluno.nome || 'Sem Nome'}
+                      </h3>
+                      <span className="text-xs font-semibold text-gray-400 block mt-0.5 truncate">
+                        {aluno.email}
+                      </span>
                     </div>
                   </div>
-                );
-              })
-            )}
+
+                  {/* Colunas Centrais: 3 Indicadores Horizontais (Foco/Perfil, Status Ficha e Início) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 lg:gap-6 flex-1 w-full border-t border-b lg:border-y-0 border-gray-100 py-3.5 lg:py-0">
+                    
+                    {/* 1. Foco & Perfil */}
+                    <div>
+                      <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block mb-1">
+                        Foco / Perfil
+                      </span>
+                      {aluno.objetivo ? (
+                        <div className="flex flex-col gap-1">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] uppercase font-bold tracking-wider bg-gray-100 text-gray-700 border border-gray-200/60 w-fit truncate max-w-full">
+                            {aluno.objetivo}
+                          </span>
+                          <span className="text-[11px] font-semibold text-gray-500 truncate block">
+                            {aluno.idade || '--'} anos · {aluno.peso ? `${aluno.peso}kg` : '--'} · Nível {aluno.nivel_fisico || '--'}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="inline-block bg-amber-50 text-amber-600 text-[10px] uppercase font-extrabold tracking-widest px-2.5 py-1 rounded-md border border-amber-200/50 w-fit">
+                          Pendente Anamnese
+                        </span>
+                      )}
+                    </div>
+
+                    {/* 2. Status Ficha */}
+                    <div>
+                      <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block mb-1">
+                        Status do Treino
+                      </span>
+                      {isAtivo ? (
+                        <div className="flex flex-col gap-1">
+                          <span className={`inline-flex items-center whitespace-nowrap gap-1.5 text-[10px] font-bold uppercase tracking-wider ${badgeBg} px-2.5 py-0.5 rounded-full border ${badgeBorder} w-fit`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
+                            <span className="text-gray-800 font-bold">Ativo</span>
+                            {hasDuracao && (
+                              <>
+                                <span className="text-gray-300">·</span>
+                                <span className={`${diasText} font-black`}>
+                                  {diasRest <= 0 ? 'Expirada' : `${diasRest} dias`}
+                                </span>
+                              </>
+                            )}
+                          </span>
+                          <span className="text-[11px] font-bold text-gray-600 truncate block mt-0.5 max-w-[180px]">
+                            {aluno.ficha_nome || 'Ficha Ativa'}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full border border-gray-200/60 w-fit">
+                          <span className="w-1.5 h-1.5 rounded-full bg-gray-400" /> Sem Treino
+                        </span>
+                      )}
+                    </div>
+
+                    {/* 3. Cadastro */}
+                    <div>
+                      <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block mb-1">
+                        Início Cadastro
+                      </span>
+                      <span className="text-sm font-black text-gray-900 block mt-1">
+                        {aluno.data_criacao ? aluno.data_criacao.split(',')[0].split(' ')[0] : '--'}
+                      </span>
+                    </div>
+
+                  </div>
+
+                  {/* Botão à direita + Ações */}
+                  <div className="flex items-center justify-end w-full lg:w-auto shrink-0 gap-2 pt-1 lg:pt-0">
+                    {isAtivo && (
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); openDrawer(aluno); }}
+                        className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-600 hover:text-black hover:bg-gray-100 hover:border-gray-300 transition active:scale-95 shrink-0 shadow-2xs"
+                        title="Ver Ficha Ativa"
+                      >
+                        <Eye size={16} />
+                      </button>
+                    )}
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); navigate(`/admin/prescricao/${aluno.id}`); }}
+                      className={`flex justify-center items-center gap-2 h-10 px-4 rounded-xl text-xs uppercase tracking-wider font-extrabold transition shadow-sm shrink-0 flex-1 sm:flex-initial ${
+                        isAtivo
+                          ? 'bg-white border border-gray-200 text-gray-800 hover:bg-gray-900 hover:text-white hover:border-gray-900'
+                          : 'bg-black text-white hover:bg-gray-800 border border-black shadow-md shadow-black/10'
+                      }`}
+                    >
+                      <FileText size={14} className={isAtivo ? "group-hover:text-current" : "text-white"} />
+                      <span>{isAtivo ? 'Editar' : 'Ficha'}</span>
+                      <span className="text-sm leading-none ml-0.5 group-hover:translate-x-0.5 transition-transform">→</span>
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setAlunoParaExcluir(aluno); }}
+                      className="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50/80 border border-red-100 text-red-500 hover:text-white hover:bg-red-500 transition-all active:scale-95 shrink-0"
+                      title="Excluir Aluno"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
+        )}
       </div>
       {/* ── DRAWER DE VISUALIZAÇÃO DE FICHA ───────────────────────────────── */}
       {drawerAluno && (
