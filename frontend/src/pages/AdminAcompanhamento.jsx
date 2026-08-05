@@ -138,41 +138,31 @@ export default function AdminAcompanhamento() {
           </p>
         </div>
 
-        {/* Botões de Navegação entre Abas - Icones com Tooltip no Hover */}
-        <div className="flex items-center gap-2 bg-gray-100 p-1.5 rounded-xl self-start md:self-auto">
-          <div className="relative group">
-            <button
-              onClick={() => setActiveTab('alunos')}
-              title="Acompanhamento de Alunos"
-              className={`flex items-center justify-center p-3 rounded-lg transition ${
-                activeTab === 'alunos' 
-                  ? 'bg-[var(--color-noir-navy)] text-white shadow-md' 
-                  : 'text-gray-500 hover:text-gray-900 hover:bg-white/60'
-              }`}
-            >
-              <Users size={20} />
-            </button>
-            <span className="pointer-events-none absolute -bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2.5 py-1 text-xs font-semibold text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 shadow-lg z-50">
-              Acompanhamento de Alunos
-            </span>
-          </div>
+        {/* Botões de Navegação entre Abas - Elegantes, com texto e sem corte de tooltips */}
+        <div className="flex items-center gap-2 bg-gray-100 p-1.5 rounded-xl self-start md:self-auto shrink-0">
+          <button
+            onClick={() => setActiveTab('alunos')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${
+              activeTab === 'alunos' 
+                ? 'bg-[var(--color-noir-navy)] text-white shadow-md' 
+                : 'text-gray-500 hover:text-gray-900 hover:bg-white/60'
+            }`}
+          >
+            <Users size={18} />
+            <span>Alunos</span>
+          </button>
 
-          <div className="relative group">
-            <button
-              onClick={() => setActiveTab('dashboard')}
-              title="Dashboard Gerencial"
-              className={`flex items-center justify-center p-3 rounded-lg transition ${
-                activeTab === 'dashboard' 
-                  ? 'bg-[var(--color-noir-navy)] text-white shadow-md' 
-                  : 'text-gray-500 hover:text-gray-900 hover:bg-white/60'
-              }`}
-            >
-              <BarChart3 size={20} />
-            </button>
-            <span className="pointer-events-none absolute -bottom-10 right-0 md:left-1/2 md:-translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2.5 py-1 text-xs font-semibold text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 shadow-lg z-50">
-              Dashboard Gerencial
-            </span>
-          </div>
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${
+              activeTab === 'dashboard' 
+                ? 'bg-[var(--color-noir-navy)] text-white shadow-md' 
+                : 'text-gray-500 hover:text-gray-900 hover:bg-white/60'
+            }`}
+          >
+            <BarChart3 size={18} />
+            <span>Dashboard BI</span>
+          </button>
         </div>
       </div>
 
@@ -468,7 +458,7 @@ export default function AdminAcompanhamento() {
                               }));
                               return (
                                 <ResponsiveContainer width="100%" height="100%">
-                                  <BarChart layout="vertical" data={chartData} margin={{ top: 5, right: 95, left: 5, bottom: 5 }}>
+                                  <BarChart layout="vertical" data={chartData} margin={{ top: 5, right: 115, left: 5, bottom: 5 }}>
                                     <defs>
                                       <linearGradient id="pbiOrange" x1="0" y1="0" x2="1" y2="0">
                                         <stop offset="0%" stopColor="#f97316" stopOpacity={0.8} />
@@ -477,7 +467,7 @@ export default function AdminAcompanhamento() {
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
                                     <XAxis type="number" hide />
-                                    <YAxis dataKey="shortName" type="category" stroke="#475569" fontSize={11} fontWeight={700} tickLine={false} axisLine={false} width={105} />
+                                    <YAxis dataKey="shortName" type="category" stroke="#475569" fontSize={11} fontWeight={700} tickLine={false} axisLine={false} width={115} />
                                     <Tooltip content={<PowerBITooltip color="#f97316" />} cursor={{ fill: 'rgba(249, 115, 22, 0.05)', radius: 8 }} />
                                     <Bar dataKey="valor" fill="url(#pbiOrange)" radius={[0, 8, 8, 0]} animationDuration={1400} animationEasing="ease-out" barSize={18} label={{ position: 'right', fill: '#d97706', fontSize: 11, fontWeight: 800, formatter: (val, item) => (item && item.payload ? item.payload.label : val) }} />
                                   </BarChart>
