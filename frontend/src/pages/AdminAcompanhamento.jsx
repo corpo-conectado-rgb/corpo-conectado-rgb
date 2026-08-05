@@ -633,8 +633,8 @@ export default function AdminAcompanhamento() {
                                 rankIcon: i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`
                               }));
                               return (
-                                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 h-auto min-h-[250px]">
-                                  <div className="w-full sm:w-1/2 h-[200px] shrink-0">
+                                <div className="flex flex-col sm:flex-row items-center justify-between gap-5 h-auto min-h-[250px]">
+                                  <div className="w-full sm:w-[160px] md:w-[175px] h-[190px] shrink-0 flex items-center justify-center">
                                     <ResponsiveContainer width="100%" height="100%">
                                       <PieChart>
                                         <Tooltip content={<PowerBITooltip color="#059669" unit="%" />} />
@@ -644,8 +644,8 @@ export default function AdminAcompanhamento() {
                                           nameKey="shortName"
                                           cx="50%"
                                           cy="50%"
-                                          innerRadius={52}
-                                          outerRadius={78}
+                                          innerRadius={46}
+                                          outerRadius={72}
                                           paddingAngle={4}
                                           stroke="none"
                                           animationDuration={1400}
@@ -658,19 +658,22 @@ export default function AdminAcompanhamento() {
                                     </ResponsiveContainer>
                                   </div>
                                   
-                                  {/* Tabela de Legenda no Padrão Looker Studio */}
-                                  <div className="w-full sm:w-1/2 space-y-1.5 max-h-[230px] overflow-y-auto pr-1">
+                                  {/* Tabela de Legenda no Padrão Looker Studio / Power BI */}
+                                  <div className="flex-1 w-full min-w-0 space-y-2 max-h-[235px] overflow-y-auto pr-1">
                                     {chartData.map((item, idx) => (
-                                      <div key={item.id} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 hover:bg-emerald-50/50 border border-slate-100 hover:border-emerald-100 transition-all duration-200 group">
-                                        <div className="flex items-center gap-2 truncate pr-2">
+                                      <div key={item.id} className="flex items-center justify-between py-2 px-3 rounded-xl bg-slate-50 hover:bg-emerald-50/60 border border-slate-100 hover:border-emerald-100 transition-all duration-200 group">
+                                        <div className="flex items-center gap-2.5 min-w-0 pr-2">
                                           <div className="w-2.5 h-2.5 rounded-full shrink-0 shadow-2xs" style={{ backgroundColor: EMERALD_COLORS[idx % EMERALD_COLORS.length] }} />
-                                          <span className="font-bold text-xs text-gray-800 group-hover:text-emerald-950 truncate transition-colors">
-                                            {item.rankIcon} {item.shortName}
+                                          <span className="font-extrabold text-xs text-slate-600 shrink-0">{item.rankIcon}</span>
+                                          <span className="font-bold text-xs sm:text-sm text-gray-900 group-hover:text-emerald-950 truncate transition-colors">
+                                            {item.nome}
                                           </span>
                                         </div>
-                                        <div className="text-right shrink-0 flex items-center gap-2">
-                                          <span className="text-[11px] font-medium text-slate-400">({item.totalTreinos} tr)</span>
-                                          <span className="font-bold text-xs text-emerald-700 min-w-[36px] text-right">{item.label}</span>
+                                        <div className="flex items-center gap-2.5 shrink-0">
+                                          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-white text-slate-600 border border-slate-200/80 shadow-2xs">
+                                            {item.totalTreinos} {item.totalTreinos === 1 ? 'treino' : 'treinos'}
+                                          </span>
+                                          <span className="font-black text-xs sm:text-sm text-emerald-700 min-w-[38px] text-right">{item.label}</span>
                                         </div>
                                       </div>
                                     ))}
