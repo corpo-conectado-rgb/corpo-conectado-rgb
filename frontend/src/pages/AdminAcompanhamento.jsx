@@ -66,33 +66,6 @@ export default function AdminAcompanhamento() {
     return isNaN(d.getTime()) ? null : d;
   };
 
-  // Helper de formatação humanizada de Último Acesso (Hoje, Ontem, Há X dias)
-  const formatAcessoHuman = (dateStr, diasBackend) => {
-    if (!dateStr) {
-      if (diasBackend === 0) return 'Hoje';
-      if (diasBackend === 1) return 'Ontem';
-      if (diasBackend > 1 && diasBackend < 90) return `Há ${diasBackend} dias`;
-      return 'Sem acesso recente';
-    }
-    
-    try {
-      const d = parseDateSafe(dateStr);
-      if (!d || isNaN(d.getTime())) return diasBackend === 0 ? 'Hoje' : diasBackend === 1 ? 'Ontem' : `Há ${diasBackend} dias`;
-
-      const now = new Date();
-      const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const refMidnight = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-      const diffDays = Math.round((nowMidnight - refMidnight) / 86400000);
-      const dias = Math.max(0, isNaN(diffDays) ? (diasBackend ?? 99) : diffDays);
-
-      if (dias === 0) return 'Hoje';
-      if (dias === 1) return 'Ontem';
-      if (dias > 1 && dias < 90) return `Há ${dias} dias`;
-      return 'Sem acesso recente';
-    } catch (e) {
-      return 'Sem acesso recente';
-    }
-  };
 
   // Helper de formatação humanizada de Último Treino (Hoje, Ontem, Há X dias)
   const formatTreinoHuman = (dias, dateStr) => {
@@ -267,7 +240,7 @@ export default function AdminAcompanhamento() {
                       className="bg-white hover:bg-purple-50/20 rounded-2xl border border-gray-200/80 p-5 shadow-xs hover:shadow-md hover:border-purple-300 transition-all cursor-pointer flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-6 group"
                     >
                       {/* Coluna 1: Nome e Email */}
-                      <div className="w-full lg:w-3/12 min-w-[210px]">
+                      <div className="w-full lg:w-4/12 min-w-[250px] pr-2">
                         <h3 className="text-base font-black text-gray-900 tracking-tight group-hover:text-purple-700 transition line-clamp-1">
                           {a.nome}
                         </h3>
@@ -276,20 +249,10 @@ export default function AdminAcompanhamento() {
                         </span>
                       </div>
 
-                      {/* Colunas Centrais: Indicadores Horizontais Rápida Leitura */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4 flex-1 w-full border-t border-b lg:border-y-0 border-gray-100 py-3 lg:py-0">
+                      {/* Colunas Centrais: 3 Indicadores Horizontais (Treino, Frequência e Peso) */}
+                      <div className="grid grid-cols-3 gap-3 md:gap-6 lg:gap-8 flex-1 w-full border-t border-b lg:border-y-0 border-gray-100 py-3 lg:py-0">
                         
-                        {/* 1. Acesso */}
-                        <div>
-                          <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block mb-0.5">
-                            Acesso
-                          </span>
-                          <span className={`text-sm font-black truncate block ${a.diasSemAcessar > 15 ? 'text-red-600' : 'text-gray-900'}`}>
-                            {formatAcessoHuman(a.ultimoAcesso, a.diasSemAcessar)}
-                          </span>
-                        </div>
-
-                        {/* 2. Treino */}
+                        {/* 1. Treino */}
                         <div>
                           <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block mb-0.5">
                             Treino
@@ -299,7 +262,7 @@ export default function AdminAcompanhamento() {
                           </span>
                         </div>
 
-                        {/* 3. Frequência */}
+                        {/* 2. Frequência */}
                         <div>
                           <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block mb-0.5">
                             Frequência
@@ -309,7 +272,7 @@ export default function AdminAcompanhamento() {
                           </span>
                         </div>
 
-                        {/* 4. Peso */}
+                        {/* 3. Peso */}
                         <div>
                           <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block mb-0.5">
                             Peso
