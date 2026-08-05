@@ -6,7 +6,7 @@ import {
   Dumbbell, UserCheck, UserX, BarChart3, ChevronRight, Weight, X, ExternalLink, Phone, Mail, Award, Filter, ChevronDown, Check
 } from 'lucide-react';
 import { 
-  ResponsiveContainer, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, CartesianGrid 
+  ResponsiveContainer, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, CartesianGrid, LabelList 
 } from 'recharts';
 import { apiFetch } from '../services/api';
 
@@ -336,69 +336,141 @@ export default function AdminAcompanhamento() {
            * ABA 2: DASHBOARD GERENCIAL DE BI
            * ============================================================== */
           dashboard && (
-            <div className="space-y-8 max-w-7xl mx-auto">
+            <div className="space-y-10 max-w-7xl mx-auto pb-8">
               
-              {/* BLOCO 1: BASE DE ALUNOS & ENGAGED TODAY */}
-              <div>
-                <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                  <Users size={16} className="text-purple-600" />
-                  Métricas Gerais de Alunos
-                </h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs flex flex-col justify-between">
-                    <span className="text-xs font-extrabold text-gray-400 uppercase">Total de Alunos</span>
-                    <div className="text-3xl font-black text-gray-900 mt-2">{dashboard.base.totalAlunos}</div>
-                    <span className="text-[11px] font-bold text-emerald-600 mt-1">Base ativa cadastrada</span>
+              {/* BLOCO 1: INDICADORES EXECUTIVOS DE BASE & RETENÇÃO */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-1.5 h-5 bg-purple-600 rounded-full" />
+                    <h2 className="text-base font-bold text-gray-900 tracking-tight">
+                      Métricas Gerais de Alunos
+                    </h2>
+                    <span className="text-xs font-semibold px-2.5 py-0.5 bg-purple-50 text-purple-700 rounded-full border border-purple-100/70 ml-1">
+                      Em tempo real
+                    </span>
                   </div>
-                  <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs flex flex-col justify-between">
-                    <span className="text-xs font-extrabold text-gray-400 uppercase">Alunos Assinantes</span>
-                    <div className="text-3xl font-black text-purple-700 mt-2">{dashboard.base.totalAtivos}</div>
-                    <span className="text-[11px] font-bold text-gray-500 mt-1">Com plano pago ativo</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                  
+                  {/* Card 1: Total de Alunos */}
+                  <div className="bg-white rounded-2xl border border-gray-200/80 p-5 shadow-2xs hover:shadow-md hover:border-gray-300 transition-all duration-300 flex flex-col justify-between group">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <span className="text-xs font-semibold text-gray-500 block mb-1">Total de Alunos</span>
+                        <div className="text-3xl lg:text-4xl font-black text-gray-900 tracking-tight my-1.5">
+                          {dashboard.base.totalAlunos}
+                        </div>
+                      </div>
+                      <div className="p-3 bg-purple-50 text-purple-600 rounded-xl border border-purple-100/60 group-hover:scale-105 transition-transform">
+                        <Users size={22} />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 pt-2 border-t border-gray-100 mt-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <span className="text-xs font-medium text-gray-500">Base ativa cadastrada</span>
+                    </div>
                   </div>
-                  <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-xs flex flex-col justify-between">
-                    <span className="text-xs font-extrabold text-gray-400 uppercase">Em Período de Teste</span>
-                    <div className="text-3xl font-black text-blue-600 mt-2">{dashboard.base.totalTrial}</div>
-                    <span className="text-[11px] font-bold text-gray-500 mt-1">Aproveitando o Trial</span>
+
+                  {/* Card 2: Alunos Assinantes */}
+                  <div className="bg-white rounded-2xl border border-gray-200/80 p-5 shadow-2xs hover:shadow-md hover:border-gray-300 transition-all duration-300 flex flex-col justify-between group">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <span className="text-xs font-semibold text-gray-500 block mb-1">Alunos Assinantes</span>
+                        <div className="text-3xl lg:text-4xl font-black text-purple-700 tracking-tight my-1.5">
+                          {dashboard.base.totalAtivos}
+                        </div>
+                      </div>
+                      <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100/60 group-hover:scale-105 transition-transform">
+                        <UserCheck size={22} />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 pt-2 border-t border-gray-100 mt-2">
+                      <span className="text-xs font-medium text-purple-700/80 font-semibold">Com plano pago ativo</span>
+                    </div>
                   </div>
-                  <div className="bg-emerald-500 text-white p-5 rounded-2xl border border-emerald-600 shadow-sm flex flex-col justify-between">
-                    <span className="text-xs font-black uppercase text-emerald-100">Treinos Hoje</span>
-                    <div className="text-4xl font-black mt-2">{dashboard.engajamento?.treinaramHoje || 0}</div>
-                    <span className="text-[11px] font-extrabold text-emerald-100 mt-1">Sessões concluídas hoje</span>
+
+                  {/* Card 3: Em Período de Teste */}
+                  <div className="bg-white rounded-2xl border border-gray-200/80 p-5 shadow-2xs hover:shadow-md hover:border-gray-300 transition-all duration-300 flex flex-col justify-between group">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <span className="text-xs font-semibold text-gray-500 block mb-1">Em Período de Teste</span>
+                        <div className="text-3xl lg:text-4xl font-black text-sky-600 tracking-tight my-1.5">
+                          {dashboard.base.totalTrial}
+                        </div>
+                      </div>
+                      <div className="p-3 bg-sky-50 text-sky-600 rounded-xl border border-sky-100/60 group-hover:scale-105 transition-transform">
+                        <Clock size={22} />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 pt-2 border-t border-gray-100 mt-2">
+                      <span className="text-xs font-medium text-gray-500">Aproveitando o Trial</span>
+                    </div>
                   </div>
+
+                  {/* Card 4: Treinos Hoje (Card Destaque Executivo) */}
+                  <div className="bg-gradient-to-br from-emerald-50/70 via-white to-emerald-50/30 rounded-2xl border border-emerald-200/90 p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl pointer-events-none" />
+                    <div className="flex items-start justify-between gap-4 relative">
+                      <div>
+                        <span className="text-xs font-bold text-emerald-800 block mb-1 uppercase tracking-wide">Treinos Hoje</span>
+                        <div className="text-3xl lg:text-4xl font-black text-emerald-600 tracking-tight my-1.5">
+                          {dashboard.engajamento?.treinaramHoje || 0}
+                        </div>
+                      </div>
+                      <div className="p-3 bg-emerald-500 text-white rounded-xl shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+                        <Dumbbell size={22} />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 pt-2 border-t border-emerald-100 mt-2 relative">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="text-xs font-bold text-emerald-700">Sessões concluídas hoje</span>
+                    </div>
+                  </div>
+
                 </div>
               </div>
 
-              {/* BLOCO DESTAQUE: TOP 5 RANKINGS & INTELIGÊNCIA ANALÍTICA */}
+              {/* BLOCO 2: INTELIGÊNCIA ANALÍTICA & RANKINGS (POWER BI STYLE) */}
               {dashboard.top5 && (
-                <div>
-                  <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <Trophy size={16} className="text-amber-500" />
-                    Top 5 — Destaques do Mês & Desempenho
-                  </h2>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-1.5 h-5 bg-amber-500 rounded-full" />
+                      <h2 className="text-base font-bold text-gray-900 tracking-tight">
+                        Top 5 Destaques & Desempenho
+                      </h2>
+                      <span className="text-xs font-semibold px-2.5 py-0.5 bg-amber-50 text-amber-700 rounded-full border border-amber-100/70 ml-1">
+                        Inteligência Analítica
+                      </span>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     
-                    {/* TOP 1: Constância no Mês (Gráfico de Colunas Verticais com Gradiente) */}
-                    <div className="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden">
+                    {/* TOP 1: Constância no Mês */}
+                    <div className="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-2xs hover:shadow-md hover:border-gray-300/80 transition-all duration-300 flex flex-col justify-between overflow-hidden">
                       <div>
-                        <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-3">
+                        <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-3.5">
                           <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-purple-50 rounded-xl text-purple-600 shadow-xs border border-purple-100/50">
+                            <div className="p-2.5 bg-purple-50 rounded-xl text-purple-600 border border-purple-100/60">
                               <Dumbbell size={20} />
                             </div>
                             <div>
-                              <h3 className="text-sm font-black text-gray-900 uppercase tracking-wide">Treinos no Mês</h3>
-                              <span className="text-xs font-semibold text-gray-400 block mt-0.5">Maior constância de sessões no período corrente</span>
+                              <h3 className="text-sm font-bold text-gray-900 tracking-tight">Treinos no Mês</h3>
+                              <span className="text-xs text-gray-500 font-medium block mt-0.5">Maior constância de sessões no período corrente</span>
                             </div>
                           </div>
-                          <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 uppercase tracking-wider border border-purple-100">Colunas</span>
+                          <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-gray-100 text-gray-600 border border-gray-200/60">Mês Atual</span>
                         </div>
 
                         {(!dashboard.top5.treinosMes || dashboard.top5.treinosMes.length === 0) ? (
-                          <div className="py-12 text-center text-gray-400 font-bold text-sm">
+                          <div className="py-12 text-center text-gray-400 font-medium text-sm">
                             Nenhum treino registrado neste mês.
                           </div>
                         ) : (
-                          <div className="h-[240px] w-full pt-2">
+                          <div className="h-[250px] w-full pt-4">
                             {(() => {
                               const chartData = dashboard.top5.treinosMes.map((item, i) => ({
                                 ...item,
@@ -407,7 +479,7 @@ export default function AdminAcompanhamento() {
                               }));
                               return (
                                 <ResponsiveContainer width="100%" height="100%">
-                                  <BarChart data={chartData} margin={{ top: 15, right: 10, left: -25, bottom: 5 }}>
+                                  <BarChart data={chartData} margin={{ top: 25, right: 10, left: -25, bottom: 5 }}>
                                     <defs>
                                       <linearGradient id="pbiPurple" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.95} />
@@ -415,10 +487,12 @@ export default function AdminAcompanhamento() {
                                       </linearGradient>
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                                    <XAxis dataKey="shortName" stroke="#94a3b8" fontSize={11} fontWeight={700} tickLine={false} axisLine={{ stroke: '#f1f5f9' }} />
-                                    <YAxis stroke="#94a3b8" fontSize={11} fontWeight={700} tickLine={false} axisLine={false} allowDecimals={false} />
-                                    <Tooltip content={<PowerBITooltip color="#8b5cf6" />} cursor={{ fill: 'rgba(139, 92, 246, 0.05)', radius: 8 }} />
-                                    <Bar dataKey="valor" fill="url(#pbiPurple)" radius={[8, 8, 0, 0]} animationDuration={1200} animationEasing="ease-out" maxBarSize={45} />
+                                    <XAxis dataKey="shortName" stroke="#64748b" fontSize={11} fontWeight={600} tickLine={false} axisLine={{ stroke: '#e2e8f0' }} />
+                                    <YAxis stroke="#64748b" fontSize={11} fontWeight={600} tickLine={false} axisLine={false} allowDecimals={false} />
+                                    <Tooltip content={<PowerBITooltip color="#8b5cf6" />} cursor={{ fill: 'rgba(139, 92, 246, 0.04)', radius: 6 }} />
+                                    <Bar dataKey="valor" fill="url(#pbiPurple)" radius={[6, 6, 0, 0]} animationDuration={1200} animationEasing="ease-out" maxBarSize={38}>
+                                      <LabelList dataKey="valor" position="top" fill="#475569" fontSize={12} fontWeight={700} />
+                                    </Bar>
                                   </BarChart>
                                 </ResponsiveContainer>
                               );
@@ -428,28 +502,28 @@ export default function AdminAcompanhamento() {
                       </div>
                     </div>
 
-                    {/* TOP 2: Frequência Consecutiva (Gráfico de Barras Horizontais / Leaderboard) */}
-                    <div className="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden">
+                    {/* TOP 2: Frequência Consecutiva */}
+                    <div className="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-2xs hover:shadow-md hover:border-gray-300/80 transition-all duration-300 flex flex-col justify-between overflow-hidden">
                       <div>
-                        <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-3">
+                        <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-3.5">
                           <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-amber-50 rounded-xl text-amber-500 shadow-xs border border-amber-100/50">
+                            <div className="p-2.5 bg-amber-50 rounded-xl text-amber-500 border border-amber-100/60">
                               <Flame size={20} />
                             </div>
                             <div>
-                              <h3 className="text-sm font-black text-gray-900 uppercase tracking-wide">Frequência Consecutiva</h3>
-                              <span className="text-xs font-semibold text-gray-400 block mt-0.5">Sequência de consistência ininterrupta (Streak)</span>
+                              <h3 className="text-sm font-bold text-gray-900 tracking-tight">Frequência Consecutiva</h3>
+                              <span className="text-xs text-gray-500 font-medium block mt-0.5">Sequência de consistência ininterrupta (Streak)</span>
                             </div>
                           </div>
-                          <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 uppercase tracking-wider border border-amber-100">Barras</span>
+                          <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200/60">Streak Ativo</span>
                         </div>
 
                         {(!dashboard.top5.streak || dashboard.top5.streak.length === 0) ? (
-                          <div className="py-12 text-center text-gray-400 font-bold text-sm">
+                          <div className="py-12 text-center text-gray-400 font-medium text-sm">
                             Nenhum aluno com sequência consecutiva ativa.
                           </div>
                         ) : (
-                          <div className="h-[240px] w-full">
+                          <div className="h-[250px] w-full">
                             {(() => {
                               const chartData = dashboard.top5.streak.map((item, i) => ({
                                 ...item,
@@ -461,15 +535,15 @@ export default function AdminAcompanhamento() {
                                   <BarChart layout="vertical" data={chartData} margin={{ top: 5, right: 115, left: 5, bottom: 5 }}>
                                     <defs>
                                       <linearGradient id="pbiOrange" x1="0" y1="0" x2="1" y2="0">
-                                        <stop offset="0%" stopColor="#f97316" stopOpacity={0.8} />
+                                        <stop offset="0%" stopColor="#f97316" stopOpacity={0.85} />
                                         <stop offset="100%" stopColor="#f59e0b" stopOpacity={1} />
                                       </linearGradient>
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
                                     <XAxis type="number" hide />
-                                    <YAxis dataKey="shortName" type="category" stroke="#475569" fontSize={11} fontWeight={700} tickLine={false} axisLine={false} width={115} />
-                                    <Tooltip content={<PowerBITooltip color="#f97316" />} cursor={{ fill: 'rgba(249, 115, 22, 0.05)', radius: 8 }} />
-                                    <Bar dataKey="valor" fill="url(#pbiOrange)" radius={[0, 8, 8, 0]} animationDuration={1400} animationEasing="ease-out" barSize={18} label={{ position: 'right', fill: '#d97706', fontSize: 11, fontWeight: 800, formatter: (val, item) => (item && item.payload ? item.payload.label : val) }} />
+                                    <YAxis dataKey="shortName" type="category" stroke="#334155" fontSize={12} fontWeight={600} tickLine={false} axisLine={false} width={115} />
+                                    <Tooltip content={<PowerBITooltip color="#f97316" />} cursor={{ fill: 'rgba(249, 115, 22, 0.04)', radius: 6 }} />
+                                    <Bar dataKey="valor" fill="url(#pbiOrange)" radius={[0, 6, 6, 0]} animationDuration={1400} animationEasing="ease-out" barSize={20} label={{ position: 'right', fill: '#d97706', fontSize: 11, fontWeight: 700, formatter: (val, item) => (item && item.payload ? item.payload.label : val) }} />
                                   </BarChart>
                                 </ResponsiveContainer>
                               );
@@ -479,28 +553,28 @@ export default function AdminAcompanhamento() {
                       </div>
                     </div>
 
-                    {/* TOP 3: Volume Total Movimentado no Mês (Gráfico de Área / Evolução de Carga) */}
-                    <div className="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden">
+                    {/* TOP 3: Volume Total Movimentado no Mês */}
+                    <div className="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-2xs hover:shadow-md hover:border-gray-300/80 transition-all duration-300 flex flex-col justify-between overflow-hidden">
                       <div>
-                        <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-3">
+                        <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-3.5">
                           <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-blue-50 rounded-xl text-blue-600 shadow-xs border border-blue-100/50">
+                            <div className="p-2.5 bg-blue-50 rounded-xl text-blue-600 border border-blue-100/60">
                               <BarChart3 size={20} />
                             </div>
                             <div>
-                              <h3 className="text-sm font-black text-gray-900 uppercase tracking-wide">Volume Carga (Mês)</h3>
-                              <span className="text-xs font-semibold text-gray-400 block mt-0.5">Total de carga mecânica movimentada (kg / toneladas)</span>
+                              <h3 className="text-sm font-bold text-gray-900 tracking-tight">Volume de Carga no Mês</h3>
+                              <span className="text-xs text-gray-500 font-medium block mt-0.5">Total de carga mecânica movimentada (kg / toneladas)</span>
                             </div>
                           </div>
-                          <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 uppercase tracking-wider border border-blue-100">Área</span>
+                          <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 border border-blue-200/60">Evolução Carga</span>
                         </div>
 
                         {(!dashboard.top5.volumeMes || dashboard.top5.volumeMes.length === 0) ? (
-                          <div className="py-12 text-center text-gray-400 font-bold text-sm">
+                          <div className="py-12 text-center text-gray-400 font-medium text-sm">
                             Nenhum volume de treino registrado neste mês.
                           </div>
                         ) : (
-                          <div className="h-[240px] w-full pt-2">
+                          <div className="h-[250px] w-full pt-2">
                             {(() => {
                               const chartData = dashboard.top5.volumeMes.map((item, i) => ({
                                 ...item,
@@ -509,18 +583,18 @@ export default function AdminAcompanhamento() {
                               }));
                               return (
                                 <ResponsiveContainer width="100%" height="100%">
-                                  <AreaChart data={chartData} margin={{ top: 15, right: 15, left: -15, bottom: 5 }}>
+                                  <AreaChart data={chartData} margin={{ top: 20, right: 15, left: -15, bottom: 5 }}>
                                     <defs>
                                       <linearGradient id="pbiBlue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#0284c7" stopOpacity={0.85} />
-                                        <stop offset="95%" stopColor="#38bdf8" stopOpacity={0.05} />
+                                        <stop offset="5%" stopColor="#0284c7" stopOpacity={0.75} />
+                                        <stop offset="95%" stopColor="#38bdf8" stopOpacity={0.03} />
                                       </linearGradient>
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                                    <XAxis dataKey="shortName" stroke="#94a3b8" fontSize={11} fontWeight={700} tickLine={false} axisLine={{ stroke: '#f1f5f9' }} />
-                                    <YAxis stroke="#94a3b8" fontSize={11} fontWeight={700} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${Math.round(v/1000)}t` : v} />
+                                    <XAxis dataKey="shortName" stroke="#64748b" fontSize={11} fontWeight={600} tickLine={false} axisLine={{ stroke: '#e2e8f0' }} />
+                                    <YAxis stroke="#64748b" fontSize={11} fontWeight={600} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${Math.round(v/1000)}t` : v} />
                                     <Tooltip content={<PowerBITooltip color="#0284c7" />} />
-                                    <Area type="monotone" dataKey="valor" stroke="#0284c7" strokeWidth={3} fillOpacity={1} fill="url(#pbiBlue)" dot={{ r: 5, stroke: '#fff', strokeWidth: 2, fill: '#0284c7' }} activeDot={{ r: 8, stroke: '#fff', strokeWidth: 2, fill: '#0369a1' }} animationDuration={1500} animationEasing="ease-in-out" />
+                                    <Area type="monotone" dataKey="valor" stroke="#0284c7" strokeWidth={3} fillOpacity={1} fill="url(#pbiBlue)" dot={{ r: 4, stroke: '#fff', strokeWidth: 2, fill: '#0284c7' }} activeDot={{ r: 7, stroke: '#fff', strokeWidth: 2, fill: '#0369a1' }} animationDuration={1500} animationEasing="ease-in-out" />
                                   </AreaChart>
                                 </ResponsiveContainer>
                               );
@@ -530,24 +604,24 @@ export default function AdminAcompanhamento() {
                       </div>
                     </div>
 
-                    {/* TOP 4: Eficiência de Conclusão (Gráfico de Rosca Interativa + Tabela Pareada) */}
-                    <div className="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden">
+                    {/* TOP 4: Eficiência de Conclusão */}
+                    <div className="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-2xs hover:shadow-md hover:border-gray-300/80 transition-all duration-300 flex flex-col justify-between overflow-hidden">
                       <div>
-                        <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-3">
+                        <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-3.5">
                           <div className="flex items-center gap-3">
-                            <div className="p-2.5 bg-emerald-50 rounded-xl text-emerald-600 shadow-xs border border-emerald-100/50">
+                            <div className="p-2.5 bg-emerald-50 rounded-xl text-emerald-600 border border-emerald-100/60">
                               <Award size={20} />
                             </div>
                             <div>
-                              <h3 className="text-sm font-black text-gray-900 uppercase tracking-wide">Eficiência nos Treinos</h3>
-                              <span className="text-xs font-semibold text-gray-400 block mt-0.5">% de exercícios concluídos vs prescritos na ficha</span>
+                              <h3 className="text-sm font-bold text-gray-900 tracking-tight">Eficiência nos Treinos</h3>
+                              <span className="text-xs text-gray-500 font-medium block mt-0.5">% de exercícios concluídos vs prescritos na ficha</span>
                             </div>
                           </div>
-                          <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 uppercase tracking-wider border border-emerald-100">Rosca</span>
+                          <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/60">Meta vs Conclusão</span>
                         </div>
 
                         {(!dashboard.top5.eficiencia || dashboard.top5.eficiencia.length === 0) ? (
-                          <div className="py-12 text-center text-gray-400 font-bold text-sm">
+                          <div className="py-12 text-center text-gray-400 font-medium text-sm">
                             Nenhuma sessão concluída para avaliar eficiência.
                           </div>
                         ) : (
@@ -559,7 +633,7 @@ export default function AdminAcompanhamento() {
                                 rankIcon: i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`
                               }));
                               return (
-                                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 h-auto min-h-[240px]">
+                                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 h-auto min-h-[250px]">
                                   <div className="w-full sm:w-1/2 h-[200px] shrink-0">
                                     <ResponsiveContainer width="100%" height="100%">
                                       <PieChart>
@@ -570,9 +644,9 @@ export default function AdminAcompanhamento() {
                                           nameKey="shortName"
                                           cx="50%"
                                           cy="50%"
-                                          innerRadius={50}
+                                          innerRadius={52}
                                           outerRadius={78}
-                                          paddingAngle={5}
+                                          paddingAngle={4}
                                           stroke="none"
                                           animationDuration={1400}
                                         >
@@ -584,18 +658,19 @@ export default function AdminAcompanhamento() {
                                     </ResponsiveContainer>
                                   </div>
                                   
-                                  {/* Tabela Exclusiva de Legenda e Estatísticas do Donut */}
-                                  <div className="w-full sm:w-1/2 space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                                  {/* Tabela de Legenda no Padrão Looker Studio */}
+                                  <div className="w-full sm:w-1/2 space-y-1.5 max-h-[230px] overflow-y-auto pr-1">
                                     {chartData.map((item, idx) => (
-                                      <div key={item.id} className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50/70 hover:bg-emerald-50/40 border border-gray-100 transition-all duration-200 group">
+                                      <div key={item.id} className="flex items-center justify-between p-2 rounded-xl bg-slate-50 hover:bg-emerald-50/50 border border-slate-100 hover:border-emerald-100 transition-all duration-200 group">
                                         <div className="flex items-center gap-2 truncate pr-2">
-                                          <div className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs" style={{ backgroundColor: EMERALD_COLORS[idx % EMERALD_COLORS.length] }} />
-                                          <span className="font-black text-xs">{item.rankIcon}</span>
-                                          <span className="font-bold text-xs text-gray-800 group-hover:text-emerald-900 truncate transition-colors">{item.shortName}</span>
+                                          <div className="w-2.5 h-2.5 rounded-full shrink-0 shadow-2xs" style={{ backgroundColor: EMERALD_COLORS[idx % EMERALD_COLORS.length] }} />
+                                          <span className="font-bold text-xs text-gray-800 group-hover:text-emerald-950 truncate transition-colors">
+                                            {item.rankIcon} {item.shortName}
+                                          </span>
                                         </div>
-                                        <div className="text-right shrink-0">
-                                          <span className="font-black text-xs text-emerald-700 block leading-tight">{item.label}</span>
-                                          <span className="text-[10px] font-semibold text-gray-400">({item.totalTreinos} treinos)</span>
+                                        <div className="text-right shrink-0 flex items-center gap-2">
+                                          <span className="text-[11px] font-medium text-slate-400">({item.totalTreinos} tr)</span>
+                                          <span className="font-bold text-xs text-emerald-700 min-w-[36px] text-right">{item.label}</span>
                                         </div>
                                       </div>
                                     ))}
