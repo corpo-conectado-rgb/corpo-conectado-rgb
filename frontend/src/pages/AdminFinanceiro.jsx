@@ -308,7 +308,7 @@ export default function AdminFinanceiro() {
         </div>
 
         {/* Busca */}
-        <div className="bg-gray-50 rounded-xl p-3 flex items-center gap-3 mb-5 border border-gray-100">
+        <div className="bg-gray-50 rounded-xl p-3 flex items-center gap-3 border border-gray-100">
           <Search size={18} className="text-gray-400 ml-1 shrink-0" />
           <input
             type="text"
@@ -323,9 +323,12 @@ export default function AdminFinanceiro() {
             </button>
           )}
         </div>
+      </div>
 
+      {/* ===================== ÁREA ROLÁVEL (KPIs + CARDS) ===================== */}
+      <div className="flex-1 min-h-0 px-5 lg:px-8 xl:px-10 pb-5 lg:pb-7 overflow-y-auto custom-scrollbar pt-3">
         {/* ===================== KPIs ===================== */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
           {/* Receita Mensal */}
           <div className="bg-white rounded-xl p-5 border border-emerald-100 shadow-sm shadow-emerald-50 group hover:shadow-md transition-shadow col-span-2 md:col-span-1 flex flex-col justify-center relative overflow-hidden">
             <div className="absolute -bottom-2 -right-2 opacity-10 pointer-events-none">
@@ -380,12 +383,9 @@ export default function AdminFinanceiro() {
               </div>
             </div>
             <p className="text-lg lg:text-xl font-black text-gray-900">{qtdTrialAtivo}</p>
-          </div>
         </div>
-      </div>
 
-      {/* ===================== CARDS DE ALUNOS ===================== */}
-      <div className="flex-1 min-h-0 px-5 lg:px-8 xl:px-10 pb-5 lg:pb-7 overflow-y-auto custom-scrollbar">
+        {/* ===================== CARDS DE ALUNOS ===================== */}
         {alunosFiltrados.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-4">
