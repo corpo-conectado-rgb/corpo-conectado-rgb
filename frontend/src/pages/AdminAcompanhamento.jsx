@@ -361,9 +361,9 @@ export default function AdminAcompanhamento() {
                     <span className="text-[11px] font-bold text-gray-500 mt-1">Aproveitando o Trial</span>
                   </div>
                   <div className="bg-emerald-500 text-white p-5 rounded-2xl border border-emerald-600 shadow-sm flex flex-col justify-between">
-                    <span className="text-xs font-black uppercase text-emerald-100">Alunos Ativos Hoje</span>
-                    <div className="text-4xl font-black mt-2">{dashboard.base.ativosHoje}</div>
-                    <span className="text-[11px] font-extrabold text-emerald-100 mt-1">Acessaram o app hoje</span>
+                    <span className="text-xs font-black uppercase text-emerald-100">Treinos Hoje</span>
+                    <div className="text-4xl font-black mt-2">{dashboard.engajamento?.treinaramHoje || 0}</div>
+                    <span className="text-[11px] font-extrabold text-emerald-100 mt-1">Sessões concluídas hoje</span>
                   </div>
                 </div>
               </div>
