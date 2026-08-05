@@ -22,9 +22,37 @@ let isInitialized = false;
 // Reduz drasticamente as chamadas à API do Google Sheets
 // evitando o erro 429 (Quota exceeded)
 // ============================================
-const CACHE_TTL_MS = 30000; // 30 segundos de cache
+const CACHE_TTL_MS = 300000; // 5 minutos de cache (era 30 segundos)
 const rowsCache = new Map(); // Map<sheetTitle, { data, timestamp }>
 const sheetCache = new Map(); // Map<sheetTitle, sheet>
+const inFlightRequests = new Map(); // Map<sheetTitle, Promise<Array>>
+
+// ============================================
+// Helper para Retry Automático com Backoff Exponencial
+// Evita falhas imediatas em caso de erro 429 (Quota Exceeded)
+// ============================================
+async function retryOperation(fn, retries = 3, delayMs = 1000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      const isQuotaError = error && (
+        String(error.message).includes('429') ||
+        String(error.message).toLowerCase().includes('quota') ||
+        String(error.message).toLowerCase().includes('rate limit') ||
+        (error.response && error.response.status === 429)
+      );
+
+      if (isQuotaError && i < retries - 1) {
+        console.warn(`[GoogleSheets] Quota 429 atingida. Tentando novamente em ${delayMs}ms (Tentativa ${i + 1}/${retries})...`);
+        await new Promise(res => setTimeout(res, delayMs));
+        delayMs *= 2;
+      } else {
+        throw error;
+      }
+    }
+  }
+}
 
 /**
  * Initializes the Google Spreadsheet connection
@@ -39,7 +67,7 @@ async function getDoc() {
   const jwt = new JWT(jwtInfo);
   doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, jwt);
   
-  await doc.loadInfo();
+  await retryOperation(() => doc.loadInfo());
   isInitialized = true;
   return doc;
 }
@@ -60,16 +88,10 @@ async function getSheet(title, headers = []) {
 
   if (!sheet) {
     if (headers.length > 0) {
-      sheet = await document.addSheet({ title, headerValues: headers });
+      sheet = await retryOperation(() => document.addSheet({ title, headerValues: headers }));
     } else {
       throw new Error(`Aba "${title}" não encontrada e sem cabeçalhos definidos para cria-la.`);
     }
-  } else {
-    await sheet.loadHeaderRow().catch(async () => {
-        if (headers.length > 0) {
-           await sheet.setHeaderRow(headers);
-        }
-    });
   }
 
   // Cacheia o objeto sheet
@@ -92,11 +114,32 @@ async function getCachedRows(title, headers = []) {
     return cached.data;
   }
 
-  const sheet = await getSheet(title, headers);
-  const rows = await sheet.getRows();
-  
-  rowsCache.set(key, { data: rows, timestamp: Date.now() });
-  return rows;
+  // Coalescência: Se já existe uma leitura em andamento para esta aba, aguarde o mesmo Promise
+  if (inFlightRequests.has(key)) {
+    return inFlightRequests.get(key);
+  }
+
+  const fetchPromise = (async () => {
+    try {
+      const sheet = await getSheet(title, headers);
+      const rows = await retryOperation(() => sheet.getRows());
+      
+      rowsCache.set(key, { data: rows, timestamp: Date.now() });
+      return rows;
+    } catch (error) {
+      // Fallback: Se o Google der erro de cota 429 mas temos cache antigo, retorne o cache antigo
+      if (cached && cached.data) {
+        console.warn(`[GoogleSheets] Falha ao atualizar '${title}' (${error.message}). Utilizando cache existente por segurança.`);
+        return cached.data;
+      }
+      throw error;
+    } finally {
+      inFlightRequests.delete(key);
+    }
+  })();
+
+  inFlightRequests.set(key, fetchPromise);
+  return fetchPromise;
 }
 
 /**

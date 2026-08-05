@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { getSheet } = require('../services/googleSheets');
+const { getCachedRows } = require('../services/googleSheets');
 const { updateUltimoAcesso } = require('../services/accessTracker');
 
 module.exports = async (req, res, next) => {
@@ -20,8 +20,7 @@ module.exports = async (req, res, next) => {
     }
 
     // Double check with DB in case JWT doesn't have role or was forged
-    const usersSheet = await getSheet('usuarios', ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role']);
-    const userRows = await usersSheet.getRows();
+    const userRows = await getCachedRows('usuarios', ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role']);
     const userRow = userRows.find(r => r.get('id') === decoded.id);
 
     if (userRow && userRow.get('role') === 'admin') {

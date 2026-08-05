@@ -1,4 +1,4 @@
-const { getSheet, invalidateCache } = require('./googleSheets');
+const { getCachedRows, invalidateCache } = require('./googleSheets');
 
 const USERS_SHEET = 'usuarios';
 const HEADERS = ['id', 'nome', 'email', 'senha_hash', 'data_criacao', 'role', 'trial_expira', 'ultimo_acesso'];
@@ -19,17 +19,18 @@ async function updateUltimoAcesso(userId) {
     return;
   }
 
+  // Marca IMEDIATAMENTE no cache da memória ANTES da chamada assíncrona para blindar contra concorrência se o frontend fizer 5 chamadas em paralelo!
+  userDayCache.set(userId, hojeBr);
+
   try {
-    const sheet = await getSheet(USERS_SHEET, HEADERS);
-    const rows = await sheet.getRows();
+    const rows = await getCachedRows(USERS_SHEET, HEADERS);
     const row = rows.find(r => r.get('id') === userId);
     
     if (row) {
       const valorAtual = (row.get('ultimo_acesso') || '').trim();
 
-      // Se a célula na planilha já constar a data de hoje, apenas abastece a RAM para proteger contra novas consultas hoje
+      // Se a célula na planilha já constar a data de hoje, já está salvo
       if (valorAtual.startsWith(hojeBr)) {
-        userDayCache.set(userId, hojeBr);
         return;
       }
 
@@ -37,11 +38,12 @@ async function updateUltimoAcesso(userId) {
       row.set('ultimo_acesso', hojeBr);
       await row.save();
       
-      userDayCache.set(userId, hojeBr);
       invalidateCache(USERS_SHEET);
     }
   } catch (e) {
     console.error('Erro silencioso no rastreador de acesso:', e);
+    // Se falhar de fato à rede, remove do cache para poder tentar na próxima requisição
+    userDayCache.delete(userId);
   }
 }
 
