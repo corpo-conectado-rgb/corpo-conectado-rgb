@@ -5,8 +5,45 @@ import {
   Search, RefreshCw, Calendar, ArrowUpRight, Flame, Trophy, 
   Dumbbell, UserCheck, UserX, BarChart3, ChevronRight, Weight, X, ExternalLink, Phone, Mail, Award, Filter, ChevronDown, Check
 } from 'lucide-react';
-import { ResponsiveContainer, AreaChart, Area, XAxis, Tooltip } from 'recharts';
+import { 
+  ResponsiveContainer, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, CartesianGrid 
+} from 'recharts';
 import { apiFetch } from '../services/api';
+
+// Paleta de cores moderna e executiva para o gráfico de Rosca (Eficiência)
+const EMERALD_COLORS = ['#059669', '#10b981', '#14b8a6', '#0f766e', '#34d399'];
+
+// Componente Tooltip Executivo no estilo Power BI (com sombreamento, ícones e tipografia nítida)
+const PowerBITooltip = ({ active, payload, color = '#8b5cf6', unit = '' }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-white/95 backdrop-blur-md px-3.5 py-2.5 rounded-xl border border-gray-100 shadow-xl shadow-slate-900/10 transition-all z-50">
+        <div className="flex items-center gap-2 mb-1 border-b border-gray-100 pb-1">
+          <span className="text-sm font-black">{data.rankIcon || '🏅'}</span>
+          <span className="text-xs font-black text-gray-900">{data.nome}</span>
+        </div>
+        <div className="flex items-center gap-1.5 pt-0.5">
+          <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
+          <span className="text-xs font-black text-gray-800">{data.label || `${data.valor} ${unit}`}</span>
+          {data.totalTreinos > 0 && (
+            <span className="text-[11px] font-semibold text-gray-400">({data.totalTreinos} treinos)</span>
+          )}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+// Helper para truncar nomes com elegância em rótulos de eixos dos gráficos
+const formatShortName = (fullName) => {
+  if (!fullName) return 'Al.';
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 10);
+  return `${parts[0]} ${parts[1].charAt(0)}.`;
+};
+
 
 export default function AdminAcompanhamento() {
   const [activeTab, setActiveTab] = useState('alunos'); // 'alunos' | 'dashboard'
@@ -348,207 +385,234 @@ export default function AdminAcompanhamento() {
                     <Trophy size={16} className="text-amber-500" />
                     Top 5 — Destaques do Mês & Desempenho
                   </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     
-                    {/* TOP 1: Constância no Mês */}
-                    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs flex flex-col justify-between">
+                    {/* TOP 1: Constância no Mês (Gráfico de Colunas Verticais com Gradiente) */}
+                    <div className="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden">
                       <div>
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <div className="p-2 bg-purple-50 rounded-xl text-purple-600">
-                              <Dumbbell size={18} />
+                        <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-purple-50 rounded-xl text-purple-600 shadow-xs border border-purple-100/50">
+                              <Dumbbell size={20} />
                             </div>
                             <div>
-                              <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider">Treinos no Mês</h3>
-                              <span className="text-[11px] font-semibold text-gray-400">Maior constância no período corrente</span>
+                              <h3 className="text-sm font-black text-gray-900 uppercase tracking-wide">Treinos no Mês</h3>
+                              <span className="text-xs font-semibold text-gray-400 block mt-0.5">Maior constância de sessões no período corrente</span>
                             </div>
                           </div>
+                          <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 uppercase tracking-wider border border-purple-100">Colunas</span>
                         </div>
 
                         {(!dashboard.top5.treinosMes || dashboard.top5.treinosMes.length === 0) ? (
-                          <div className="py-8 text-center text-gray-400 font-bold text-sm">
+                          <div className="py-12 text-center text-gray-400 font-bold text-sm">
                             Nenhum treino registrado neste mês.
                           </div>
                         ) : (
-                          <div className="space-y-4">
+                          <div className="h-[240px] w-full pt-2">
                             {(() => {
-                              const maxVal = Math.max(...dashboard.top5.treinosMes.map(x => x.valor), 1);
-                              return dashboard.top5.treinosMes.map((item, i) => {
-                                const pct = Math.max(Math.round((item.valor / maxVal) * 100), 12);
-                                return (
-                                  <div key={item.id} className="space-y-1">
-                                    <div className="flex items-center justify-between text-xs">
-                                      <div className="flex items-center gap-2 truncate pr-2">
-                                        <span className="w-5 font-black text-center text-sm inline-block">
-                                          {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`}
-                                        </span>
-                                        <span className="font-extrabold text-gray-800 truncate">{item.nome}</span>
-                                      </div>
-                                      <span className="font-black text-purple-700 shrink-0">{item.label}</span>
-                                    </div>
-                                    <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                                      <div 
-                                        className="h-full bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full transition-all duration-500"
-                                        style={{ width: `${pct}%` }}
-                                      />
-                                    </div>
-                                  </div>
-                                );
-                              });
+                              const chartData = dashboard.top5.treinosMes.map((item, i) => ({
+                                ...item,
+                                shortName: formatShortName(item.nome),
+                                rankIcon: i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`
+                              }));
+                              return (
+                                <ResponsiveContainer width="100%" height="100%">
+                                  <BarChart data={chartData} margin={{ top: 15, right: 10, left: -25, bottom: 5 }}>
+                                    <defs>
+                                      <linearGradient id="pbiPurple" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.95} />
+                                        <stop offset="100%" stopColor="#6366f1" stopOpacity={0.7} />
+                                      </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                                    <XAxis dataKey="shortName" stroke="#94a3b8" fontSize={11} fontWeight={700} tickLine={false} axisLine={{ stroke: '#f1f5f9' }} />
+                                    <YAxis stroke="#94a3b8" fontSize={11} fontWeight={700} tickLine={false} axisLine={false} allowDecimals={false} />
+                                    <Tooltip content={<PowerBITooltip color="#8b5cf6" />} cursor={{ fill: 'rgba(139, 92, 246, 0.05)', radius: 8 }} />
+                                    <Bar dataKey="valor" fill="url(#pbiPurple)" radius={[8, 8, 0, 0]} animationDuration={1200} animationEasing="ease-out" maxBarSize={45} />
+                                  </BarChart>
+                                </ResponsiveContainer>
+                              );
                             })()}
                           </div>
                         )}
                       </div>
                     </div>
 
-                    {/* TOP 2: Frequência Consecutiva (Streak) */}
-                    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs flex flex-col justify-between">
+                    {/* TOP 2: Frequência Consecutiva (Gráfico de Barras Horizontais / Leaderboard) */}
+                    <div className="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden">
                       <div>
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <div className="p-2 bg-amber-50 rounded-xl text-amber-500">
-                              <Flame size={18} />
+                        <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-amber-50 rounded-xl text-amber-500 shadow-xs border border-amber-100/50">
+                              <Flame size={20} />
                             </div>
                             <div>
-                              <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider">Frequência Consecutiva</h3>
-                              <span className="text-[11px] font-semibold text-gray-400">Sequência ininterrupta (Semanas ativas)</span>
+                              <h3 className="text-sm font-black text-gray-900 uppercase tracking-wide">Frequência Consecutiva</h3>
+                              <span className="text-xs font-semibold text-gray-400 block mt-0.5">Sequência de consistência ininterrupta (Streak)</span>
                             </div>
                           </div>
+                          <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 uppercase tracking-wider border border-amber-100">Barras</span>
                         </div>
 
                         {(!dashboard.top5.streak || dashboard.top5.streak.length === 0) ? (
-                          <div className="py-8 text-center text-gray-400 font-bold text-sm">
+                          <div className="py-12 text-center text-gray-400 font-bold text-sm">
                             Nenhum aluno com sequência consecutiva ativa.
                           </div>
                         ) : (
-                          <div className="space-y-4">
+                          <div className="h-[240px] w-full">
                             {(() => {
-                              const maxVal = Math.max(...dashboard.top5.streak.map(x => x.valor), 1);
-                              return dashboard.top5.streak.map((item, i) => {
-                                const pct = Math.max(Math.round((item.valor / maxVal) * 100), 12);
-                                return (
-                                  <div key={item.id} className="space-y-1">
-                                    <div className="flex items-center justify-between text-xs">
-                                      <div className="flex items-center gap-2 truncate pr-2">
-                                        <span className="w-5 font-black text-center text-sm inline-block">
-                                          {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`}
-                                        </span>
-                                        <span className="font-extrabold text-gray-800 truncate">{item.nome}</span>
-                                      </div>
-                                      <span className="font-black text-amber-600 shrink-0">{item.label}</span>
-                                    </div>
-                                    <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                                      <div 
-                                        className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500"
-                                        style={{ width: `${pct}%` }}
-                                      />
-                                    </div>
-                                  </div>
-                                );
-                              });
+                              const chartData = dashboard.top5.streak.map((item, i) => ({
+                                ...item,
+                                shortName: `${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i+1}º`} ${formatShortName(item.nome)}`,
+                                rankIcon: i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`
+                              }));
+                              return (
+                                <ResponsiveContainer width="100%" height="100%">
+                                  <BarChart layout="vertical" data={chartData} margin={{ top: 5, right: 95, left: 5, bottom: 5 }}>
+                                    <defs>
+                                      <linearGradient id="pbiOrange" x1="0" y1="0" x2="1" y2="0">
+                                        <stop offset="0%" stopColor="#f97316" stopOpacity={0.8} />
+                                        <stop offset="100%" stopColor="#f59e0b" stopOpacity={1} />
+                                      </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
+                                    <XAxis type="number" hide />
+                                    <YAxis dataKey="shortName" type="category" stroke="#475569" fontSize={11} fontWeight={700} tickLine={false} axisLine={false} width={105} />
+                                    <Tooltip content={<PowerBITooltip color="#f97316" />} cursor={{ fill: 'rgba(249, 115, 22, 0.05)', radius: 8 }} />
+                                    <Bar dataKey="valor" fill="url(#pbiOrange)" radius={[0, 8, 8, 0]} animationDuration={1400} animationEasing="ease-out" barSize={18} label={{ position: 'right', fill: '#d97706', fontSize: 11, fontWeight: 800, formatter: (val, item) => (item && item.payload ? item.payload.label : val) }} />
+                                  </BarChart>
+                                </ResponsiveContainer>
+                              );
                             })()}
                           </div>
                         )}
                       </div>
                     </div>
 
-                    {/* TOP 3: Volume Total Movimentado no Mês */}
-                    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs flex flex-col justify-between">
+                    {/* TOP 3: Volume Total Movimentado no Mês (Gráfico de Área / Evolução de Carga) */}
+                    <div className="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden">
                       <div>
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <div className="p-2 bg-blue-50 rounded-xl text-blue-600">
-                              <BarChart3 size={18} />
+                        <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-blue-50 rounded-xl text-blue-600 shadow-xs border border-blue-100/50">
+                              <BarChart3 size={20} />
                             </div>
                             <div>
-                              <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider">Volume Carga (Mês)</h3>
-                              <span className="text-[11px] font-semibold text-gray-400">Total de carga movimentada em kg / toneladas</span>
+                              <h3 className="text-sm font-black text-gray-900 uppercase tracking-wide">Volume Carga (Mês)</h3>
+                              <span className="text-xs font-semibold text-gray-400 block mt-0.5">Total de carga mecânica movimentada (kg / toneladas)</span>
                             </div>
                           </div>
+                          <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 uppercase tracking-wider border border-blue-100">Área</span>
                         </div>
 
                         {(!dashboard.top5.volumeMes || dashboard.top5.volumeMes.length === 0) ? (
-                          <div className="py-8 text-center text-gray-400 font-bold text-sm">
+                          <div className="py-12 text-center text-gray-400 font-bold text-sm">
                             Nenhum volume de treino registrado neste mês.
                           </div>
                         ) : (
-                          <div className="space-y-4">
+                          <div className="h-[240px] w-full pt-2">
                             {(() => {
-                              const maxVal = Math.max(...dashboard.top5.volumeMes.map(x => x.valor), 1);
-                              return dashboard.top5.volumeMes.map((item, i) => {
-                                const pct = Math.max(Math.round((item.valor / maxVal) * 100), 12);
-                                return (
-                                  <div key={item.id} className="space-y-1">
-                                    <div className="flex items-center justify-between text-xs">
-                                      <div className="flex items-center gap-2 truncate pr-2">
-                                        <span className="w-5 font-black text-center text-sm inline-block">
-                                          {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`}
-                                        </span>
-                                        <span className="font-extrabold text-gray-800 truncate">{item.nome}</span>
-                                      </div>
-                                      <span className="font-black text-blue-700 shrink-0">{item.label}</span>
-                                    </div>
-                                    <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                                      <div 
-                                        className="h-full bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full transition-all duration-500"
-                                        style={{ width: `${pct}%` }}
-                                      />
-                                    </div>
-                                  </div>
-                                );
-                              });
+                              const chartData = dashboard.top5.volumeMes.map((item, i) => ({
+                                ...item,
+                                shortName: formatShortName(item.nome),
+                                rankIcon: i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`
+                              }));
+                              return (
+                                <ResponsiveContainer width="100%" height="100%">
+                                  <AreaChart data={chartData} margin={{ top: 15, right: 15, left: -15, bottom: 5 }}>
+                                    <defs>
+                                      <linearGradient id="pbiBlue" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#0284c7" stopOpacity={0.85} />
+                                        <stop offset="95%" stopColor="#38bdf8" stopOpacity={0.05} />
+                                      </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                                    <XAxis dataKey="shortName" stroke="#94a3b8" fontSize={11} fontWeight={700} tickLine={false} axisLine={{ stroke: '#f1f5f9' }} />
+                                    <YAxis stroke="#94a3b8" fontSize={11} fontWeight={700} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${Math.round(v/1000)}t` : v} />
+                                    <Tooltip content={<PowerBITooltip color="#0284c7" />} />
+                                    <Area type="monotone" dataKey="valor" stroke="#0284c7" strokeWidth={3} fillOpacity={1} fill="url(#pbiBlue)" dot={{ r: 5, stroke: '#fff', strokeWidth: 2, fill: '#0284c7' }} activeDot={{ r: 8, stroke: '#fff', strokeWidth: 2, fill: '#0369a1' }} animationDuration={1500} animationEasing="ease-in-out" />
+                                  </AreaChart>
+                                </ResponsiveContainer>
+                              );
                             })()}
                           </div>
                         )}
                       </div>
                     </div>
 
-                    {/* TOP 4: Eficiência de Conclusão */}
-                    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs flex flex-col justify-between">
+                    {/* TOP 4: Eficiência de Conclusão (Gráfico de Rosca Interativa + Tabela Pareada) */}
+                    <div className="bg-white rounded-2xl border border-gray-200/80 p-6 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden">
                       <div>
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <div className="p-2 bg-emerald-50 rounded-xl text-emerald-600">
-                              <Award size={18} />
+                        <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2.5 bg-emerald-50 rounded-xl text-emerald-600 shadow-xs border border-emerald-100/50">
+                              <Award size={20} />
                             </div>
                             <div>
-                              <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider">Eficiência nos Treinos</h3>
-                              <span className="text-[11px] font-semibold text-gray-400">% de exercícios concluídos (desempate: nº de treinos)</span>
+                              <h3 className="text-sm font-black text-gray-900 uppercase tracking-wide">Eficiência nos Treinos</h3>
+                              <span className="text-xs font-semibold text-gray-400 block mt-0.5">% de exercícios concluídos vs prescritos na ficha</span>
                             </div>
                           </div>
+                          <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 uppercase tracking-wider border border-emerald-100">Rosca</span>
                         </div>
 
                         {(!dashboard.top5.eficiencia || dashboard.top5.eficiencia.length === 0) ? (
-                          <div className="py-8 text-center text-gray-400 font-bold text-sm">
+                          <div className="py-12 text-center text-gray-400 font-bold text-sm">
                             Nenhuma sessão concluída para avaliar eficiência.
                           </div>
                         ) : (
-                          <div className="space-y-4">
-                            {dashboard.top5.eficiencia.map((item, i) => {
-                              const pct = Math.max(Math.min(item.valor, 100), 12);
+                          <div>
+                            {(() => {
+                              const chartData = dashboard.top5.eficiencia.map((item, i) => ({
+                                ...item,
+                                shortName: formatShortName(item.nome),
+                                rankIcon: i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`
+                              }));
                               return (
-                                <div key={item.id} className="space-y-1">
-                                  <div className="flex items-center justify-between text-xs">
-                                    <div className="flex items-center gap-2 truncate pr-2">
-                                      <span className="w-5 font-black text-center text-sm inline-block">
-                                        {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}º`}
-                                      </span>
-                                      <span className="font-extrabold text-gray-800 truncate">{item.nome}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5 shrink-0">
-                                      <span className="text-[10px] font-bold text-gray-400">({item.totalTreinos} treinos)</span>
-                                      <span className="font-black text-emerald-700">{item.label}</span>
-                                    </div>
+                                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 h-auto min-h-[240px]">
+                                  <div className="w-full sm:w-1/2 h-[200px] shrink-0">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                      <PieChart>
+                                        <Tooltip content={<PowerBITooltip color="#059669" unit="%" />} />
+                                        <Pie
+                                          data={chartData}
+                                          dataKey="valor"
+                                          nameKey="shortName"
+                                          cx="50%"
+                                          cy="50%"
+                                          innerRadius={50}
+                                          outerRadius={78}
+                                          paddingAngle={5}
+                                          stroke="none"
+                                          animationDuration={1400}
+                                        >
+                                          {chartData.map((entry, idx) => (
+                                            <Cell key={`cell-${idx}`} fill={EMERALD_COLORS[idx % EMERALD_COLORS.length]} className="hover:opacity-85 transition-opacity duration-200 cursor-pointer" />
+                                          ))}
+                                        </Pie>
+                                      </PieChart>
+                                    </ResponsiveContainer>
                                   </div>
-                                  <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                                    <div 
-                                      className="h-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full transition-all duration-500"
-                                      style={{ width: `${pct}%` }}
-                                    />
+                                  
+                                  {/* Tabela Exclusiva de Legenda e Estatísticas do Donut */}
+                                  <div className="w-full sm:w-1/2 space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                                    {chartData.map((item, idx) => (
+                                      <div key={item.id} className="flex items-center justify-between p-2.5 rounded-xl bg-gray-50/70 hover:bg-emerald-50/40 border border-gray-100 transition-all duration-200 group">
+                                        <div className="flex items-center gap-2 truncate pr-2">
+                                          <div className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs" style={{ backgroundColor: EMERALD_COLORS[idx % EMERALD_COLORS.length] }} />
+                                          <span className="font-black text-xs">{item.rankIcon}</span>
+                                          <span className="font-bold text-xs text-gray-800 group-hover:text-emerald-900 truncate transition-colors">{item.shortName}</span>
+                                        </div>
+                                        <div className="text-right shrink-0">
+                                          <span className="font-black text-xs text-emerald-700 block leading-tight">{item.label}</span>
+                                          <span className="text-[10px] font-semibold text-gray-400">({item.totalTreinos} treinos)</span>
+                                        </div>
+                                      </div>
+                                    ))}
                                   </div>
                                 </div>
                               );
-                            })}
+                            })()}
                           </div>
                         )}
                       </div>
