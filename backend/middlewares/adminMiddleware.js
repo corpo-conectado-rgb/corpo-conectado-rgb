@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { getSheet } = require('../services/googleSheets');
+const { updateUltimoAcesso } = require('../services/accessTracker');
 
 module.exports = async (req, res, next) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -8,6 +9,10 @@ module.exports = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_super_seguro_para_desenvolvimento');
     
+    if (decoded && decoded.id) {
+      updateUltimoAcesso(decoded.id).catch(() => {});
+    }
+
     // Quick role check if role is in JWT payload
     if (decoded.role === 'admin') {
       req.user = decoded;

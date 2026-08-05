@@ -58,6 +58,16 @@ export const AuthProvider = ({ children }) => {
     };
 
     loadStorageData();
+
+    // Garante rastreo de atividade ao destravar a tela do celular ou alternar de app no iOS/Android
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && localStorage.getItem('@CorpoConectado:token')) {
+        apiFetch('/auth/heartbeat', { method: 'POST' }).catch(() => {});
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   const register = async (nome, email, password) => {
