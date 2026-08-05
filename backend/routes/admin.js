@@ -454,9 +454,15 @@ async function gerarDadosAcompanhamento() {
   const treinosRows = await getCachedRows('treinos', ['id', 'user_id', 'nome_ficha', 'objetivo', 'status', 'data_inicio', 'data_termino']);
   const assinaturasRows = await getCachedRows('assinaturas', ['id', 'user_id', 'status']);
 
-  const agora = new Date();
-  agora.setHours(23, 59, 59, 999);
-  const hojeStr = agora.toISOString().split('T')[0];
+  // Garantir que a referência de "agora" esteja sincronizada com o fuso horário oficial do Brasil (America/Sao_Paulo)
+  // Evita bug onde o servidor na nuvem (UTC) vira o dia às 21h00 do Brasil, transformando treinos de hoje em "Ontem".
+  const agoraSpStr = new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' });
+  const agora = new Date(agoraSpStr);
+  const anoSp = agora.getFullYear();
+  const mesSp = String(agora.getMonth() + 1).padStart(2, '0');
+  const diaSp = String(agora.getDate()).padStart(2, '0');
+  const hojeStr = `${anoSp}-${mesSp}-${diaSp}`;
+
   const trintaDiasAtras = new Date(agora.getTime() - (30 * 86400000));
   const seteDiasAtras = new Date(agora.getTime() - (7 * 86400000));
 
