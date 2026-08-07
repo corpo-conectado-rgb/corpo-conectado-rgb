@@ -859,9 +859,9 @@ export default function Treinos() {
                   </button>
                 </div>
                 {/* Video */}
-                <div className="p-4">
-                  <div className="bg-black rounded-2xl overflow-hidden aspect-video">
-                    {ytMatch ? (
+                <div className="p-4 flex items-center justify-center">
+                  {ytMatch ? (
+                    <div className="bg-black rounded-2xl overflow-hidden aspect-video w-full">
                       <iframe
                         src={`https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&loop=1&playlist=${ytMatch[1]}&rel=0&modestbranding=1`}
                         allow="autoplay; encrypted-media"
@@ -869,18 +869,18 @@ export default function Treinos() {
                         className="w-full h-full"
                         title={exAtual.nome}
                       />
-                    ) : isDirectMedia ? (
-                      url.endsWith('.gif') || url.includes('.gif') ? (
-                        <img src={url} alt={exAtual.nome} className="w-full h-full object-contain" />
-                      ) : (
-                        <video src={url} autoPlay loop muted playsInline className="w-full h-full object-contain" />
-                      )
+                    </div>
+                  ) : isDirectMedia ? (
+                    url.endsWith('.gif') || url.includes('.gif') ? (
+                      <img src={url} alt={exAtual.nome} className="max-h-[50vh] object-contain rounded-xl" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <p className="text-sm font-medium">Formato não suportado</p>
-                      </div>
-                    )}
-                  </div>
+                      <video src={url} autoPlay loop muted playsInline className="max-h-[50vh] object-contain rounded-xl" />
+                    )
+                  ) : (
+                    <div className="bg-gray-50 rounded-2xl w-full aspect-video flex items-center justify-center text-gray-400">
+                      <p className="text-sm font-medium">Formato não suportado</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
