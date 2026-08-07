@@ -19,6 +19,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { name: 'Meu Treino', icon: Dumbbell, path: '/treinos' },
     { name: 'Meus Dados', icon: User, path: '/perfil' },
     { name: 'Assinatura', icon: CreditCard, path: '/assinatura' },
+    { name: 'Configurações', icon: Settings, path: '/configuracoes' },
   ];
 
   const adminMenu = user?.role === 'admin' ? [

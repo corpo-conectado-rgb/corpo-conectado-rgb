@@ -514,4 +514,39 @@ router.post('/heartbeat', authMiddleware, async (req, res) => {
   }
 });
 
+// PUT /change-password - Aluno atualiza sua própria senha
+router.put('/change-password', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { senhaAtual, novaSenha } = req.body;
+
+    if (!senhaAtual || !novaSenha) {
+      return res.status(400).json({ error: 'Senha atual e nova senha são obrigatórias.' });
+    }
+
+    const userSheet = await getSheet(USERS_SHEET, HEADERS);
+    const userRows = await userSheet.getRows();
+    const userRow = userRows.find(r => r.get('id') === userId);
+
+    if (!userRow) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+
+    const valid = await bcrypt.compare(senhaAtual, userRow.get('senha_hash'));
+    if (!valid) {
+      return res.status(401).json({ error: 'Senha atual incorreta.' });
+    }
+
+    const senha_hash = await bcrypt.hash(novaSenha, 10);
+    userRow.set('senha_hash', senha_hash);
+    await userRow.save();
+    invalidateCache(USERS_SHEET);
+
+    res.json({ message: 'Senha alterada com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao alterar senha:', error);
+    res.status(500).json({ error: 'Erro ao alterar a senha.' });
+  }
+});
+
 module.exports = router;
