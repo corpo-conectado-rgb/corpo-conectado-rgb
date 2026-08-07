@@ -838,24 +838,20 @@ export default function Treinos() {
           </button>
         </div>
 
-        {/* Bottom Sheet: Demonstração do Exercício */}
+        {/* Modal: Demonstração do Exercício */}
         {showDemo && exAtual.video && (() => {
           // Detect YouTube URLs
           const url = exAtual.video;
           const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
           const isDirectMedia = /\.(mp4|webm|gif|mov)$/i.test(url) || url.includes('.gif') || url.includes('.mp4');
           return (
-            <div className="fixed inset-0 z-[60] flex items-end justify-center">
-              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={() => setShowDemo(false)} />
-              <div className="relative w-full max-w-lg bg-white rounded-t-3xl shadow-2xl z-10 animate-slide-up flex flex-col max-h-[85dvh]">
-                {/* Grab handle */}
-                <div className="flex justify-center pt-3 pb-2">
-                  <div className="w-10 h-1 rounded-full bg-gray-300" />
-                </div>
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+              <div className="absolute inset-0 bg-black/70 animate-fade-in" onClick={() => setShowDemo(false)} />
+              <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl z-10 animate-fade-in overflow-hidden">
                 {/* Header */}
-                <div className="px-5 pb-3 flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Demonstração</p>
+                <div className="px-5 py-4 flex items-center justify-between border-b border-gray-50">
+                  <div className="flex-1 min-w-0 pr-2">
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Demonstração</p>
                     <h3 className="text-base font-black text-gray-900 truncate">{exAtual.nome}</h3>
                   </div>
                   <button onClick={() => setShowDemo(false)} className="w-8 h-8 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200 transition shrink-0">
@@ -863,7 +859,7 @@ export default function Treinos() {
                   </button>
                 </div>
                 {/* Video */}
-                <div className="px-5 pb-5">
+                <div className="p-4">
                   <div className="bg-black rounded-2xl overflow-hidden aspect-video">
                     {ytMatch ? (
                       <iframe
