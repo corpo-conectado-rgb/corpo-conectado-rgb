@@ -153,7 +153,8 @@ router.get('/my-sheet', authMiddleware, async (req, res) => {
           reps: ex.get('repeticoes') || '10-12',
           descanso: ex.get('descanso') !== undefined && ex.get('descanso') !== null && ex.get('descanso') !== '' ? Number(ex.get('descanso')) : '',
           grupomuscular: dia.get('foco_muscular') || 'Geral',
-          observacao: ex.get('observacoes') || ''
+          observacao: ex.get('observacoes') || '',
+          video: ex.get('link_video') || ''
         }))
       };
     });
