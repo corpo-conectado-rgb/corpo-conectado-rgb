@@ -16,8 +16,10 @@ import {
 } from 'lucide-react';
 import { apiFetch } from '../services/api';
 import Toast from '../components/Toast';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Configuracoes() {
+  const { user } = useAuth();
   const appVersion = import.meta.env.VITE_APP_VERSION || '1.0.0';
   const buildDate = import.meta.env.VITE_BUILD_DATE || new Date().toLocaleDateString('pt-BR');
 
@@ -90,6 +92,30 @@ export default function Configuracoes() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleWhatsAppSupport = () => {
+    // Basic OS detection
+    const ua = navigator.userAgent;
+    let os = "Desconhecido";
+    if (/android/i.test(ua)) os = "Android";
+    else if (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) os = "iOS";
+    else if (/Windows/.test(ua)) os = "Windows";
+    else if (/Mac/.test(ua)) os = "Mac OS";
+
+    // Build the message
+    const message = `Olá! Preciso de suporte no aplicativo Corpo Conectado.
+
+Nome: ${user?.nome || 'Não identificado'}
+E-mail: ${user?.email || 'Não identificado'}
+Versão do App: ${appVersion}
+Dispositivo: ${navigator.platform || 'N/A'}
+Sistema: ${os}
+
+Descrição do problema: `;
+
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/5531988798642?text=${encodedMessage}`, '_blank');
   };
 
   const SectionLabel = ({ text }) => (
@@ -174,14 +200,13 @@ export default function Configuracoes() {
         <div>
           <SectionLabel text="Suporte & Feedback" />
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <a href="https://wa.me/5531988798642" target="_blank" rel="noreferrer" className="block">
-              <SettingsRow 
-                icon={Phone} 
-                iconColorClass="bg-emerald-50 text-emerald-600" 
-                title="Central de Ajuda" 
-                subtitle="(31) 98879-8642 / WhatsApp"
-              />
-            </a>
+            <SettingsRow 
+              icon={Phone} 
+              iconColorClass="bg-emerald-50 text-emerald-600" 
+              title="Central de Ajuda" 
+              subtitle="(31) 98879-8642 / WhatsApp"
+              onClick={handleWhatsAppSupport}
+            />
             <SettingsRow 
               icon={Lightbulb} 
               iconColorClass="bg-amber-50 text-amber-500" 
