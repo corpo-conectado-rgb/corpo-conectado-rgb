@@ -323,13 +323,14 @@ export default function Configuracoes() {
             <button onClick={() => setModalSobre(false)} className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition">
               <X size={16} />
             </button>
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#101010] to-[#1a1a1a] flex items-center justify-center mx-auto mb-4 shadow-lg border border-gray-800">
-              <span className="text-[#C4973B] font-black text-2xl tracking-tighter italic pr-1">CC</span>
+            <div className="w-16 h-16 mx-auto mb-4">
+              <img src="/icon-192.png" alt="Corpo Conectado" className="w-full h-full rounded-2xl shadow-lg border border-gray-100 object-cover" />
             </div>
             <h2 className="text-xl font-black text-gray-900 tracking-tight">Corpo Conectado</h2>
             <p className="text-[10px] font-black uppercase tracking-widest text-purple-600 mt-1 mb-4">Plataforma Premium</p>
             <p className="text-sm text-gray-500 font-medium leading-relaxed mb-6">
-              Nossa missão é transformar sua relação com o treinamento através de ciência, acompanhamento próximo e tecnologia intuitiva.
+              Nossa missão é transformar sua relação com o treinamento através de ciência, acompanhamento próximo e tecnologia intuitiva.<br/><br/>
+              Criado por <strong className="text-gray-800">Kevin Oliveira</strong>.
             </p>
             <div className="bg-gray-50 rounded-xl p-3 border border-gray-100 text-left">
               <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Versão</p>
