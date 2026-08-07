@@ -1011,7 +1011,7 @@ export default function Treinos() {
             <button onClick={() => iniciarTreino(fichaProxima)}
               disabled={iniciandoTreinoId === fichaProxima.id}
               className="flex items-center justify-center gap-2 bg-white text-black font-black py-4 md:py-3.5 rounded-xl text-sm
-                         hover:bg-gray-100 active:scale-[0.98] transition-all shadow-md w-full mt-1 disabled:opacity-70">
+                         hover:bg-gray-100 active:scale-[0.98] transition shadow-md w-full mt-1 disabled:opacity-70">
               {iniciandoTreinoId === fichaProxima.id ? (
                 <>
                   <div className="w-4 h-4 border-2 border-gray-300 border-t-black rounded-full animate-spin" />
@@ -1075,7 +1075,7 @@ export default function Treinos() {
                   </div>
                   <button onClick={(e) => { e.stopPropagation(); iniciarTreino(ficha); }}
                     disabled={iniciandoTreinoId === ficha.id}
-                    className="flex items-center justify-center gap-1 py-2 rounded-lg bg-black text-white text-[11px] font-black hover:bg-gray-800 active:scale-95 transition-all mt-0.5 disabled:opacity-70">
+                    className="flex items-center justify-center gap-1 py-2 rounded-lg bg-black text-white text-[11px] font-black hover:bg-gray-800 active:scale-95 transition mt-0.5 disabled:opacity-70">
                     {iniciandoTreinoId === ficha.id ? (
                       <>
                         <div className="w-3 h-3 border border-gray-400 border-t-white rounded-full animate-spin" /> Preparando...
