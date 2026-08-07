@@ -847,7 +847,7 @@ export default function Treinos() {
           return (
             <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
               <div className="absolute inset-0 bg-black/70 animate-fade-in" onClick={() => setShowDemo(false)} />
-              <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl z-10 animate-fade-in overflow-hidden">
+              <div className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl z-10 animate-fade-in overflow-hidden border border-purple-300">
                 {/* Header */}
                 <div className="px-5 py-4 flex items-center justify-between border-b border-gray-50">
                   <div className="flex-1 min-w-0 pr-2">
