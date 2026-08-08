@@ -154,7 +154,7 @@ export default function AdminExercicios() {
             <table className="w-full text-left text-sm whitespace-nowrap">
               <thead className="bg-gray-50/80 sticky top-0 backdrop-blur-sm z-10">
                 <tr>
-                  <th className="px-6 py-4 font-bold text-gray-500 w-20">CÓD.</th>
+                  <th className="px-6 py-4 font-bold text-gray-500 w-20">CÓDIGO</th>
                   <th className="px-6 py-4 font-bold text-gray-500">EXERCÍCIO</th>
                   <th className="px-6 py-4 font-bold text-gray-500 w-32">GIF/VÍDEO</th>
                   <th className="px-6 py-4 font-bold text-gray-500 text-right w-24">AÇÕES</th>
@@ -164,7 +164,7 @@ export default function AdminExercicios() {
                 {filtered.map((ex) => (
                   <tr key={ex.codigo} className="hover:bg-gray-50/50 transition-colors group">
                     <td className="px-6 py-4 font-medium text-gray-400">
-                      #{String(ex.codigo).padStart(3, '0')}
+                      {ex.codigo}
                     </td>
                     <td className="px-6 py-4 font-black text-gray-900">
                       {ex.nome}
