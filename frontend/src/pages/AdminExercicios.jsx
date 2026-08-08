@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Dumbbell, Search, Plus, Edit2, X, AlertCircle, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Dumbbell, Search, Plus, Edit2, X, AlertCircle, Loader2, Filter, Check } from 'lucide-react';
 import { apiFetch } from '../services/api';
 
 export default function AdminExercicios() {
@@ -7,6 +7,18 @@ export default function AdminExercicios() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterVideo, setFilterVideo] = useState('all');
+  const [showFilters, setShowFilters] = useState(false);
+  const filterRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setShowFilters(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -125,15 +137,53 @@ export default function AdminExercicios() {
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder:text-gray-400"
             />
           </div>
-          <select
-            value={filterVideo}
-            onChange={(e) => setFilterVideo(e.target.value)}
-            className="bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all cursor-pointer min-w-[200px]"
-          >
-            <option value="all">Todos os exercícios</option>
-            <option value="with_video">Com vídeo cadastrado</option>
-            <option value="without_video">Sem vídeo (pendentes)</option>
-          </select>
+          <div className="relative" ref={filterRef}>
+            <button 
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border text-sm font-bold transition shadow-sm ${
+                filterVideo !== 'all' 
+                  ? 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100' 
+                  : 'border-gray-200 text-gray-700 bg-white hover:bg-gray-50'
+              }`}
+            >
+              <Filter size={18} className={filterVideo !== 'all' ? "text-blue-600" : "text-gray-500"} />
+              Filtros
+              {filterVideo !== 'all' && (
+                <span className="flex items-center justify-center w-5 h-5 bg-blue-600 text-white rounded-full text-[10px] ml-1">1</span>
+              )}
+            </button>
+
+            {showFilters && (
+              <div className="absolute top-full mt-2 right-0 md:left-0 w-[240px] bg-white border border-gray-200 rounded-2xl shadow-xl z-50 overflow-hidden animate-fade-in">
+                <div className="p-3 bg-gray-50/80 border-b border-gray-100 flex items-center justify-between">
+                  <span className="text-[11px] font-black uppercase tracking-widest text-gray-500">Status do GIF</span>
+                  {filterVideo !== 'all' && (
+                    <button onClick={() => setFilterVideo('all')} className="text-[10px] font-bold text-blue-600 hover:text-blue-800 transition">
+                      Limpar
+                    </button>
+                  )}
+                </div>
+                <div className="p-2 flex flex-col gap-1">
+                  {[
+                    { id: 'all', label: 'Todos os exercícios' },
+                    { id: 'with_video', label: 'Com vídeo cadastrado' },
+                    { id: 'without_video', label: 'Sem vídeo (pendentes)' }
+                  ].map(opt => (
+                    <button
+                      key={opt.id}
+                      onClick={() => { setFilterVideo(opt.id); setShowFilters(false); }}
+                      className={`flex items-center justify-between w-full px-3 py-2.5 text-sm font-bold rounded-xl transition-all ${
+                        filterVideo === opt.id ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      {opt.label}
+                      {filterVideo === opt.id && <Check size={16} className="text-blue-600" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex-1 overflow-auto">
