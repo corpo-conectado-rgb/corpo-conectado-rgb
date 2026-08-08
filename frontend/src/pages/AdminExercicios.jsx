@@ -6,6 +6,7 @@ export default function AdminExercicios() {
   const [exercicios, setExercicios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterVideo, setFilterVideo] = useState('all');
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,10 +30,14 @@ export default function AdminExercicios() {
     }
   };
 
-  const filtered = exercicios.filter(ex => 
-    ex.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (ex.codigo && ex.codigo.includes(searchTerm))
-  );
+  const filtered = exercicios.filter(ex => {
+    const matchesSearch = ex.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          (ex.codigo && String(ex.codigo).includes(searchTerm));
+    
+    if (filterVideo === 'with_video') return matchesSearch && ex.link_video;
+    if (filterVideo === 'without_video') return matchesSearch && !ex.link_video;
+    return matchesSearch;
+  });
 
   const openAddModal = () => {
     setModalMode('add');
@@ -109,8 +114,8 @@ export default function AdminExercicios() {
 
       {/* Search and List */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[500px]">
-        <div className="p-4 border-b border-gray-100 bg-gray-50/50">
-          <div className="relative max-w-md">
+        <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input 
               type="text" 
@@ -120,6 +125,15 @@ export default function AdminExercicios() {
               className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all placeholder:text-gray-400"
             />
           </div>
+          <select
+            value={filterVideo}
+            onChange={(e) => setFilterVideo(e.target.value)}
+            className="bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all cursor-pointer min-w-[200px]"
+          >
+            <option value="all">Todos os exercícios</option>
+            <option value="with_video">Com vídeo cadastrado</option>
+            <option value="without_video">Sem vídeo (pendentes)</option>
+          </select>
         </div>
 
         <div className="flex-1 overflow-auto">
