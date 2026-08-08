@@ -28,6 +28,10 @@ export default function AdminPrescricao() {
   const [buscaModelo, setBuscaModelo] = useState('');
   const [loadingModelos, setLoadingModelos] = useState(false);
 
+  // Catálogo de Exercícios e Autocomplete
+  const [catalogo, setCatalogo] = useState([]);
+  const [activeAutocomplete, setActiveAutocomplete] = useState(null);
+
   // Estados do Formulário Master
   const [nomeFicha, setNomeFicha] = useState('Projeto Hipertrofia 1.0');
   const [tipoDivisao, setTipoDivisao] = useState('A/B/C');
@@ -66,6 +70,10 @@ export default function AdminPrescricao() {
             setDiasTreino(fichaAtiva.dias);
           }
         }
+
+        // 3. Buscar Catálogo de Exercícios para Autocomplete
+        const catData = await apiFetch('/exercises');
+        if (catData) setCatalogo(catData);
       } catch (err) {
         console.error("Erro no fetchDados:", err);
         setToast({ 
@@ -479,7 +487,41 @@ export default function AdminPrescricao() {
                                <ArrowDown size={14} strokeWidth={3} />
                              </button>
                            </div>
-                           <input type="text" placeholder="Nome da Máquina/Técnica" value={ex.nome} onChange={e=>updateEx(diaIdx, exIdx, 'nome', e.target.value)} className="flex-[3] w-full lg:w-auto bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-black text-gray-900 outline-none min-w-0 md:min-w-[200px]" />
+                           
+                           <div className="flex-[3] w-full lg:w-auto relative min-w-0 md:min-w-[200px]">
+                             <input 
+                               type="text" 
+                               placeholder="Nome da Máquina/Técnica" 
+                               value={ex.nome} 
+                               onFocus={() => setActiveAutocomplete({ diaIdx, exIdx })}
+                               onBlur={() => setTimeout(() => setActiveAutocomplete(null), 200)}
+                               onChange={e => updateEx(diaIdx, exIdx, 'nome', e.target.value)} 
+                               className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-black text-gray-900 outline-none" 
+                             />
+                             {activeAutocomplete?.diaIdx === diaIdx && activeAutocomplete?.exIdx === exIdx && ex.nome.length > 0 && (
+                               <div className="absolute top-full left-0 mt-1 w-full max-h-48 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1">
+                                 {(() => {
+                                    const sugestoes = catalogo.filter(c => c.nome.toLowerCase().includes(ex.nome.toLowerCase()) && c.nome.toLowerCase() !== ex.nome.toLowerCase());
+                                    if (sugestoes.length === 0) return (
+                                      <div className="px-3 py-2 text-xs text-gray-400 font-medium">Novo exercício será cadastrado.</div>
+                                    );
+                                    return sugestoes.map(s => (
+                                      <div 
+                                        key={s.codigo} 
+                                        className="px-3 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50 cursor-pointer"
+                                        onClick={() => {
+                                          updateEx(diaIdx, exIdx, 'nome', s.nome);
+                                          setActiveAutocomplete(null);
+                                        }}
+                                      >
+                                        {s.nome}
+                                      </div>
+                                    ));
+                                 })()}
+                               </div>
+                             )}
+                           </div>
+
                            <div className="flex gap-2 flex-1 w-full relative">
                              <input type="number" placeholder="Séries" value={ex.series} onChange={e=>updateEx(diaIdx, exIdx, 'series', e.target.value)} className="w-[80px] shrink-0 bg-white border border-gray-200 rounded-lg px-2 py-2 text-center text-sm font-bold placeholder-gray-400" />
                              <input type="text" placeholder="Reps" value={ex.repeticoes} onChange={e=>updateEx(diaIdx, exIdx, 'repeticoes', e.target.value)} className="w-[80px] shrink-0 bg-white border border-gray-200 rounded-lg px-2 py-2 text-center text-sm font-bold placeholder-gray-400" />

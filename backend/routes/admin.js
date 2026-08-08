@@ -292,6 +292,13 @@ router.post('/fichas', adminMiddleware, async (req, res) => {
     const diasSheet = await getSheet('dias_treino', []);
     const exerciciosSheet = await getSheet('exercicios', []);
 
+    // NOVO: Catálogo de exercícios
+    const catalogRows = await getCachedRows('catalogo_exercicios');
+    const existingCatalogNames = new Set(catalogRows.map(r => r.get('nome').trim().toLowerCase()));
+    let nextCatalogCode = catalogRows.length > 0 ? Math.max(...catalogRows.map(r => parseInt(r.get('codigo') || 0))) + 1 : 1;
+    const catalogSheet = await getSheet('catalogo_exercicios', ['codigo', 'nome', 'link_video']);
+    let catalogChanged = false;
+
     // Salvar Dias e Exercícios iterativamente
     for (const dia of dias) {
       const diaId = uuidv4();
@@ -304,6 +311,21 @@ router.post('/fichas', adminMiddleware, async (req, res) => {
 
       for (let i = 0; i < dia.exercicios.length; i++) {
         const ex = dia.exercicios[i];
+        
+        const cleanName = ex.nome.trim();
+        const lowerName = cleanName.toLowerCase();
+        
+        if (!existingCatalogNames.has(lowerName)) {
+          await catalogSheet.addRow({
+            codigo: String(nextCatalogCode),
+            nome: cleanName,
+            link_video: ''
+          });
+          existingCatalogNames.add(lowerName);
+          nextCatalogCode++;
+          catalogChanged = true;
+        }
+
         await exerciciosSheet.addRow({
           id: uuidv4(),
           dia_treino_id: diaId,
@@ -316,6 +338,10 @@ router.post('/fichas', adminMiddleware, async (req, res) => {
           observacoes: ex.observacoes || ''
         });
       }
+    }
+
+    if (catalogChanged) {
+      invalidateCache('catalogo_exercicios');
     }
 
     // Registrar o log de auditoria

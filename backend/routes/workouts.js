@@ -115,6 +115,16 @@ router.get('/my-sheet', authMiddleware, async (req, res) => {
 
     const exerciciosRows = await getCachedRows('exercicios', []);
 
+    // NOVO: Buscar o catálogo para fazer o join dinâmico de vídeos
+    const catalogRows = await getCachedRows('catalogo_exercicios', []);
+    const catalogMap = {};
+    catalogRows.forEach(r => {
+      const nome = r.get('nome');
+      if (nome) {
+        catalogMap[nome.trim().toLowerCase()] = r.get('link_video') || '';
+      }
+    });
+
     // Calcular média real de duração por letra a partir do histórico
     const histRows = await getCachedRows('historico_treinos', HISTORICO_HEADERS);
     const userHist = histRows.filter(r => r.get('user_id') === req.user.id);
@@ -146,16 +156,20 @@ router.get('/my-sheet', authMiddleware, async (req, res) => {
         duracao: duracaoStr, // Média real do histórico do aluno
         ativa: idx === 0, // Inicia a Letra "A" como standard ativo na visualizacao
         grupoPrimario: dia.get('foco_muscular') ? dia.get('foco_muscular').split(',')[0] : 'Geral',
-        exercicios: exsOfDia.map((ex, i) => ({
-          id: ex.get('id') || i.toString(),
-          nome: ex.get('nome'),
-          series: Number(ex.get('series')) || 3,
-          reps: ex.get('repeticoes') || '10-12',
-          descanso: ex.get('descanso') !== undefined && ex.get('descanso') !== null && ex.get('descanso') !== '' ? Number(ex.get('descanso')) : '',
-          grupomuscular: dia.get('foco_muscular') || 'Geral',
-          observacao: ex.get('observacoes') || '',
-          video: ex.get('link_video') || ''
-        }))
+        exercicios: exsOfDia.map((ex, i) => {
+          const rawName = ex.get('nome');
+          const cleanName = rawName ? rawName.trim().toLowerCase() : '';
+          return {
+            id: ex.get('id') || i.toString(),
+            nome: rawName,
+            series: Number(ex.get('series')) || 3,
+            reps: ex.get('repeticoes') || '10-12',
+            descanso: ex.get('descanso') !== undefined && ex.get('descanso') !== null && ex.get('descanso') !== '' ? Number(ex.get('descanso')) : '',
+            grupomuscular: dia.get('foco_muscular') || 'Geral',
+            observacao: ex.get('observacoes') || '',
+            video: catalogMap[cleanName] || ex.get('link_video') || ''
+          };
+        })
       };
     });
 

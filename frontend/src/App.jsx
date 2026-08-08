@@ -18,6 +18,7 @@ import Assinatura from './pages/Assinatura';
 import Configuracoes from './pages/Configuracoes';
 import AdminFinanceiro from './pages/AdminFinanceiro';
 import AdminAcompanhamento from './pages/AdminAcompanhamento';
+import AdminExercicios from './pages/AdminExercicios';
 import Welcome from './pages/Welcome';
 import InstallPrompt from './components/InstallPrompt';
 
@@ -95,6 +96,7 @@ function AppRoutes() {
         <Route path="admin/configuracoes" element={<AdminRoute><AdminConfiguracoes /></AdminRoute>} />
         <Route path="admin/financeiro" element={<AdminRoute><AdminFinanceiro /></AdminRoute>} />
         <Route path="admin/acompanhamento" element={<AdminRoute><AdminAcompanhamento /></AdminRoute>} />
+        <Route path="admin/exercicios" element={<AdminRoute><AdminExercicios /></AdminRoute>} />
       </Route>
       
       <Route path="*" element={<Navigate to="/" replace />} />

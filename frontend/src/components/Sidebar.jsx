@@ -25,6 +25,7 @@ export default function Sidebar({ isOpen, onClose }) {
   const adminMenu = user?.role === 'admin' ? [
     { name: 'Solicitações', icon: Bell, path: '/admin/solicitacoes' },
     { name: 'Gestão de Fichas', icon: FileText, path: '/admin/alunos' },
+    { name: 'Exercícios', icon: Dumbbell, path: '/admin/exercicios' },
     { name: 'Acompanhamento', icon: Activity, path: '/admin/acompanhamento' },
     { name: 'Financeiro', icon: Wallet, path: '/admin/financeiro' },
     { name: 'Configurações', icon: Settings, path: '/admin/configuracoes' }
